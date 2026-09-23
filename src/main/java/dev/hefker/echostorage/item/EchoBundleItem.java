@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
@@ -63,13 +64,13 @@ public class EchoBundleItem extends Item {
 		ItemStack inSlot = slot.getItem();
 		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
 		if (inSlot.isEmpty()) {
-			playRemoveOneSound(player);
+			playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
 			ItemStack removed = mutable.removeOne();
 			if (!removed.isEmpty()) {
 				mutable.tryInsert(slot.safeInsert(removed));
 			}
 		} else if (mutable.tryTransfer(slot, player) > 0) {
-			playInsertSound(player);
+			playSound(player, SoundEvents.BUNDLE_INSERT);
 		}
 
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
@@ -91,11 +92,11 @@ public class EchoBundleItem extends Item {
 		if (carried.isEmpty()) {
 			ItemStack removed = mutable.removeOne();
 			if (!removed.isEmpty()) {
-				playRemoveOneSound(player);
+				playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
 				carriedAccess.set(removed);
 			}
 		} else if (mutable.tryInsert(carried) > 0) {
-			playInsertSound(player);
+			playSound(player, SoundEvents.BUNDLE_INSERT);
 		}
 
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
@@ -106,7 +107,7 @@ public class EchoBundleItem extends Item {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		ItemStack bundle = player.getItemInHand(hand);
 		if (dropContents(bundle, player)) {
-			playDropContentsSound(player);
+			playSound(player, SoundEvents.BUNDLE_DROP_CONTENTS);
 			player.awardStat(Stats.ITEM_USED.get(this));
 			return InteractionResultHolder.sidedSuccess(bundle, level.isClientSide());
 		}
@@ -198,15 +199,7 @@ public class EchoBundleItem extends Item {
 		EchoItems.SPILL.add(spills);
 	}
 
-	private static void playRemoveOneSound(Entity entity) {
-		entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
-	}
-
-	private static void playInsertSound(Entity entity) {
-		entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
-	}
-
-	private static void playDropContentsSound(Entity entity) {
-		entity.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
+	private static void playSound(Entity entity, SoundEvent sound) {
+		entity.playSound(sound, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
 	}
 }

@@ -20,17 +20,22 @@ class EchoBundleTooltipLayoutTest {
 	}
 
 	@Test
-	void vanillasLargestGridStillShowsEverything() {
+	void aFullVanillaBundlesWorthOfEntriesLooksLikeVanillas() {
 		assertEquals(new EchoBundleTooltipLayout(9, 8, 64, 0), EchoBundleTooltipLayout.forEntries(64));
 	}
 
 	@Test
+	void theGridKeepsGrowingUntilItFillsVanillasLargest() {
+		assertEquals(new EchoBundleTooltipLayout(9, 8, 71, 0), EchoBundleTooltipLayout.forEntries(71));
+	}
+
+	@Test
 	void pastVanillasLargestGridTheLastCellCountsWhatIsHidden() {
-		assertEquals(new EchoBundleTooltipLayout(8, 8, 63, 2), EchoBundleTooltipLayout.forEntries(65));
+		assertEquals(new EchoBundleTooltipLayout(9, 8, 71, 1), EchoBundleTooltipLayout.forEntries(72));
 	}
 
 	@Test
 	void aBundleOfTwoHundredFiftySixDifferentThingsStaysOnScreen() {
-		assertEquals(new EchoBundleTooltipLayout(8, 8, 63, 193), EchoBundleTooltipLayout.forEntries(256));
+		assertEquals(new EchoBundleTooltipLayout(9, 8, 71, 185), EchoBundleTooltipLayout.forEntries(256));
 	}
 }

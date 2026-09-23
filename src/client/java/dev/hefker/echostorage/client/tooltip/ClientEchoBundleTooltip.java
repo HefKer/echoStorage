@@ -21,6 +21,7 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 	private static final int SLOT_WIDTH = 18;
 	private static final int SLOT_HEIGHT = 20;
 	private static final int TEXT_COLOR = 0xFFFFFF;
+	private static final int LABEL_WIDTH = SLOT_WIDTH - 2;
 
 	private final EchoBundleContents contents;
 	private final EchoBundleTooltipLayout layout;
@@ -72,11 +73,21 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 			}
 		} else if (index == layout.shownEntries() && layout.capped()) {
 			blit(graphics, x, y, SLOT);
-			String more = "+" + layout.hiddenEntries();
-			graphics.drawString(font, more, x + (SLOT_WIDTH - font.width(more)) / 2, y + 6, TEXT_COLOR);
+			renderHiddenCount(x, y, graphics, font);
 		} else {
 			blit(graphics, x, y, full ? BLOCKED_SLOT : SLOT);
 		}
+	}
+
+	/** "+185" is wider than a cell, so the label shrinks to fit rather than spill over. */
+	private void renderHiddenCount(int x, int y, GuiGraphics graphics, Font font) {
+		String label = "+" + layout.hiddenEntries();
+		float scale = Math.min(1F, (float) LABEL_WIDTH / font.width(label));
+		graphics.pose().pushPose();
+		graphics.pose().translate(x + SLOT_WIDTH / 2F, y + SLOT_HEIGHT / 2F, 0);
+		graphics.pose().scale(scale, scale, 1F);
+		graphics.drawString(font, label, -font.width(label) / 2, -font.lineHeight / 2, TEXT_COLOR);
+		graphics.pose().popPose();
 	}
 
 	private static void blit(GuiGraphics graphics, int x, int y, ResourceLocation sprite) {

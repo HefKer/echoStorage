@@ -50,7 +50,7 @@ public final class EchoBundleContents {
 	private static Fraction weightOf(List<ItemStack> items) {
 		Fraction total = Fraction.ZERO;
 		for (ItemStack stack : items) {
-			total = total.add(unitWeight(stack).multiplyBy(Fraction.getFraction(stack.getCount(), 1)));
+			total = total.add(weightOf(stack, stack.getCount()));
 		}
 		return total;
 	}
@@ -70,6 +70,10 @@ public final class EchoBundleContents {
 				|| stack.getItem() instanceof EchoBundleItem
 				|| stack.has(DataComponents.BUNDLE_CONTENTS)
 				|| stack.has(EchoComponents.ECHO_BUNDLE_CONTENTS);
+	}
+
+	static Fraction weightOf(ItemStack stack, int count) {
+		return unitWeight(stack).multiplyBy(Fraction.getFraction(count, 1));
 	}
 
 	/** Vanilla's weight for one of this stack, over {@link #CAPACITY_IN_STACKS}. */
@@ -139,7 +143,7 @@ public final class EchoBundleContents {
 				return 0;
 			}
 
-			weight = weight.add(unitWeight(stack).multiplyBy(Fraction.getFraction(amount, 1)));
+			weight = weight.add(weightOf(stack, amount));
 			int remaining = amount;
 
 			int partial = findPartialEntry(stack);
@@ -188,7 +192,7 @@ public final class EchoBundleContents {
 				return ItemStack.EMPTY;
 			}
 			ItemStack removed = items.remove(0).copy();
-			weight = weight.subtract(unitWeight(removed).multiplyBy(Fraction.getFraction(removed.getCount(), 1)));
+			weight = weight.subtract(weightOf(removed, removed.getCount()));
 			return removed;
 		}
 
