@@ -12,12 +12,13 @@ public final class NetClient {
 	}
 
 	/**
-	 * Wires the client-bound handlers. Handlers run on the netty thread, so anything touching
-	 * game state is scheduled onto the client thread here rather than in the handler.
+	 * Wires the client-bound handlers. Fabric calls these on the render thread, so they may
+	 * touch client state directly — do not defer them, or every timing they report is really
+	 * a tick boundary.
 	 */
 	public static void registerClientReceivers() {
 		ClientPlayNetworking.registerGlobalReceiver(SeamPingPayload.TYPE,
-				(payload, context) -> context.client().execute(() -> ClientSeamProbe.onPing(payload)));
+				(payload, context) -> ClientSeamProbe.onPing(payload));
 	}
 
 	/** Sends a payload to the server. The only client-to-server send in the mod. */

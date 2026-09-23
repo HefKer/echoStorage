@@ -13,6 +13,10 @@ import net.minecraft.network.codec.StreamCodec;
  * both accept this shape, which is what keeps the port a five-line adapter in
  * {@link EchoMenus} rather than a rewrite of every screen.
  *
+ * <p>The invariant is checked in the compact constructor, which is also the codec's decoder:
+ * open-data that violates it fails the decode and drops the connection. That is the right
+ * outcome — this record only ever travels server to client, so a bad value is our own bug.
+ *
  * @param label the name the player gave this container
  * @param rows how tall it is, in rows of nine
  */

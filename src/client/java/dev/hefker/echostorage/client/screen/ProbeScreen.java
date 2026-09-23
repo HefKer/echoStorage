@@ -45,7 +45,7 @@ public class ProbeScreen extends AbstractContainerScreen<ProbeMenu> {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-		renderBackground(graphics, mouseX, mouseY, partialTick);
+		// Screen.render draws the backdrop; AbstractContainerScreen.render does not draw tooltips.
 		super.render(graphics, mouseX, mouseY, partialTick);
 		renderTooltip(graphics, mouseX, mouseY);
 	}

@@ -39,11 +39,4 @@ public final class Net {
 	public static void sendTo(ServerPlayer player, CustomPacketPayload payload) {
 		ServerPlayNetworking.send(player, payload);
 	}
-
-	/** Sends a payload to every player in {@code players}. */
-	public static void sendTo(Iterable<ServerPlayer> players, CustomPacketPayload payload) {
-		for (ServerPlayer player : players) {
-			sendTo(player, payload);
-		}
-	}
 }
