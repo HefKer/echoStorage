@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -33,8 +34,9 @@ class PortabilityRulesTest {
 			Pattern.compile("^import (?:static )?(net\\.fabricmc\\.[\\w.]+);", Pattern.MULTILINE);
 
 	/**
-	 * Loader package prefix -> the packages allowed to import it. Matching is exact: a
-	 * sub-package does not inherit its parent's permission.
+	 * Loader API prefix -> the packages allowed to import it. The longest matching prefix
+	 * decides, so one API can have a different owner from the rest of its namespace. Package
+	 * matching is exact: a sub-package does not inherit its parent's permission.
 	 */
 	private static final Map<String, List<String>> CONFINED_IMPORTS = Map.of(
 			"net.fabricmc.api", List.of("dev.hefker.echostorage", "dev.hefker.echostorage.client"),
@@ -45,6 +47,8 @@ class PortabilityRulesTest {
 			"net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item"),
 			"net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item"),
 			"net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip"),
+			"net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry",
+					List.of("dev.hefker.echostorage.client.render"),
 			"net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric"));
 
 	private static final Path RESOURCE_ROOT = Path.of("src/main/resources");
@@ -91,7 +95,7 @@ class PortabilityRulesTest {
 			String imported = imports.group(1);
 			String rule = CONFINED_IMPORTS.keySet().stream()
 					.filter(prefix -> imported.equals(prefix) || imported.startsWith(prefix + "."))
-					.findFirst()
+					.max(Comparator.comparingInt(String::length))
 					.orElseThrow(() -> new AssertionError(file + " imports " + imported
 							+ ", a loader API no portability rule covers. Confine it to one package"
 							+ " and add it to CONFINED_IMPORTS, or use the vanilla equivalent."));
