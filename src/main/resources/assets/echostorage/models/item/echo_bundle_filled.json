@@ -1,0 +1,6 @@
+{
+  "parent": "echostorage:item/echo_bundle",
+  "textures": {
+    "layer0": "minecraft:item/bundle_filled"
+  }
+}

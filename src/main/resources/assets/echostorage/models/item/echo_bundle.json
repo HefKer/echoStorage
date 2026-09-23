@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/bundle"
+  },
+  "overrides": [
+    { "predicate": { "minecraft:filled": 0.0000001 }, "model": "echostorage:item/echo_bundle_filled" }
+  ]
+}

@@ -42,6 +42,9 @@ class PortabilityRulesTest {
 			"net.fabricmc.fabric.api.client.networking", List.of("dev.hefker.echostorage.network"),
 			"net.fabricmc.fabric.api.screenhandler", List.of("dev.hefker.echostorage.menu"),
 			"net.fabricmc.fabric.api.command", List.of("dev.hefker.echostorage.command"),
+			"net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item"),
+			"net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item"),
+			"net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip"),
 			"net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric"));
 
 	/** Fabric sugar that rule 5 says to skip entirely in favour of the vanilla equivalent. */

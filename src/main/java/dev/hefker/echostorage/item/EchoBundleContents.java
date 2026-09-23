@@ -8,6 +8,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
@@ -155,6 +157,15 @@ public final class EchoBundleContents {
 
 			stack.shrink(amount);
 			return amount;
+		}
+
+		/** Moves as much of a slot's stack in as fits, taking it the way a player would. */
+		public int tryTransfer(Slot slot, Player player) {
+			ItemStack stack = slot.getItem();
+			if (!canHold(stack)) {
+				return 0;
+			}
+			return tryInsert(slot.safeTake(stack.getCount(), maxAmountToAdd(stack), player));
 		}
 
 		/** An entry of the same item with room left in its stack, or -1. */
