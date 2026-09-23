@@ -36,3 +36,33 @@ no tags, no config, no mixins), it downgrades Fabric's typed `ExtendedScreenHand
 to NeoForge's raw `FriendlyByteBuf` model, and it is a runtime dependency our users must
 install. If we ever go multiloader, `jaredlll08/MultiLoader-Template`'s 1.21.1 branch is the
 better vehicle.
+
+## Amendment (2026-09-23): the unit of confinement is a package, not a class
+
+Rule 3 says payloads are "sent and received through one small `Net` facade", and rule 2 says
+loader APIs go behind the `platform` interface. Implementing the seam showed both readings are
+too narrow, in the same way.
+
+`Net` is two classes. Under `splitEnvironmentSourceSets()`, `ClientPlayNetworking` exists only
+in the client source set, so a single class naming both it and `ServerPlayNetworking` will not
+compile for the dedicated server. The facade is therefore `Net` plus `NetClient`, both in
+`dev.hefker.echostorage.network`. The rule's intent is intact — exactly one package names a
+Fabric networking API — and on NeoForge the two collapse back into one `PayloadRegistrar`
+registration, so the split costs the port nothing.
+
+The same applies to loader APIs that *register* rather than *answer*: commands, menu types,
+events. Putting them behind `PlatformHelper` would mean an interface method per registration
+callback, which is more adapter than the port saves. They are confined to one owning package
+each instead — `network`, `menu`, `command` — and `PlatformHelper` keeps only the questions
+something actually asks.
+
+So the rule is: every loader API is named in exactly one package, and which package is written
+down. `PortabilityRulesTest` enforces it as an allow-list — every `net.fabricmc` import in the
+tree must be named there, so a Fabric API nobody has considered fails the build on first use
+rather than spreading quietly. That test is the real deliverable of rules 2 to 4; the interface
+and the facade are just where the confined code lives.
+
+### Consequences
+
+Adding a Fabric API now means a deliberate edit to `CONFINED_IMPORTS`, naming its owner. That
+is the point, but it will read as friction to anyone who meets the failure without this ADR.
