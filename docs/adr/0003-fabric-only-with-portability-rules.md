@@ -66,3 +66,8 @@ and the facade are just where the confined code lives.
 
 Adding a Fabric API now means a deliberate edit to `CONFINED_IMPORTS`, naming its owner. That
 is the point, but it will read as friction to anyone who meets the failure without this ADR.
+
+An owner can be a single API rather than a whole module. `BuiltinItemRendererRegistry` draws
+the Echo Chest item and is owned by `client.render`, while the rest of Fabric's rendering
+module stays with `client.tooltip`; the test resolves overlapping entries by longest prefix.
+Game-test sources are checked too, with the game-test API confined to their own package.

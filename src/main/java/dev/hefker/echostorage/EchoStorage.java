@@ -1,5 +1,6 @@
 package dev.hefker.echostorage;
 
+import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.command.SeamCommand;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
@@ -25,6 +26,7 @@ public class EchoStorage implements ModInitializer {
 		Net.registerPayloads();
 		Net.registerServerReceivers();
 		EchoComponents.register();
+		EchoBlocks.register();
 		EchoItems.register();
 		EchoMenus.register();
 		SeamCommand.register();

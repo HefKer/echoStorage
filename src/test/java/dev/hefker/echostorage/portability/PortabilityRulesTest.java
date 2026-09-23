@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -27,25 +28,28 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 class PortabilityRulesTest {
 	private static final List<Path> SOURCE_ROOTS =
-			List.of(Path.of("src/main/java"), Path.of("src/client/java"));
+			List.of(Path.of("src/main/java"), Path.of("src/client/java"), Path.of("src/gametest/java"));
 
 	private static final Pattern FABRIC_IMPORT =
 			Pattern.compile("^import (?:static )?(net\\.fabricmc\\.[\\w.]+);", Pattern.MULTILINE);
 
 	/**
-	 * Loader package prefix -> the packages allowed to import it. Matching is exact: a
-	 * sub-package does not inherit its parent's permission.
+	 * Loader API prefix -> the packages allowed to import it. The longest matching prefix
+	 * decides, so one API can have a different owner from the rest of its namespace. Package
+	 * matching is exact: a sub-package does not inherit its parent's permission.
 	 */
-	private static final Map<String, List<String>> CONFINED_IMPORTS = Map.of(
-			"net.fabricmc.api", List.of("dev.hefker.echostorage", "dev.hefker.echostorage.client"),
-			"net.fabricmc.fabric.api.networking", List.of("dev.hefker.echostorage.network"),
-			"net.fabricmc.fabric.api.client.networking", List.of("dev.hefker.echostorage.network"),
-			"net.fabricmc.fabric.api.screenhandler", List.of("dev.hefker.echostorage.menu"),
-			"net.fabricmc.fabric.api.command", List.of("dev.hefker.echostorage.command"),
-			"net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item"),
-			"net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item"),
-			"net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip"),
-			"net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric"));
+	private static final Map<String, List<String>> CONFINED_IMPORTS = Map.ofEntries(
+			Map.entry("net.fabricmc.api", List.of("dev.hefker.echostorage", "dev.hefker.echostorage.client")),
+			Map.entry("net.fabricmc.fabric.api.networking", List.of("dev.hefker.echostorage.network")),
+			Map.entry("net.fabricmc.fabric.api.client.networking", List.of("dev.hefker.echostorage.network")),
+			Map.entry("net.fabricmc.fabric.api.screenhandler", List.of("dev.hefker.echostorage.menu")),
+			Map.entry("net.fabricmc.fabric.api.command", List.of("dev.hefker.echostorage.command")),
+			Map.entry("net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item")),
+			Map.entry("net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item")),
+			Map.entry("net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip")),
+			Map.entry("net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry", List.of("dev.hefker.echostorage.client.render")),
+			Map.entry("net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric")),
+			Map.entry("net.fabricmc.fabric.api.gametest", List.of("dev.hefker.echostorage.gametest")));
 
 	private static final Path RESOURCE_ROOT = Path.of("src/main/resources");
 
@@ -91,7 +95,7 @@ class PortabilityRulesTest {
 			String imported = imports.group(1);
 			String rule = CONFINED_IMPORTS.keySet().stream()
 					.filter(prefix -> imported.equals(prefix) || imported.startsWith(prefix + "."))
-					.findFirst()
+					.max(Comparator.comparingInt(String::length))
 					.orElseThrow(() -> new AssertionError(file + " imports " + imported
 							+ ", a loader API no portability rule covers. Confine it to one package"
 							+ " and add it to CONFINED_IMPORTS, or use the vanilla equivalent."));

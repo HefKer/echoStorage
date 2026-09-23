@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "S",
+    "C",
+    "S"
+  ],
+  "key": {
+    "S": { "item": "minecraft:echo_shard" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "echostorage:echo_chest",
+    "count": 1
+  }
+}
