@@ -42,3 +42,6 @@ replay_*.log
 # Nix / direnv
 .direnv/
 result
+
+# Gradle test-run logs
+logs/

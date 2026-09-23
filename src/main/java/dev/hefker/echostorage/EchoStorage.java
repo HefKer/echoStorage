@@ -1,5 +1,9 @@
 package dev.hefker.echostorage;
 
+import dev.hefker.echostorage.command.SeamCommand;
+import dev.hefker.echostorage.menu.EchoMenus;
+import dev.hefker.echostorage.network.Net;
+import dev.hefker.echostorage.platform.Services;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.ResourceLocation;
@@ -14,6 +18,12 @@ public class EchoStorage implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		LOGGER.info("Echo Storage starting on {}", Services.PLATFORM.platformName());
+
+		Net.registerPayloads();
+		Net.registerServerReceivers();
+		EchoMenus.register();
+		SeamCommand.register();
 	}
 
 	public static ResourceLocation id(String path) {
