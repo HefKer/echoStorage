@@ -42,7 +42,23 @@ class PortabilityRulesTest {
 			"net.fabricmc.fabric.api.client.networking", List.of("dev.hefker.echostorage.network"),
 			"net.fabricmc.fabric.api.screenhandler", List.of("dev.hefker.echostorage.menu"),
 			"net.fabricmc.fabric.api.command", List.of("dev.hefker.echostorage.command"),
+			"net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item"),
+			"net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item"),
+			"net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip"),
 			"net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric"));
+
+	private static final Path RESOURCE_ROOT = Path.of("src/main/resources");
+
+	private static final Pattern FABRIC_RESOURCE_KEY = Pattern.compile("\"fabric:[\\w/]+\"");
+
+	/**
+	 * Data files allowed to use a Fabric-only JSON key (a custom ingredient, a load condition).
+	 * These do not show up as imports, so they are listed here instead; each one needs a
+	 * NeoForge equivalent on a port.
+	 */
+	private static final List<String> LOADER_RESOURCES = List.of(
+			// fabric:components ingredient; NeoForge has neoforge:components.
+			"data/echostorage/recipe/echo_bundle.json");
 
 	/** Fabric sugar that rule 5 says to skip entirely in favour of the vanilla equivalent. */
 	private static final List<String> FORBIDDEN_IMPORTS = List.of(
@@ -95,6 +111,28 @@ class PortabilityRulesTest {
 		for (String forbidden : FORBIDDEN_IMPORTS) {
 			assertTrue(!source.contains("import " + forbidden),
 					file + " imports " + forbidden + "; ADR-0003 rule 5 wants the vanilla equivalent");
+		}
+	}
+
+	static Stream<Path> resourceFiles() {
+		try (Stream<Path> tree = Files.walk(RESOURCE_ROOT)) {
+			return tree.filter(path -> path.toString().endsWith(".json")).toList().stream();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("resourceFiles")
+	void everyLoaderKeyInDataIsOneWeHaveListed(Path file) throws IOException {
+		String relative = RESOURCE_ROOT.relativize(file).toString().replace('\\', '/');
+		if (relative.equals("fabric.mod.json") || LOADER_RESOURCES.contains(relative)) {
+			return;
+		}
+		Matcher key = FABRIC_RESOURCE_KEY.matcher(Files.readString(file));
+		if (key.find()) {
+			throw new AssertionError(file + " uses " + key.group() + ", a Fabric-only data key."
+					+ " Add the file to LOADER_RESOURCES with its NeoForge equivalent.");
 		}
 	}
 

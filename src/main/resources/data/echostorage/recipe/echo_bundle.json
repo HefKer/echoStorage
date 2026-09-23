@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "fabric:type": "fabric:components",
+      "base": { "item": "minecraft:bundle" },
+      "components": { "minecraft:bundle_contents": [] }
+    },
+    { "item": "minecraft:echo_shard" }
+  ],
+  "result": {
+    "id": "echostorage:echo_bundle",
+    "count": 1
+  }
+}

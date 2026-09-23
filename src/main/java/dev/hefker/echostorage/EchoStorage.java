@@ -1,6 +1,8 @@
 package dev.hefker.echostorage;
 
 import dev.hefker.echostorage.command.SeamCommand;
+import dev.hefker.echostorage.item.EchoComponents;
+import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoMenus;
 import dev.hefker.echostorage.network.Net;
 import dev.hefker.echostorage.platform.Services;
@@ -22,6 +24,8 @@ public class EchoStorage implements ModInitializer {
 
 		Net.registerPayloads();
 		Net.registerServerReceivers();
+		EchoComponents.register();
+		EchoItems.register();
 		EchoMenus.register();
 		SeamCommand.register();
 	}
