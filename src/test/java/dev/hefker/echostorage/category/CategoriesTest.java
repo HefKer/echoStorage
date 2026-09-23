@@ -3,15 +3,15 @@ package dev.hefker.echostorage.category;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.mojang.serialization.JsonOps;
-import com.google.gson.JsonPrimitive;
-
 import java.util.List;
 
+import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.api.Test;
 
+/** The v1 preset list, and how a Category is found and saved by name. */
 class CategoriesTest {
 	@Test
 	void v1ShipsOnlyTheCategoriesTagsDoWell() {

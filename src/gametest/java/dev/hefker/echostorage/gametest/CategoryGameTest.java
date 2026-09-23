@@ -2,6 +2,7 @@ package dev.hefker.echostorage.gametest;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -31,7 +32,7 @@ public class CategoryGameTest implements FabricGameTest {
 				Categories.TOOLS, List.of(Items.IRON_PICKAXE, Items.DIAMOND_SWORD, Items.SHEARS),
 				Categories.ARMOR, List.of(Items.IRON_CHESTPLATE, Items.LEATHER_BOOTS));
 
-		helper.assertValueEqual(expected.size(), Categories.ALL.size(), "presets covered");
+		helper.assertValueEqual(expected.keySet(), Set.copyOf(Categories.ALL), "presets covered");
 		expected.forEach((category, items) -> items.forEach(item ->
 				helper.assertTrue(category.matches(new ItemStack(item)), category.name() + " should hold " + item)));
 		helper.succeed();

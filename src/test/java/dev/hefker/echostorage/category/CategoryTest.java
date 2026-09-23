@@ -9,6 +9,7 @@ import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/** The layering itself; the tag layer against real datapacks is {@code CategoryGameTest}'s. */
 class CategoryTest {
 	@BeforeAll
 	static void bootstrap() {

@@ -3,15 +3,15 @@ package dev.hefker.echostorage.category;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import net.minecraft.network.chat.contents.TranslatableContents;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -24,7 +24,8 @@ class CategoryResourcesTest {
 	@ParameterizedTest
 	@MethodSource("presets")
 	void everyPresetShipsTheTagThatBacksIt(Category category) throws IOException {
-		String path = "/data/%s/tags/item/%s.json".formatted(category.tag().location().getNamespace(), category.tag().location().getPath());
+		ResourceLocation location = category.tag().location();
+		String path = "/data/%s/tags/item/%s.json".formatted(location.getNamespace(), location.getPath());
 		JsonObject tag = read(path);
 
 		assertTrue(tag.getAsJsonArray("values").size() > 0, path + " is empty");
@@ -33,9 +34,8 @@ class CategoryResourcesTest {
 	@ParameterizedTest
 	@MethodSource("presets")
 	void everyPresetHasADisplayName(Category category) throws IOException {
-		String key = ((TranslatableContents) category.displayName().getContents()).getKey();
-
-		assertTrue(read("/assets/echostorage/lang/en_us.json").has(key), "no en_us entry for " + key);
+		assertTrue(read("/assets/echostorage/lang/en_us.json").has(category.translationKey()),
+				"no en_us entry for " + category.translationKey());
 	}
 
 	private static JsonObject read(String path) throws IOException {

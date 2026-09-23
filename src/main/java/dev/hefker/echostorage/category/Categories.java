@@ -1,9 +1,10 @@
 package dev.hefker.echostorage.category;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import java.util.List;
 import java.util.Optional;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 /**
  * The preset Categories. v1 ships only those its tag layer can do well (ADR-0001); wood,
@@ -31,6 +32,7 @@ public final class Categories {
 	private Categories() {
 	}
 
+	/** The preset called {@code name}, if one ships. */
 	public static Optional<Category> byName(String name) {
 		return ALL.stream().filter(category -> category.name().equals(name)).findFirst();
 	}
