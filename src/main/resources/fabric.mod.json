@@ -1,36 +1,35 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "echostorage",
 	"version": "${version}",
-	"name": "Example Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Echo Storage",
+	"description": "Makes putting items away cheap without making finding them automatic.",
 	"authors": [
-		"Me!"
+		"HefKer"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/HefKer/echoStorage"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"icon": "assets/echostorage/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"dev.hefker.echostorage.EchoStorage"
 		],
 		"client": [
-			"com.example.client.ExampleModClient"
+			"dev.hefker.echostorage.client.EchoStorageClient"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"echostorage.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "echostorage.client.mixins.json",
 			"environment": "client"
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.19.5",
+		"fabricloader": ">=0.19.3",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
 		"fabric-api": "*"

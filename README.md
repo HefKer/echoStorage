@@ -1,6 +1,9 @@
-# Fabric mod template (NixOS)
+# Echo Storage
 
-A starting point for Fabric mods on NixOS: the upstream
+A Minecraft mod that makes *putting items away* cheap without making *finding them*
+automatic. See [CONTEXT.md](CONTEXT.md) for what that means.
+
+Built on the upstream
 [fabric-example-mod](https://github.com/FabricMC/fabric-example-mod) for Minecraft
 1.21.1, plus a flake devShell that makes `runClient` actually work without an FHS
 wrapper.
@@ -32,9 +35,7 @@ direnv allow     # or: nix develop
 ./gradlew runClient
 ```
 
-Then rename the placeholders: `com.example` / `modid` appear in `gradle.properties`,
-`settings.gradle`, `build.gradle`, `fabric.mod.json`, both `*.mixins.json` files, the
-`src/` package paths, and the `assets/modid/` directory.
+The mod id is `echostorage` and the root package is `dev.hefker.echostorage`.
 
 ## Why the devShell is shaped like this
 
