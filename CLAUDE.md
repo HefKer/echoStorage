@@ -16,10 +16,6 @@ Single-context — one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/
 
 ### Workflow
 
-Solo repo, no pull requests. Work on a short-lived branch, merge it into `main`
-locally (`git merge --no-ff`), and push. Small changes may be committed directly
-on `main`.
+Solo repo, no pull requests. Work on a short-lived branch, merge it into `main` locally (`git merge --no-ff`), and push. Small changes may be committed directly on `main`. Commit in chunks.
 
-Do not run `gh pr create` or `gh pr merge` — issues are closed by a closing
-keyword (`Closes #12`) in a commit message, which GitHub honours as soon as that
-commit reaches `main`.
+Do not run `gh pr create` or `gh pr merge` — issues are closed by a closing keyword (`Closes #12`) in a commit message, which GitHub honours as soon as that commit reaches `main`.
