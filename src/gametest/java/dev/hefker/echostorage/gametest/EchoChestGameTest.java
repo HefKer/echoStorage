@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
@@ -174,6 +175,19 @@ public class EchoChestGameTest implements FabricGameTest {
 		EchoChestRenames.onRename(player, new RenameEchoChestPayload(player.containerMenu.containerId, "  Ores "));
 
 		helper.assertValueEqual(chest.name(), "Ores", "name");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aChestNamedLongerThanTheAnvilAllowsStillOpens(GameTestHelper helper) {
+		// Commands and other mods can name an item past the anvil's limit.
+		ItemStack named = new ItemStack(EchoItems.ECHO_CHEST);
+		named.set(DataComponents.CUSTOM_NAME, Component.literal("x".repeat(EchoChestName.MAX_LENGTH + 10)));
+		placeFromItem(helper, named, CHEST);
+
+		openedBy(helper, chestAt(helper, CHEST));
+
+		helper.assertValueEqual(chestAt(helper, CHEST).name(), "x".repeat(EchoChestName.MAX_LENGTH), "name");
 		helper.succeed();
 	}
 

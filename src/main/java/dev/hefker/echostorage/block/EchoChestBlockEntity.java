@@ -88,9 +88,12 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
-	/** The name as the player typed it, empty if the chest has none. */
+	/**
+	 * The name as the player typed it, empty if the chest has none. Held to the rename rules
+	 * even when it came from an item named some other way, such as by a command.
+	 */
 	public String name() {
-		return name == null ? "" : name.getString();
+		return name == null ? "" : EchoChestName.sanitize(name.getString());
 	}
 
 	/** Renames the chest to what {@code typed} sanitises to; blank clears the name. */

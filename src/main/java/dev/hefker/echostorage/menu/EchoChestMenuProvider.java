@@ -17,7 +17,7 @@ public record EchoChestMenuProvider(EchoChestBlockEntity chest)
 
 	@Override
 	public EchoChestMenuData getScreenOpeningData(ServerPlayer player) {
-		return new EchoChestMenuData(chest.name());
+		return openingData();
 	}
 
 	@Override
@@ -27,6 +27,10 @@ public record EchoChestMenuProvider(EchoChestBlockEntity chest)
 
 	@Override
 	public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-		return new EchoChestMenu(containerId, playerInventory, chest, new EchoChestMenuData(chest.name()));
+		return new EchoChestMenu(containerId, playerInventory, chest, openingData());
+	}
+
+	private EchoChestMenuData openingData() {
+		return new EchoChestMenuData(chest.name());
 	}
 }
