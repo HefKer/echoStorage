@@ -12,6 +12,7 @@ import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.network.NetClient;
 import dev.hefker.echostorage.network.RenameEchoChestPayload;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -32,6 +33,9 @@ import org.lwjgl.glfw.GLFW;
  * <p>Beside the chest sit its Category and strictness. Either can change at any time and neither
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
+ *
+ * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
+ * only fill a slot. Its tooltip says so, since the two otherwise look like the same action.
  */
 public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final ResourceLocation TEXTURE =
@@ -92,6 +96,13 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 						Component.translatable("container.echostorage.echo_chest.strict"),
 						(button, strict) -> clickButton(strict ? EchoChestMenu.STRICT_BUTTON : EchoChestMenu.PERMISSIVE_BUTTON));
 		addRenderableWidget(strictButton);
+
+		// Not predicted here: the server works out the whole transfer and the slots sync back.
+		addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
+						button -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, EchoChestMenu.QUICK_STACK_BUTTON))
+				.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
+				.bounds(buttonX, topPos + 2 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
+				.build());
 	}
 
 	/** Follows changes that did not come from this screen: another player's, or the server's answer. */
