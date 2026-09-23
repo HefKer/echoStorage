@@ -30,6 +30,31 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter-params:${project.junit_version}"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+// Plain JUnit tests for loader-agnostic logic: codecs, the platform lookup, and the
+// portability rules from ADR-0003. Anything needing a live game belongs in a game test.
+sourceSets {
+	test {
+		compileClasspath += sourceSets.client.output
+		runtimeClasspath += sourceSets.client.output
+	}
+}
+
+configurations {
+	testImplementation.extendsFrom clientImplementation
+}
+
+tasks.named('test', Test) {
+	useJUnitPlatform()
+	testLogging {
+		events "failed"
+		exceptionFormat "full"
+	}
 }
 
 processResources {
