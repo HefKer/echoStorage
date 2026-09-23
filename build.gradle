@@ -14,6 +14,14 @@ repositories {
 loom {
 	splitEnvironmentSourceSets()
 
+	runs {
+		// Keep the two run dirs apart: sharing one means client and server fight over
+		// logs/latest.log, and whichever starts second truncates the other's log.
+		server {
+			runDir = "run/server"
+		}
+	}
+
 	mods {
 		"echostorage" {
 			sourceSet sourceSets.main
