@@ -5,16 +5,19 @@ import java.util.Optional;
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 /**
  * An Echo Chest's Category and strictness: how they are saved, assigned, enforced and shown.
@@ -24,6 +27,10 @@ import net.minecraft.world.item.Items;
 public class EchoChestCategoryGameTest implements FabricGameTest {
 	// GameTestHelper.assertValueEqual takes (actual, expected, what).
 	private static final BlockPos CHEST = new BlockPos(1, 1, 1);
+	/** The first slot of the player's main inventory, above the hotbar. */
+	private static final int FIRST_MAIN_INVENTORY_SLOT = 9;
+	/** The same slot in the Echo Chest menu, which lists the chest's 27 first. */
+	private static final int FIRST_PLAYER_MENU_SLOT = EchoChestBlockEntity.SLOTS;
 
 	// --- persistence ----------------------------------------------------------------------
 
@@ -143,11 +150,110 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	// --- strictness -----------------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestRefusesAStrayFromAHopper(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+
+		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
+
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), left), "the hopper keeps the stray, got " + left);
+		helper.assertTrue(chest.isEmpty(), "the chest took a stray");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestTakesItsCategoryFromAHopper(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+
+		ItemStack left = hopperInto(chest, new ItemStack(Items.IRON_ORE, 5));
+
+		helper.assertTrue(left.isEmpty(), "the hopper kept a match, " + left);
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 5), chest.getItem(0)), "the match went in");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aPermissiveChestTakesStraysFromAHopper(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+
+		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
+
+		helper.assertTrue(left.isEmpty(), "a permissive chest refused a stray, " + left);
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void strictWithNoCategoryRefusesNothing(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.setStrict(true);
+
+		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
+
+		helper.assertTrue(left.isEmpty(), "an unassigned chest has nothing to be strict about, " + left);
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestRefusesAShiftClickedStray(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+		// A stray already inside must not become a way in for more of it.
+		chest.setItem(0, new ItemStack(Items.BREAD, 1));
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
+
+		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT)),
+				"the stray stays with the player");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 1), chest.getItem(0)), "the chest took a stray");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestTakesAShiftClickedMatch(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 5));
+
+		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 5), chest.getItem(0)), "the match went in");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aPermissiveChestTakesAShiftClickedStray(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
+
+		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(0)), "the stray went in");
+		helper.succeed();
+	}
+
 	// --- helpers --------------------------------------------------------------------------
 
 	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
 		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
 		return helper.getBlockEntity(pos);
+	}
+
+	private static EchoChestBlockEntity strictChestOf(GameTestHelper helper, Category category) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(category);
+		chest.setStrict(true);
+		return chest;
+	}
+
+	/** Vanilla's hopper insert, which hoppers and droppers both use; returns what did not fit. */
+	private static ItemStack hopperInto(EchoChestBlockEntity chest, ItemStack stack) {
+		return HopperBlockEntity.addItem(null, chest, stack, Direction.DOWN);
 	}
 
 	private static ServerPlayer openedBy(GameTestHelper helper, EchoChestBlockEntity chest) {

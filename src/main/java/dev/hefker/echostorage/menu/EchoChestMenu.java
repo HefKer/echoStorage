@@ -19,7 +19,8 @@ import net.minecraft.world.item.ItemStack;
  * An open Echo Chest: its 27 slots over the player's inventory, laid out like a vanilla chest.
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
- * nested bundle is quick-stack's job alone (ADR-0007).
+ * nested bundle is quick-stack's job alone (ADR-0007). A strict chest refuses a shift-clicked
+ * stray, but a stack placed by hand always goes in: that is the player choosing to.
  *
  * <p>The chest's Category and strictness ride along as vanilla data slots, so an open screen
  * follows every change, and the screen changes them with vanilla menu-button clicks — which the
@@ -109,6 +110,19 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		return assignment.get(STRICT_DATA) != 0;
 	}
 
+	/** Whether {@code stack} falls outside the chest's Category. An unassigned chest has no strays. */
+	public boolean isStray(ItemStack stack) {
+		return category().filter(category -> !category.matches(stack)).isPresent();
+	}
+
+	/**
+	 * The chest's rule, read from the synced data so the client predicts what the server does.
+	 * On the server it agrees with {@link EchoChestBlockEntity#refuses} by construction.
+	 */
+	private boolean refuses(ItemStack stack) {
+		return isStrict() && isStray(stack);
+	}
+
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
 		if (button == TOGGLE_STRICT_BUTTON) {
@@ -148,7 +162,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			if (!moveItemStackTo(inSlot, containerSlots, slots.size(), true)) {
 				return ItemStack.EMPTY;
 			}
-		} else if (!moveItemStackTo(inSlot, 0, containerSlots, false)) {
+		} else if (refuses(inSlot) || !moveItemStackTo(inSlot, 0, containerSlots, false)) {
 			return ItemStack.EMPTY;
 		}
 

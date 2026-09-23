@@ -137,6 +137,11 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
+	/** Whether {@code stack} is kept out: only by a strict chest, and only if it is not in the Category. */
+	public boolean refuses(ItemStack stack) {
+		return strict && category != null && !category.matches(stack);
+	}
+
 	@Override
 	public Component getName() {
 		return name != null ? name : getBlockState().getBlock().getName();
@@ -249,6 +254,12 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		items.set(slot, stack);
 		stack.limitSize(getMaxStackSize(stack));
 		setChanged();
+	}
+
+	/** What hoppers and droppers ask before inserting. A player placing by hand is never refused. */
+	@Override
+	public boolean canPlaceItem(int slot, ItemStack stack) {
+		return !refuses(stack);
 	}
 
 	@Override
