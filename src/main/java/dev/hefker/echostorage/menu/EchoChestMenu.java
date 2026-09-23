@@ -3,6 +3,7 @@ package dev.hefker.echostorage.menu;
 import java.util.Optional;
 
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import net.minecraft.world.Container;
@@ -19,8 +20,8 @@ import net.minecraft.world.item.ItemStack;
  * An open Echo Chest: its 27 slots over the player's inventory, laid out like a vanilla chest.
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
- * nested bundle is quick-stack's job alone (ADR-0007). A strict chest refuses a shift-clicked
- * stray, but a stack placed by hand always goes in: that is the player choosing to.
+ * nested bundle is the quick-stack button's job alone (ADR-0007). A strict chest refuses a
+ * shift-clicked stray, but a stack placed by hand always goes in: that is the player choosing to.
  *
  * <p>The chest's Category and strictness ride along as vanilla data slots, so an open screen
  * follows every change, and the screen changes them with vanilla menu-button clicks — which the
@@ -34,8 +35,9 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	// had not yet seen someone else's change cannot undo it.
 	public static final int PERMISSIVE_BUTTON = 0;
 	public static final int STRICT_BUTTON = 1;
+	public static final int QUICK_STACK_BUTTON = 2;
 	/** Followed by one button per preset, in {@link Categories#ALL} order. */
-	public static final int CLEAR_CATEGORY_BUTTON = 2;
+	public static final int CLEAR_CATEGORY_BUTTON = 3;
 
 	private static final int CATEGORY_DATA = 0;
 	private static final int STRICT_DATA = 1;
@@ -122,6 +124,10 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
+		if (button == QUICK_STACK_BUTTON) {
+			quickStack(player);
+			return true;
+		}
 		if (button == PERMISSIVE_BUTTON || button == STRICT_BUTTON) {
 			assignment.set(STRICT_DATA, button == STRICT_BUTTON ? 1 : 0);
 			return true;
@@ -132,6 +138,17 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Server-only: the whole transfer is worked out and written here, and the client learns the
+	 * result from the slot sync that follows every button click. The hotbar is left alone, so
+	 * what the player is holding stays at hand.
+	 */
+	private void quickStack(Player player) {
+		if (!player.level().isClientSide()) {
+			QuickStack.run(container, this::refuses, player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
+		}
 	}
 
 	/**
