@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
-			"dev.hefker.echostorage.gametest.EchoChestGameTest"
+			"dev.hefker.echostorage.gametest.EchoChestGameTest",
+			"dev.hefker.echostorage.gametest.CategoryGameTest"
 		]
 	},
 	"depends": {

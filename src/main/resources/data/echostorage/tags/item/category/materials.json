@@ -1,0 +1,312 @@
+{
+  "values": [
+    {
+      "id": "#c:ingots",
+      "required": false
+    },
+    {
+      "id": "#c:gems",
+      "required": false
+    },
+    {
+      "id": "#c:dusts",
+      "required": false
+    },
+    {
+      "id": "#c:nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:raw_materials",
+      "required": false
+    },
+    {
+      "id": "#c:raw_ores",
+      "required": false
+    },
+    {
+      "id": "#c:iron_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:gold_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:copper_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:netherite_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:tin_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:silver_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:lead_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:zinc_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:nickel_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:aluminum_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:platinum_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:uranium_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:osmium_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:bronze_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:brass_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:steel_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:electrum_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:invar_ingots",
+      "required": false
+    },
+    {
+      "id": "#c:iron_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:gold_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:copper_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:netherite_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:tin_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:silver_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:lead_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:zinc_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:nickel_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:aluminum_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:platinum_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:uranium_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:osmium_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:bronze_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:brass_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:steel_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:electrum_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:invar_nuggets",
+      "required": false
+    },
+    {
+      "id": "#c:iron_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:gold_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:copper_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:netherite_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:tin_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:silver_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:lead_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:zinc_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:nickel_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:aluminum_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:platinum_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:uranium_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:osmium_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:bronze_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:brass_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:steel_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:electrum_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:invar_dusts",
+      "required": false
+    },
+    {
+      "id": "#c:raw_iron_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_gold_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_copper_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_tin_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_silver_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_lead_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_zinc_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_nickel_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_aluminum_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_platinum_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_uranium_ores",
+      "required": false
+    },
+    {
+      "id": "#c:raw_osmium_ores",
+      "required": false
+    },
+    {
+      "id": "#c:diamonds",
+      "required": false
+    },
+    {
+      "id": "#c:emeralds",
+      "required": false
+    },
+    {
+      "id": "#c:quartz",
+      "required": false
+    },
+    {
+      "id": "#c:lapis",
+      "required": false
+    },
+    {
+      "id": "#c:redstone_dusts",
+      "required": false
+    }
+  ]
+}
