@@ -1,7 +1,11 @@
 package dev.hefker.echostorage.block;
 
+import java.util.Optional;
 import java.util.UUID;
 
+import dev.hefker.echostorage.EchoStorage;
+import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -9,6 +13,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -43,6 +48,8 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	private static final String ID_TAG = "EchoChestId";
 	private static final String NAME_TAG = "CustomName";
+	private static final String CATEGORY_TAG = "Category";
+	private static final String STRICT_TAG = "Strict";
 	private static final int EVENT_SET_OPEN_COUNT = 1;
 
 	private final NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
@@ -72,6 +79,9 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	private UUID id = UUID.randomUUID();
 	@Nullable
 	private Component name;
+	@Nullable
+	private Category category;
+	private boolean strict;
 
 	public EchoChestBlockEntity(BlockPos pos, BlockState state) {
 		super(EchoBlocks.ECHO_CHEST_ENTITY, pos, state);
@@ -103,6 +113,30 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
+	/** The Category this chest is assigned to hold, if any. */
+	public Optional<Category> category() {
+		return Optional.ofNullable(category);
+	}
+
+	/**
+	 * Assigns the chest to {@code category}, or clears it with null. Allowed at any time, on any
+	 * chest, and never moves or refuses what is already inside.
+	 */
+	public void assign(@Nullable Category category) {
+		this.category = category;
+		setChanged();
+	}
+
+	/** Whether this chest refuses items outside its Category on shift-click and hopper insert. */
+	public boolean isStrict() {
+		return strict;
+	}
+
+	public void setStrict(boolean strict) {
+		this.strict = strict;
+		setChanged();
+	}
+
 	@Override
 	public Component getName() {
 		return name != null ? name : getBlockState().getBlock().getName();
@@ -125,8 +159,21 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		name = tag.contains(NAME_TAG, CompoundTag.TAG_STRING)
 				? parseCustomNameSafe(tag.getString(NAME_TAG), registries)
 				: null;
+		category = tag.contains(CATEGORY_TAG) ? loadCategory(tag) : null;
+		strict = tag.getBoolean(STRICT_TAG);
 		items.clear();
 		ContainerHelper.loadAllItems(tag, items, registries);
+	}
+
+	/**
+	 * A Category saved under a name that no longer ships loads as none, so the chest comes back
+	 * unassigned rather than failing to load its contents and name with it.
+	 */
+	@Nullable
+	private Category loadCategory(CompoundTag tag) {
+		return Categories.CODEC.parse(NbtOps.INSTANCE, tag.get(CATEGORY_TAG))
+				.resultOrPartial(error -> EchoStorage.LOGGER.warn("Echo Chest at {} lost its Category: {}", getBlockPos(), error))
+				.orElse(null);
 	}
 
 	@Override
@@ -135,6 +182,12 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		tag.putUUID(ID_TAG, id);
 		if (name != null) {
 			tag.putString(NAME_TAG, Component.Serializer.toJson(name, registries));
+		}
+		if (category != null) {
+			tag.put(CATEGORY_TAG, Categories.CODEC.encodeStart(NbtOps.INSTANCE, category).getOrThrow());
+		}
+		if (strict) {
+			tag.putBoolean(STRICT_TAG, true);
 		}
 		ContainerHelper.saveAllItems(tag, items, registries);
 	}

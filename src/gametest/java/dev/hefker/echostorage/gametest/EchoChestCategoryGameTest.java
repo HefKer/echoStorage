@@ -1,0 +1,175 @@
+package dev.hefker.echostorage.gametest;
+
+import java.util.Optional;
+
+import dev.hefker.echostorage.block.EchoBlocks;
+import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.menu.EchoChestMenu;
+import dev.hefker.echostorage.menu.EchoChestMenuProvider;
+import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+/**
+ * An Echo Chest's Category and strictness: how they are saved, assigned, enforced and shown.
+ * Assignment is unrestricted and never moves anything; strictness only refuses what is being
+ * put in by shift-click or hopper.
+ */
+public class EchoChestCategoryGameTest implements FabricGameTest {
+	// GameTestHelper.assertValueEqual takes (actual, expected, what).
+	private static final BlockPos CHEST = new BlockPos(1, 1, 1);
+
+	// --- persistence ----------------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theCategoryAndStrictnessSurviveASaveAndLoad(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.setStrict(true);
+
+		EchoChestBlockEntity loaded = load(helper, chest, save(helper, chest));
+
+		helper.assertValueEqual(loaded.category(), Optional.of(Categories.ORES), "category after load");
+		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aChestNeverAssignedLoadsUnassignedAndPermissive(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+
+		EchoChestBlockEntity loaded = load(helper, chest, save(helper, chest));
+
+		helper.assertValueEqual(loaded.category(), Optional.empty(), "category after load");
+		helper.assertFalse(loaded.isStrict(), "a chest is permissive by default");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aCategoryThatNoLongerShipsLoadsUnassignedAndKeepsTheRest(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.rename("Logs");
+		chest.assign(Categories.ORES);
+		chest.setStrict(true);
+		chest.setItem(4, new ItemStack(Items.OAK_LOG, 32));
+		CompoundTag saved = save(helper, chest);
+		// As if saved by a version that shipped a "wood" preset this one has since dropped.
+		saved.putString("Category", "wood");
+
+		EchoChestBlockEntity loaded = load(helper, chest, saved);
+
+		helper.assertValueEqual(loaded.category(), Optional.empty(), "category after load");
+		helper.assertValueEqual(loaded.name(), "Logs", "name after load");
+		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.OAK_LOG, 32), loaded.getItem(4)), "contents after load");
+		helper.succeed();
+	}
+
+	// --- assignment -----------------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void assigningFromTheOpenScreenSetsTheCategory(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		ServerPlayer player = openedBy(helper, chest);
+
+		helper.assertTrue(menu(player).clickMenuButton(player, EchoChestMenu.assignButton(Categories.ORES)), "button handled");
+
+		helper.assertValueEqual(chest.category(), Optional.of(Categories.ORES), "category");
+		helper.assertValueEqual(menu(player).category(), Optional.of(Categories.ORES), "category the screen sees");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void changingTheCategoryOfAFullChestMovesNothing(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.setItem(0, new ItemStack(Items.IRON_ORE, 16));
+		chest.setItem(1, new ItemStack(Items.BREAD, 5));
+		ServerPlayer player = openedBy(helper, chest);
+
+		menu(player).clickMenuButton(player, EchoChestMenu.assignButton(Categories.FOOD));
+
+		helper.assertValueEqual(chest.category(), Optional.of(Categories.FOOD), "category");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 16), chest.getItem(0)), "the stray stays put");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(1)), "the match stays put");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void clearingTheCategoryLeavesTheChestUnassigned(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+
+		menu(player).clickMenuButton(player, EchoChestMenu.CLEAR_CATEGORY_BUTTON);
+
+		helper.assertValueEqual(chest.category(), Optional.empty(), "category");
+		helper.assertValueEqual(menu(player).category(), Optional.empty(), "category the screen sees");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theStrictToggleFlipsStrictness(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		ServerPlayer player = openedBy(helper, chest);
+
+		menu(player).clickMenuButton(player, EchoChestMenu.TOGGLE_STRICT_BUTTON);
+		helper.assertTrue(chest.isStrict(), "strict after one toggle");
+		helper.assertTrue(menu(player).isStrict(), "strictness the screen sees");
+
+		menu(player).clickMenuButton(player, EchoChestMenu.TOGGLE_STRICT_BUTTON);
+		helper.assertFalse(chest.isStrict(), "strict after two toggles");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aButtonTheScreenDoesNotHaveChangesNothing(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+
+		for (int button : new int[] {-1, EchoChestMenu.assignButton(Categories.ALL.getLast()) + 1, 999}) {
+			helper.assertFalse(menu(player).clickMenuButton(player, button), "button " + button + " handled");
+		}
+
+		helper.assertValueEqual(chest.category(), Optional.of(Categories.ORES), "category");
+		helper.assertFalse(chest.isStrict(), "strictness");
+		helper.succeed();
+	}
+
+	// --- helpers --------------------------------------------------------------------------
+
+	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
+		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
+		return helper.getBlockEntity(pos);
+	}
+
+	private static ServerPlayer openedBy(GameTestHelper helper, EchoChestBlockEntity chest) {
+		@SuppressWarnings("removal")
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.moveTo(helper.absoluteVec(CHEST.getCenter()).add(0, 1, 0));
+		player.openMenu(new EchoChestMenuProvider(chest));
+		helper.assertTrue(player.containerMenu instanceof EchoChestMenu, "the Echo Chest menu did not open");
+		return player;
+	}
+
+	private static EchoChestMenu menu(ServerPlayer player) {
+		return (EchoChestMenu) player.containerMenu;
+	}
+
+	private static CompoundTag save(GameTestHelper helper, EchoChestBlockEntity chest) {
+		return chest.saveWithFullMetadata(helper.getLevel().registryAccess());
+	}
+
+	private static EchoChestBlockEntity load(GameTestHelper helper, EchoChestBlockEntity chest, CompoundTag saved) {
+		EchoChestBlockEntity loaded = new EchoChestBlockEntity(chest.getBlockPos(), chest.getBlockState());
+		loaded.loadWithComponents(saved, helper.getLevel().registryAccess());
+		return loaded;
+	}
+}
