@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.category.Categories;
@@ -12,7 +11,6 @@ import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.network.NetClient;
 import dev.hefker.echostorage.network.RenameEchoChestPayload;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -73,7 +71,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		nameField.setMaxLength(EchoChestName.MAX_LENGTH);
 		nameField.setTextColor(LABEL_COLOR);
 		nameField.setValue(value);
-		nameField.setHint(unnamedTitle(menu.category()));
+		nameField.setHint(EchoChestBlockEntity.unnamedTitle(menu.category()));
 		nameField.setTooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.rename")));
 		addRenderableWidget(nameField);
 
@@ -104,7 +102,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		if (!categoryButton.getValue().equals(category)) {
 			categoryButton.setValue(category);
 		}
-		nameField.setHint(unnamedTitle(category));
+		nameField.setHint(EchoChestBlockEntity.unnamedTitle(category));
 		if (strictButton.getValue() != menu.isStrict()) {
 			strictButton.setValue(menu.isStrict());
 		}
@@ -126,12 +124,6 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static Component categoryLabel(Optional<Category> category) {
 		return category.map(Category::displayName)
 				.orElseGet(() -> Component.translatable("container.echostorage.echo_chest.category.none"));
-	}
-
-	/** What stands in for the name while none is typed; mirrors the chest's own display name. */
-	private static Component unnamedTitle(Optional<Category> category) {
-		return category.<Component>map(assigned -> assigned.displayName().copy().withStyle(ChatFormatting.ITALIC))
-				.orElseGet(EchoBlocks.ECHO_CHEST::getName);
 	}
 
 	@Override

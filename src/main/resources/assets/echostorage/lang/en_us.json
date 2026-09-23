@@ -4,7 +4,7 @@
   "container.echostorage.echo_chest.rename": "Click to rename",
   "container.echostorage.echo_chest.category": "Category",
   "container.echostorage.echo_chest.category.none": "No Category",
-  "container.echostorage.echo_chest.category.tooltip": "Items outside the Category are marked, never moved. Shift-click to go back.",
+  "container.echostorage.echo_chest.category.tooltip": "Items outside the Category are marked, never moved. Shift-click this button to go back.",
   "container.echostorage.echo_chest.strict": "Strict",
   "container.echostorage.echo_chest.strict.tooltip": "When on, shift-click and hoppers refuse items outside the Category. Placing by hand always works.",
   "category.echostorage.food": "Food",

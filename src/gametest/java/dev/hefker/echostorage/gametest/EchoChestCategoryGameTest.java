@@ -8,6 +8,7 @@ import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
+import dev.hefker.echostorage.menu.EchoChestMenuData;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.ChatFormatting;
@@ -20,8 +21,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 /**
@@ -153,6 +156,17 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		helper.assertValueEqual(chest.category(), Optional.of(Categories.ORES), "category");
 		helper.assertFalse(chest.isStrict(), "strictness");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aScreenOpenedBeforeItsFirstSyncShowsNoCategory(GameTestHelper helper) {
+		// The client's menu, as it stands between the open packet and the first data sync.
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		EchoChestMenu unsynced = new EchoChestMenu(1, player.getInventory(), new EchoChestMenuData(""));
+
+		helper.assertValueEqual(unsynced.category(), Optional.empty(), "category before sync");
+		helper.assertFalse(unsynced.isStray(new ItemStack(Items.BREAD)), "an unsynced screen marks strays");
 		helper.succeed();
 	}
 

@@ -34,13 +34,12 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	// had not yet seen someone else's change cannot undo it.
 	public static final int PERMISSIVE_BUTTON = 0;
 	public static final int STRICT_BUTTON = 1;
+	/** Followed by one button per preset, in {@link Categories#ALL} order. */
 	public static final int CLEAR_CATEGORY_BUTTON = 2;
-	private static final int FIRST_CATEGORY_BUTTON = 3;
 
 	private static final int CATEGORY_DATA = 0;
 	private static final int STRICT_DATA = 1;
 	private static final int DATA_COUNT = 2;
-	private static final int NO_CATEGORY = -1;
 
 	private final Container container;
 	private final ContainerData assignment;
@@ -96,17 +95,15 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The button that assigns the chest to {@code category}. */
 	public static int assignButton(Category category) {
-		int index = Categories.ALL.indexOf(category);
-		if (index < 0) {
+		if (!Categories.ALL.contains(category)) {
 			throw new IllegalArgumentException("not a preset: " + category.name());
 		}
-		return FIRST_CATEGORY_BUTTON + index;
+		return CLEAR_CATEGORY_BUTTON + encode(Optional.of(category));
 	}
 
 	/** The chest's Category as last synced: on the server the chest's own, on the client a copy. */
 	public Optional<Category> category() {
-		int index = assignment.get(CATEGORY_DATA);
-		return index >= 0 && index < Categories.ALL.size() ? Optional.of(Categories.ALL.get(index)) : Optional.empty();
+		return decode(assignment.get(CATEGORY_DATA));
 	}
 
 	public boolean isStrict() {
@@ -115,15 +112,12 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** Whether {@code stack} falls outside the chest's Category. An unassigned chest has no strays. */
 	public boolean isStray(ItemStack stack) {
-		return category().filter(category -> !category.matches(stack)).isPresent();
+		return EchoChestBlockEntity.isStray(category(), stack);
 	}
 
-	/**
-	 * The chest's rule, read from the synced data so the client predicts what the server does.
-	 * On the server it agrees with {@link EchoChestBlockEntity#refuses} by construction.
-	 */
+	/** The chest's own rule, read from the synced data so the client predicts what the server does. */
 	private boolean refuses(ItemStack stack) {
-		return isStrict() && isStray(stack);
+		return EchoChestBlockEntity.refuses(category(), isStrict(), stack);
 	}
 
 	@Override
@@ -132,16 +126,25 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			assignment.set(STRICT_DATA, button == STRICT_BUTTON ? 1 : 0);
 			return true;
 		}
-		if (button == CLEAR_CATEGORY_BUTTON) {
-			assignment.set(CATEGORY_DATA, NO_CATEGORY);
-			return true;
-		}
-		int index = button - FIRST_CATEGORY_BUTTON;
-		if (index >= 0 && index < Categories.ALL.size()) {
-			assignment.set(CATEGORY_DATA, index);
+		int category = button - CLEAR_CATEGORY_BUTTON;
+		if (category >= 0 && category <= Categories.ALL.size()) {
+			assignment.set(CATEGORY_DATA, category);
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * A Category as a data-slot value: 0 is none, so a client menu that has not heard from the
+	 * server yet reads as unassigned rather than as the first preset.
+	 */
+	private static int encode(Optional<Category> category) {
+		return category.map(assigned -> Categories.ALL.indexOf(assigned) + 1).orElse(0);
+	}
+
+	/** The inverse of {@link #encode}; a value no preset has reads as none. */
+	private static Optional<Category> decode(int value) {
+		return value >= 1 && value <= Categories.ALL.size() ? Optional.of(Categories.ALL.get(value - 1)) : Optional.empty();
 	}
 
 	@Override
@@ -190,7 +193,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			@Override
 			public int get(int index) {
 				return switch (index) {
-					case CATEGORY_DATA -> chest.category().map(Categories.ALL::indexOf).orElse(NO_CATEGORY);
+					case CATEGORY_DATA -> encode(chest.category());
 					case STRICT_DATA -> chest.isStrict() ? 1 : 0;
 					default -> 0;
 				};
@@ -199,7 +202,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			@Override
 			public void set(int index, int value) {
 				switch (index) {
-					case CATEGORY_DATA -> chest.assign(value == NO_CATEGORY ? null : Categories.ALL.get(value));
+					case CATEGORY_DATA -> chest.assign(decode(value).orElse(null));
 					case STRICT_DATA -> chest.setStrict(value != 0);
 					default -> {
 					}

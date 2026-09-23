@@ -140,7 +140,17 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/** Whether {@code stack} is kept out: only by a strict chest, and only if it is not in the Category. */
 	public boolean refuses(ItemStack stack) {
-		return strict && category != null && !category.matches(stack);
+		return refuses(category(), strict, stack);
+	}
+
+	/** The rule itself, shared with the menu so a client screen can predict it. */
+	public static boolean refuses(Optional<Category> category, boolean strict, ItemStack stack) {
+		return strict && isStray(category, stack);
+	}
+
+	/** Whether {@code stack} falls outside {@code category}. With no Category nothing is a stray. */
+	public static boolean isStray(Optional<Category> category, ItemStack stack) {
+		return category.filter(assigned -> !assigned.matches(stack)).isPresent();
 	}
 
 	/**
@@ -150,13 +160,13 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 */
 	@Override
 	public Component getName() {
-		if (name != null) {
-			return name;
-		}
-		if (category != null) {
-			return category.displayName().copy().withStyle(ChatFormatting.ITALIC);
-		}
-		return getBlockState().getBlock().getName();
+		return name != null ? name : unnamedTitle(category());
+	}
+
+	/** What an Echo Chest with no typed name is called: its Category in italics, else "Echo Chest". */
+	public static Component unnamedTitle(Optional<Category> category) {
+		return category.<Component>map(assigned -> assigned.displayName().copy().withStyle(ChatFormatting.ITALIC))
+				.orElseGet(EchoBlocks.ECHO_CHEST::getName);
 	}
 
 	@Nullable
