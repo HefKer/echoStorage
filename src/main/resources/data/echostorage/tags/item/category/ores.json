@@ -1,0 +1,80 @@
+{
+  "values": [
+    {
+      "id": "#c:ores",
+      "required": false
+    },
+    {
+      "id": "#c:iron_ores",
+      "required": false
+    },
+    {
+      "id": "#c:gold_ores",
+      "required": false
+    },
+    {
+      "id": "#c:copper_ores",
+      "required": false
+    },
+    {
+      "id": "#c:tin_ores",
+      "required": false
+    },
+    {
+      "id": "#c:silver_ores",
+      "required": false
+    },
+    {
+      "id": "#c:lead_ores",
+      "required": false
+    },
+    {
+      "id": "#c:zinc_ores",
+      "required": false
+    },
+    {
+      "id": "#c:nickel_ores",
+      "required": false
+    },
+    {
+      "id": "#c:aluminum_ores",
+      "required": false
+    },
+    {
+      "id": "#c:platinum_ores",
+      "required": false
+    },
+    {
+      "id": "#c:uranium_ores",
+      "required": false
+    },
+    {
+      "id": "#c:osmium_ores",
+      "required": false
+    },
+    {
+      "id": "#c:coal_ores",
+      "required": false
+    },
+    {
+      "id": "#c:diamond_ores",
+      "required": false
+    },
+    {
+      "id": "#c:emerald_ores",
+      "required": false
+    },
+    {
+      "id": "#c:lapis_ores",
+      "required": false
+    },
+    {
+      "id": "#c:redstone_ores",
+      "required": false
+    },
+    {
+      "id": "#c:quartz_ores",
+      "required": false
+    }
+  ]
+}

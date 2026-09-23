@@ -1,0 +1,128 @@
+{
+  "values": [
+    {
+      "id": "#c:storage_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:iron_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:gold_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:copper_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:netherite_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:tin_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:silver_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:lead_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:zinc_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:nickel_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:aluminum_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:platinum_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:uranium_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:osmium_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:bronze_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:brass_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:steel_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:electrum_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:invar_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_iron_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_gold_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_copper_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_tin_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_silver_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_lead_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_zinc_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_nickel_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_aluminum_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_platinum_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_uranium_blocks",
+      "required": false
+    },
+    {
+      "id": "#c:raw_osmium_blocks",
+      "required": false
+    }
+  ]
+}
