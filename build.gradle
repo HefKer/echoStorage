@@ -30,6 +30,18 @@ loom {
 	}
 }
 
+// Game tests: a headless server that runs every @GameTest in src/gametest and exits,
+// via ./gradlew runGameTest. The break/drop and identity paths need a real world.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "echostorage-gametest"
+		enableGameTests = true
+		enableClientGameTests = false
+		eula = true
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"

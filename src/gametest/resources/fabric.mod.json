@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "echostorage-gametest",
+	"version": "1.0.0",
+	"name": "Echo Storage game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"dev.hefker.echostorage.gametest.EchoChestGameTest"
+		]
+	},
+	"depends": {
+		"echostorage": "*"
+	}
+}
