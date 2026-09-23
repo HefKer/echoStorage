@@ -7,6 +7,7 @@ import dev.hefker.echostorage.EchoStorage;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.menu.EchoChestMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -142,9 +143,20 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		return strict && category != null && !category.matches(stack);
 	}
 
+	/**
+	 * What the chest is called on screen: its typed name, else its Category's name in italics,
+	 * else "Echo Chest". The Category fallback is display-only — never stored as the custom name,
+	 * so clearing the Category strands no name the player never typed.
+	 */
 	@Override
 	public Component getName() {
-		return name != null ? name : getBlockState().getBlock().getName();
+		if (name != null) {
+			return name;
+		}
+		if (category != null) {
+			return category.displayName().copy().withStyle(ChatFormatting.ITALIC);
+		}
+		return getBlockState().getBlock().getName();
 	}
 
 	@Nullable

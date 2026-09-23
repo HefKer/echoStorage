@@ -30,9 +30,12 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private static final int SLOTS_PER_ROW = 9;
 	private static final int ROWS = EchoChestBlockEntity.SLOTS / SLOTS_PER_ROW;
 
-	public static final int TOGGLE_STRICT_BUTTON = 0;
-	public static final int CLEAR_CATEGORY_BUTTON = 1;
-	private static final int FIRST_CATEGORY_BUTTON = 2;
+	// Buttons say what the chest should become, never "flip it", so a click from a screen that
+	// had not yet seen someone else's change cannot undo it.
+	public static final int PERMISSIVE_BUTTON = 0;
+	public static final int STRICT_BUTTON = 1;
+	public static final int CLEAR_CATEGORY_BUTTON = 2;
+	private static final int FIRST_CATEGORY_BUTTON = 3;
 
 	private static final int CATEGORY_DATA = 0;
 	private static final int STRICT_DATA = 1;
@@ -125,8 +128,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
-		if (button == TOGGLE_STRICT_BUTTON) {
-			assignment.set(STRICT_DATA, isStrict() ? 0 : 1);
+		if (button == PERMISSIVE_BUTTON || button == STRICT_BUTTON) {
+			assignment.set(STRICT_DATA, button == STRICT_BUTTON ? 1 : 0);
 			return true;
 		}
 		if (button == CLEAR_CATEGORY_BUTTON) {

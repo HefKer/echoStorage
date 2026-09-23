@@ -6,15 +6,20 @@ import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
@@ -122,16 +127,17 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
-	public void theStrictToggleFlipsStrictness(GameTestHelper helper) {
+	public void theStrictAndPermissiveButtonsSetStrictness(GameTestHelper helper) {
 		EchoChestBlockEntity chest = placeChest(helper, CHEST);
 		ServerPlayer player = openedBy(helper, chest);
 
-		menu(player).clickMenuButton(player, EchoChestMenu.TOGGLE_STRICT_BUTTON);
-		helper.assertTrue(chest.isStrict(), "strict after one toggle");
+		menu(player).clickMenuButton(player, EchoChestMenu.STRICT_BUTTON);
+		menu(player).clickMenuButton(player, EchoChestMenu.STRICT_BUTTON);
+		helper.assertTrue(chest.isStrict(), "strict after asking twice");
 		helper.assertTrue(menu(player).isStrict(), "strictness the screen sees");
 
-		menu(player).clickMenuButton(player, EchoChestMenu.TOGGLE_STRICT_BUTTON);
-		helper.assertFalse(chest.isStrict(), "strict after two toggles");
+		menu(player).clickMenuButton(player, EchoChestMenu.PERMISSIVE_BUTTON);
+		helper.assertFalse(chest.isStrict(), "strict after asking for permissive");
 		helper.succeed();
 	}
 
@@ -234,6 +240,56 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
 
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(0)), "the stray went in");
+		helper.succeed();
+	}
+
+	// --- display fallback -----------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anUnnamedChestIsShownByItsCategoryInItalics(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+
+		helper.assertValueEqual(chest.getName(), Component.translatable("category.echostorage.ores").withStyle(ChatFormatting.ITALIC),
+				"shown name");
+		helper.assertValueEqual(chest.name(), "", "typed name");
+		helper.assertTrue(chest.getCustomName() == null, "the Category name is never stored as the chest's name");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aTypedNameBeatsTheCategory(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.rename("Mine haul");
+
+		helper.assertValueEqual(chest.getName(), Component.literal("Mine haul"), "shown name");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void clearingTheCategoryOfAnUnnamedChestStrandsNoName(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.assign(null);
+
+		helper.assertValueEqual(chest.getName(), EchoBlocks.ECHO_CHEST.getName(), "shown name");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anUnnamedChestWithACategoryDropsAsAPlainItem(GameTestHelper helper) {
+		placeChest(helper, CHEST).assign(Categories.ORES);
+
+		helper.getLevel().destroyBlock(helper.absolutePos(CHEST), true);
+
+		ItemStack dropped = helper.getEntities(EntityType.ITEM).stream()
+				.map(ItemEntity::getItem)
+				.filter(stack -> stack.is(EchoItems.ECHO_CHEST))
+				.findFirst()
+				.orElseThrow();
+		helper.assertTrue(ItemStack.isSameItemSameComponents(dropped, new ItemStack(EchoItems.ECHO_CHEST)),
+				"the Category name must not be written onto the item, got " + dropped);
 		helper.succeed();
 	}
 
