@@ -57,7 +57,7 @@ public final class QuickStack {
 		for (int slot = 0; slot < chest.getContainerSize() && !moving.isEmpty(); slot++) {
 			ItemStack bundle = chest.getItem(slot);
 			EchoBundleContents contents = bundle.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
-			if (contents == null || bundle.getCount() != 1 || !holds(contents, moving.getItem())) {
+			if (contents == null || bundle.getCount() != 1 || !contents.contains(moving.getItem())) {
 				continue;
 			}
 			EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
@@ -67,15 +67,6 @@ public final class QuickStack {
 				chest.setItem(slot, written);
 			}
 		}
-	}
-
-	private static boolean holds(EchoBundleContents contents, Item item) {
-		for (ItemStack inside : contents.items()) {
-			if (inside.is(item)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/** Merges into matching stacks first, then fills empty slots, as a shift-click would. */

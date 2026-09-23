@@ -2,6 +2,7 @@ package dev.hefker.echostorage.item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponents;
@@ -11,6 +12,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BundleItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.math.Fraction;
 
@@ -102,6 +104,16 @@ public final class EchoBundleContents {
 
 	public Iterable<ItemStack> items() {
 		return items;
+	}
+
+	/** Whether any entry is {@code item}, whatever its components. */
+	public boolean contains(Item item) {
+		return items.stream().anyMatch(entry -> entry.is(item));
+	}
+
+	/** Whether every entry passes {@code test}; true of an empty bundle. */
+	public boolean allMatch(Predicate<ItemStack> test) {
+		return items.stream().allMatch(test);
 	}
 
 	@Override

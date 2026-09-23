@@ -161,15 +161,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	private static boolean belongs(Category category, ItemStack stack) {
 		EchoBundleContents contents = stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
-		if (contents == null) {
-			return category.matches(stack);
-		}
-		for (ItemStack inside : contents.items()) {
-			if (!category.matches(inside)) {
-				return false;
-			}
-		}
-		return true;
+		return contents == null ? category.matches(stack) : contents.allMatch(category::matches);
 	}
 
 	/**

@@ -35,6 +35,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	// had not yet seen someone else's change cannot undo it.
 	public static final int PERMISSIVE_BUTTON = 0;
 	public static final int STRICT_BUTTON = 1;
+	/** An action, not a state: runs quick-stack once on the server, however often it arrives. */
 	public static final int QUICK_STACK_BUTTON = 2;
 	/** Followed by one button per preset, in {@link Categories#ALL} order. */
 	public static final int CLEAR_CATEGORY_BUTTON = 3;

@@ -97,9 +97,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 						(button, strict) -> clickButton(strict ? EchoChestMenu.STRICT_BUTTON : EchoChestMenu.PERMISSIVE_BUTTON));
 		addRenderableWidget(strictButton);
 
-		// Not predicted here: the server works out the whole transfer and the slots sync back.
+		// The menu does nothing with this on the client; the slots sync back from the server.
 		addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
-						button -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, EchoChestMenu.QUICK_STACK_BUTTON))
+						button -> clickButton(EchoChestMenu.QUICK_STACK_BUTTON))
 				.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
 				.bounds(buttonX, topPos + 2 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
 				.build());
