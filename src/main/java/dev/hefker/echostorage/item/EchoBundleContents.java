@@ -65,7 +65,8 @@ public final class EchoBundleContents {
 		return !stack.isEmpty() && stack.getItem().canFitInsideContainerItems() && !isBundle(stack);
 	}
 
-	private static boolean isBundle(ItemStack stack) {
+	/** Whether {@code stack} is a bundle of either kind, full or empty. */
+	public static boolean isBundle(ItemStack stack) {
 		return stack.getItem() instanceof BundleItem
 				|| stack.getItem() instanceof EchoBundleItem
 				|| stack.has(DataComponents.BUNDLE_CONTENTS)
