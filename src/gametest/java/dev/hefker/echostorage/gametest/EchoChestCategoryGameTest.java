@@ -6,6 +6,8 @@ import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.menu.EchoChestMenuData;
@@ -257,6 +259,32 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	// --- through bundles (ADR-0007, read-only) --------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aBundleIsJudgedByWhatItHolds(GameTestHelper helper) {
+		Optional<Category> ores = Optional.of(Categories.ORES);
+
+		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf(new ItemStack(Items.IRON_ORE, 10))), "a bundle of ore is a stray");
+		helper.assertTrue(EchoChestBlockEntity.isStray(ores, bundleOf(new ItemStack(Items.IRON_ORE, 10), new ItemStack(Items.BREAD, 1))),
+				"a bundle with bread in it is not a stray");
+		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf()), "an empty bundle is a stray");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestTakesAShiftClickedBundleOfItsCategory(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+		ItemStack bundle = bundleOf(new ItemStack(Items.IRON_ORE, 10));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, bundle.copy());
+
+		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+
+		helper.assertTrue(ItemStack.matches(bundle, chest.getItem(0)), "the bundle went in, got " + chest.getItem(0));
+		helper.succeed();
+	}
+
 	// --- display fallback -----------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -312,6 +340,16 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
 		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
 		return helper.getBlockEntity(pos);
+	}
+
+	private static ItemStack bundleOf(ItemStack... contents) {
+		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(EchoBundleContents.EMPTY);
+		for (ItemStack stack : contents) {
+			mutable.tryInsert(stack.copy());
+		}
+		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
+		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		return bundle;
 	}
 
 	private static EchoChestBlockEntity strictChestOf(GameTestHelper helper, Category category) {

@@ -6,6 +6,8 @@ import java.util.UUID;
 import dev.hefker.echostorage.EchoStorage;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -148,9 +150,26 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		return strict && isStray(category, stack);
 	}
 
-	/** Whether {@code stack} falls outside {@code category}. With no Category nothing is a stray. */
+	/**
+	 * Whether {@code stack} falls outside {@code category}. With no Category nothing is a stray.
+	 * An Echo Bundle is judged by what it holds, one level deep and read-only (ADR-0007), so an
+	 * empty one — capacity waiting to be filled — belongs in any chest.
+	 */
 	public static boolean isStray(Optional<Category> category, ItemStack stack) {
-		return category.filter(assigned -> !assigned.matches(stack)).isPresent();
+		return category.filter(assigned -> !belongs(assigned, stack)).isPresent();
+	}
+
+	private static boolean belongs(Category category, ItemStack stack) {
+		EchoBundleContents contents = stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
+		if (contents == null) {
+			return category.matches(stack);
+		}
+		for (ItemStack inside : contents.items()) {
+			if (!category.matches(inside)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
