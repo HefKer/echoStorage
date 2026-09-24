@@ -2,7 +2,6 @@ package dev.hefker.echostorage.network;
 
 import java.util.Optional;
 
-import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import dev.hefker.echostorage.menu.EchoInterfaceMenu;
@@ -27,7 +26,7 @@ public final class EchoInterfaces {
 		interfaceFor(player, open.containerId()).ifPresent(echoInterface -> {
 			echoInterface.resolve();
 			echoInterface.linkedChest(open.chest()).ifPresent(chest -> player.openMenu(
-					new EchoChestMenuProvider(chest, viewer -> echoInterface.stillValid(viewer) && stands(chest))));
+					new EchoChestMenuProvider(chest, viewer -> echoInterface.stillValid(viewer) && chest.isStanding())));
 		});
 	}
 
@@ -43,9 +42,5 @@ public final class EchoInterfaces {
 				&& menu.stillValid(player)
 				? Optional.ofNullable(menu.echoInterface())
 				: Optional.empty();
-	}
-
-	private static boolean stands(EchoChestBlockEntity chest) {
-		return !chest.isRemoved() && chest.getLevel() != null && chest.getLevel().getBlockEntity(chest.getBlockPos()) == chest;
 	}
 }

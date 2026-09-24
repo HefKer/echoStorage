@@ -16,11 +16,11 @@ import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 
 /** The Echo Chests an Echo Interface lists, one row each, kept between resolutions. */
@@ -51,7 +51,7 @@ public final class LinkedChests {
 		resolution.chests().forEach(chest -> found.put(chest.id(), chest));
 		rows.replaceAll(row -> {
 			LinkedChest chest = found.remove(row.id());
-			return chest == null ? row.as(missing(row, resolution, isLoaded)) : linked(chest, labels);
+			return chest == null ? row.withState(missing(row, resolution, isLoaded)) : linked(chest, labels);
 		});
 		for (LinkedChest chest : found.values()) {
 			if (rows.size() >= MAX_ROWS) {
@@ -116,10 +116,10 @@ public final class LinkedChests {
 				BlockPos.STREAM_CODEC, Row::pos,
 				ByteBufCodecs.stringUtf8(EchoChestName.MAX_LENGTH), Row::name,
 				ByteBufCodecs.optional(Categories.STREAM_CODEC), Row::category,
-				ByteBufCodecs.idMapper(ByIdMap.continuous(State::ordinal, State.values(), ByIdMap.OutOfBoundsStrategy.ZERO), State::ordinal), Row::state,
+				State.STREAM_CODEC, Row::state,
 				Row::new);
 
-		Row as(State state) {
+		Row withState(State state) {
 			return new Row(id, pos, name, category, state);
 		}
 	}
@@ -133,6 +133,14 @@ public final class LinkedChests {
 		LOST;
 
 		static final Codec<State> CODEC = StringRepresentable.fromEnum(State::values);
+
+		/** Throws on a state it does not know rather than read it as one, least of all as openable. */
+		static final StreamCodec<ByteBuf, State> STREAM_CODEC = ByteBufCodecs.idMapper(ordinal -> {
+			if (ordinal < 0 || ordinal >= values().length) {
+				throw new DecoderException("Unknown row state: " + ordinal);
+			}
+			return values()[ordinal];
+		}, State::ordinal);
 
 		@Override
 		public String getSerializedName() {

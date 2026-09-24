@@ -14,6 +14,10 @@ import net.minecraft.core.Direction;
 /**
  * Link resolution (ADR-0004): a flood-fill from an Echo Interface through connector blocks. An
  * Echo Chest touching the interface or any connector reached is linked.
+ *
+ * <p>The fill never looks into an unloaded chunk. A chest the interface already lists is then
+ * greyed ({@link LinkedChests}); one it has never reached simply has no row until the chunk loads,
+ * since learning it exists would mean loading the chunk.
  */
 public final class Links {
 	/** How many connector blocks one interface's traversal may enter. */

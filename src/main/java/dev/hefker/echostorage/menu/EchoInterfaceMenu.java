@@ -59,7 +59,7 @@ public class EchoInterfaceMenu extends AbstractContainerMenu {
 		this.rows = List.copyOf(rows);
 	}
 
-	/** The interface behind this menu; empty on the client. */
+	/** The interface behind this menu; null on the client. */
 	@Nullable
 	public EchoInterfaceBlockEntity echoInterface() {
 		return echoInterface;

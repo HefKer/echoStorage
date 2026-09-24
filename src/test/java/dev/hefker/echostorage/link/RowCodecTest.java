@@ -1,6 +1,7 @@
 package dev.hefker.echostorage.link;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -10,7 +11,11 @@ import dev.hefker.echostorage.CodecRoundTrip;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
@@ -41,5 +46,14 @@ class RowCodecTest {
 		saved.addProperty("category", "gone");
 
 		assertEquals(Optional.empty(), Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().category());
+	}
+
+	@Test
+	void aRowStateTheWireDoesNotKnowIsRefusedRatherThanReadAsOpenable() {
+		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+		Row.STREAM_CODEC.encode(buf, ORES);
+		buf.setByte(buf.writerIndex() - 1, State.values().length);
+
+		assertThrows(DecoderException.class, () -> Row.STREAM_CODEC.decode(buf));
 	}
 }

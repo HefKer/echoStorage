@@ -43,4 +43,11 @@ class EchoInterfacePayloadTest {
 		DismissLinkedChestPayload sent = new DismissLinkedChestPayload(7, UUID.randomUUID());
 		assertEquals(sent, CodecRoundTrip.of(DismissLinkedChestPayload.STREAM_CODEC, sent));
 	}
+
+	@Test
+	void payloadTypesAreNamespacedToTheMod() {
+		assertEquals("echostorage:echo_interface_rows", EchoInterfaceRowsPayload.TYPE.id().toString());
+		assertEquals("echostorage:open_linked_chest", OpenLinkedChestPayload.TYPE.id().toString());
+		assertEquals("echostorage:dismiss_linked_chest", DismissLinkedChestPayload.TYPE.id().toString());
+	}
 }

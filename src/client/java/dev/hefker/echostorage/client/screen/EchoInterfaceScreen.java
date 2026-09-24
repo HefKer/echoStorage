@@ -102,6 +102,9 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 
 	/** Makes one button per row, and a dismiss button beside each greyed one. */
 	private void addRows() {
+		// init runs again on resize, after vanilla has already dropped every widget.
+		rowWidgets.clear();
+		rowButtons.clear();
 		shownRows = menu.rows();
 		for (int i = 0; i < shownRows.size(); i++) {
 			Row row = shownRows.get(i);
@@ -138,8 +141,6 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 		super.containerTick();
 		if (menu.rows() != shownRows) {
 			rowWidgets.forEach(this::removeWidget);
-			rowWidgets.clear();
-			rowButtons.clear();
 			addRows();
 		}
 	}
