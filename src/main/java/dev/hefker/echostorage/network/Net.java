@@ -28,6 +28,9 @@ public final class Net {
 		PayloadTypeRegistry.playS2C().register(SeamPingPayload.TYPE, SeamPingPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(SeamPongPayload.TYPE, SeamPongPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(RenameEchoChestPayload.TYPE, RenameEchoChestPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(EchoInterfaceRowsPayload.TYPE, EchoInterfaceRowsPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(OpenLinkedChestPayload.TYPE, OpenLinkedChestPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(DismissLinkedChestPayload.TYPE, DismissLinkedChestPayload.STREAM_CODEC);
 	}
 
 	/** Wires the server-bound handlers. Payload types must already be registered. */
@@ -36,6 +39,10 @@ public final class Net {
 				(payload, context) -> SeamProbe.onPong(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(RenameEchoChestPayload.TYPE,
 				(payload, context) -> EchoChestRenames.onRename(context.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(OpenLinkedChestPayload.TYPE,
+				(payload, context) -> EchoInterfaces.onOpen(context.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(DismissLinkedChestPayload.TYPE,
+				(payload, context) -> EchoInterfaces.onDismiss(context.player(), payload));
 	}
 
 	/** Sends a payload to one player. The only server-to-client send in the mod. */

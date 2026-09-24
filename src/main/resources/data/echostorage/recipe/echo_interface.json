@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ESE",
+    " A "
+  ],
+  "key": {
+    "E": { "item": "minecraft:echo_shard" },
+    "S": { "item": "minecraft:sculk_sensor" },
+    "A": { "item": "minecraft:amethyst_block" }
+  },
+  "result": {
+    "id": "echostorage:echo_interface",
+    "count": 1
+  }
+}

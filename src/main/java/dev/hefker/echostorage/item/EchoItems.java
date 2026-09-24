@@ -24,6 +24,8 @@ public final class EchoItems {
 
 	public static final Item ECHO_CHEST = new BlockItem(EchoBlocks.ECHO_CHEST, new Item.Properties());
 
+	public static final Item ECHO_INTERFACE = new BlockItem(EchoBlocks.ECHO_INTERFACE, new Item.Properties());
+
 	/** Contents of destroyed Echo Bundles, released at vanilla's worst-case bundle burst per tick. */
 	static final StaggeredSpill SPILL = new StaggeredSpill(EchoBundleItem.MAX_ENTRIES_DROPPED_AT_ONCE);
 
@@ -33,11 +35,12 @@ public final class EchoItems {
 	public static void register() {
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_bundle"), ECHO_BUNDLE);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_chest"), ECHO_CHEST);
+		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
 				.register(entries -> entries.addAfter(Items.BUNDLE, ECHO_BUNDLE));
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
-				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST));
+				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST, ECHO_INTERFACE));
 		ServerTickEvents.END_SERVER_TICK.register(server -> SPILL.tick());
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> SPILL.flush());
 	}

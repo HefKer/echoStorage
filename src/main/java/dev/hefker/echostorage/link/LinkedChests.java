@@ -34,6 +34,12 @@ public final class LinkedChests {
 		return List.copyOf(rows);
 	}
 
+	/** Puts back rows saved earlier, as many as fit. */
+	public void replace(List<Row> saved) {
+		rows.clear();
+		rows.addAll(saved.subList(0, Math.min(saved.size(), MAX_ROWS)));
+	}
+
 	/**
 	 * Brings the rows up to date with {@code resolution}.
 	 *
