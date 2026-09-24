@@ -1,8 +1,13 @@
 package dev.hefker.echostorage.gametest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
 import dev.hefker.echostorage.block.EchoBlocks;
+import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -16,16 +21,23 @@ import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
@@ -37,6 +49,7 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
 public class EchoChestCategoryGameTest implements FabricGameTest {
 	// GameTestHelper.assertValueEqual takes (actual, expected, what).
 	private static final BlockPos CHEST = new BlockPos(1, 1, 1);
+	private static final BlockPos NEIGHBOUR = new BlockPos(2, 1, 1);
 	/** The first slot of the player's main inventory, above the hotbar. */
 	private static final int FIRST_MAIN_INVENTORY_SLOT = 9;
 	/** The same slot in the Echo Chest menu, which lists the chest's 27 first. */
@@ -319,19 +332,113 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	// --- on the item (ADR-0008) -----------------------------------------------------------
+
 	@GameTest(template = EMPTY_STRUCTURE)
-	public void anUnnamedChestWithACategoryDropsAsAPlainItem(GameTestHelper helper) {
+	public void anUnnamedChestWithACategoryDropsCarryingItButNoName(GameTestHelper helper) {
 		placeChest(helper, CHEST).assign(Categories.ORES);
 
-		helper.getLevel().destroyBlock(helper.absolutePos(CHEST), true);
+		breakChest(helper, CHEST);
 
-		ItemStack dropped = helper.getEntities(EntityType.ITEM).stream()
-				.map(ItemEntity::getItem)
-				.filter(stack -> stack.is(EchoItems.ECHO_CHEST))
-				.findFirst()
-				.orElseThrow();
-		helper.assertTrue(ItemStack.isSameItemSameComponents(dropped, new ItemStack(EchoItems.ECHO_CHEST)),
-				"the Category name must not be written onto the item, got " + dropped);
+		ItemStack dropped = droppedChest(helper);
+		helper.assertTrue(dropped.get(DataComponents.CUSTOM_NAME) == null,
+				"the Category name must not be written onto the item as its name, got " + dropped);
+		helper.assertValueEqual(dropped.get(EchoComponents.ECHO_CHEST_ASSIGNMENT),
+				new EchoChestAssignment(Optional.of(Categories.ORES), false), "assignment on the item");
+		helper.assertFalse(ItemStack.isSameItemSameComponents(dropped, new ItemStack(EchoItems.ECHO_CHEST)),
+				"an assigned chest must not stack with a blank one");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anAssignedStrictChestKeepsBothWhenBrokenAndReplaced(GameTestHelper helper) {
+		strictChestOf(helper, Categories.ORES);
+
+		breakChest(helper, CHEST);
+		placeFromItem(helper, droppedChest(helper), CHEST);
+
+		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		helper.assertValueEqual(replaced.category(), Optional.of(Categories.ORES), "category after replacing");
+		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anAssignedPermissiveChestStaysPermissiveWhenBrokenAndReplaced(GameTestHelper helper) {
+		placeChest(helper, CHEST).assign(Categories.FOOD);
+
+		breakChest(helper, CHEST);
+		placeFromItem(helper, droppedChest(helper), CHEST);
+
+		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		helper.assertValueEqual(replaced.category(), Optional.of(Categories.FOOD), "category after replacing");
+		helper.assertFalse(replaced.isStrict(), "a permissive chest comes back permissive");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestWithNoCategoryKeepsItsStrictness(GameTestHelper helper) {
+		placeChest(helper, CHEST).setStrict(true);
+
+		breakChest(helper, CHEST);
+		placeFromItem(helper, droppedChest(helper), CHEST);
+
+		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		helper.assertValueEqual(replaced.category(), Optional.empty(), "category after replacing");
+		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anItemNamingACategoryThatNoLongerShipsPlacesUnassigned(GameTestHelper helper) throws CommandSyntaxException {
+		// As if carried over from a version that shipped a "wood" preset this one has since dropped.
+		CompoundTag saved = TagParser.parseTag("""
+				{id: "echostorage:echo_chest", count: 1, components: {
+					"echostorage:echo_chest_assignment": {category: "wood", strict: 1b},
+					"minecraft:custom_name": '"Logs"'}}""");
+		ItemStack stale = ItemStack.CODEC.parse(helper.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE), saved)
+				.getOrThrow();
+
+		placeFromItem(helper, stale, CHEST);
+
+		EchoChestBlockEntity placed = helper.getBlockEntity(CHEST);
+		helper.assertValueEqual(placed.category(), Optional.empty(), "category after placing");
+		helper.assertTrue(placed.isStrict(), "strictness after placing");
+		helper.assertValueEqual(placed.name(), "Logs", "name after placing");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void pickBlockWithDataCarriesTheAssignmentAsAComponentOnly(GameTestHelper helper) {
+		EchoChestBlockEntity original = strictChestOf(helper, Categories.ORES);
+		original.rename("Mine haul");
+		// Creative pick-block with ctrl copies the block entity's data onto the item.
+		ItemStack copy = new ItemStack(EchoItems.ECHO_CHEST);
+		original.saveToItem(copy, helper.getLevel().registryAccess());
+
+		CompoundTag data = copy.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+		helper.assertFalse(data.contains("Category") || data.contains("Strict") || data.contains("CustomName"),
+				"implicit components must be stripped from the copied block data, got " + data);
+		helper.assertValueEqual(copy.get(EchoComponents.ECHO_CHEST_ASSIGNMENT),
+				new EchoChestAssignment(Optional.of(Categories.ORES), true), "assignment on the copy");
+
+		placeFromItem(helper, copy, NEIGHBOUR);
+
+		EchoChestBlockEntity placed = helper.getBlockEntity(NEIGHBOUR);
+		helper.assertValueEqual(placed.category(), Optional.of(Categories.ORES), "category after placing");
+		helper.assertTrue(placed.isStrict(), "strictness after placing");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theItemTooltipShowsTheCategoryAndStrictness(GameTestHelper helper) {
+		ItemStack assigned = new ItemStack(EchoItems.ECHO_CHEST);
+		assigned.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(Categories.ORES), true));
+
+		helper.assertValueEqual(tooltipOf(assigned), List.of(
+				Component.translatable("item.echostorage.echo_chest.category", Categories.ORES.displayName()).withStyle(ChatFormatting.GRAY),
+				Component.translatable("item.echostorage.echo_chest.strict").withStyle(ChatFormatting.GRAY)), "tooltip");
+		helper.assertValueEqual(tooltipOf(new ItemStack(EchoItems.ECHO_CHEST)), List.of(), "a blank chest's tooltip");
 		helper.succeed();
 	}
 
@@ -340,6 +447,35 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
 		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
 		return helper.getBlockEntity(pos);
+	}
+
+	/** Places {@code stack} at {@code pos} the way a player would, through the block item. */
+	private static void placeFromItem(GameTestHelper helper, ItemStack stack, BlockPos pos) {
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+		helper.placeAt(player, player.getMainHandItem(), pos.below(), Direction.UP);
+		helper.assertBlockPresent(EchoBlocks.ECHO_CHEST, pos);
+	}
+
+	/** Breaks the block as a player's tool would: loot table drops and all. */
+	private static void breakChest(GameTestHelper helper, BlockPos pos) {
+		helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
+	}
+
+	private static ItemStack droppedChest(GameTestHelper helper) {
+		List<ItemStack> chests = helper.getEntities(EntityType.ITEM).stream()
+				.map(ItemEntity::getItem)
+				.filter(stack -> stack.is(EchoItems.ECHO_CHEST))
+				.toList();
+		helper.assertValueEqual(chests.size(), 1, "dropped Echo Chests");
+		return chests.getFirst();
+	}
+
+	/** The lines the Echo Chest adds under the item's name. */
+	private static List<Component> tooltipOf(ItemStack stack) {
+		List<Component> lines = new ArrayList<>();
+		stack.getItem().appendHoverText(stack, Item.TooltipContext.EMPTY, lines, TooltipFlag.NORMAL);
+		return lines;
 	}
 
 	private static ItemStack bundleOf(ItemStack... contents) {

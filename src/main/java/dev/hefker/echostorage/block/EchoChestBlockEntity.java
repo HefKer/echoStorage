@@ -39,8 +39,9 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>The id is assigned when the block entity is made and again when a player places the
  * chest, and it is never written to the dropped item — so it dies with the block, and a
- * chest broken and replaced is a different chest. The name is a vanilla custom name and
- * does travel with the item, which is what stops a named chest stacking with a blank one.
+ * chest broken and replaced is a different chest. The name (a vanilla custom name), the
+ * Category and strictness do travel with the item (ADR-0008), which is what stops a chest
+ * with anything set stacking with a blank one.
  *
  * <p>This is a plain {@link BlockEntity} rather than a {@code BaseContainerBlockEntity}
  * because that class keeps its custom name private with no way to change it after placement,
@@ -235,18 +236,26 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		ContainerHelper.saveAllItems(tag, items, registries);
 	}
 
-	/** The item side of the name: read on placement, written when the block drops. */
+	/** The item side of the name, Category and strictness: read on placement, written when the block drops. */
 	@Override
 	protected void applyImplicitComponents(BlockEntity.DataComponentInput components) {
 		super.applyImplicitComponents(components);
 		name = components.get(DataComponents.CUSTOM_NAME);
+		EchoChestAssignment assignment = components.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.NONE);
+		category = assignment.category().orElse(null);
+		strict = assignment.strict();
 	}
 
+	/** Writes the assignment only when something is set, so a blank chest drops a plain item. */
 	@Override
 	protected void collectImplicitComponents(DataComponentMap.Builder components) {
 		super.collectImplicitComponents(components);
 		if (name != null) {
 			components.set(DataComponents.CUSTOM_NAME, name);
+		}
+		EchoChestAssignment assignment = new EchoChestAssignment(category(), strict);
+		if (!assignment.isBlank()) {
+			components.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, assignment);
 		}
 	}
 
@@ -254,6 +263,8 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	@Override
 	public void removeComponentsFromTag(CompoundTag tag) {
 		tag.remove(NAME_TAG);
+		tag.remove(CATEGORY_TAG);
+		tag.remove(STRICT_TAG);
 	}
 
 	// --- container ------------------------------------------------------------------------

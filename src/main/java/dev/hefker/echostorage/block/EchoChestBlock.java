@@ -1,9 +1,14 @@
 package dev.hefker.echostorage.block;
 
+import java.util.List;
+
 import com.mojang.serialization.MapCodec;
+import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
@@ -13,7 +18,9 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -40,8 +47,8 @@ import org.jetbrains.annotations.Nullable;
  * The Echo Chest block. Shaped and animated like a vanilla chest, but it never pairs
  * (ADR-0006): there is no chest-type property, so there is no half-a-chest to become.
  *
- * <p>Breaking it spills the contents like any chest and drops the chest itself, name and
- * all, through its loot table — reorganising a storage wall should never cost materials.
+ * <p>Breaking it spills the contents like any chest and drops the chest itself, name,
+ * Category and strictness and all, through its loot table — reorganising a storage wall should never cost materials.
  */
 public class EchoChestBlock extends BaseEntityBlock {
 	public static final MapCodec<EchoChestBlock> CODEC = simpleCodec(EchoChestBlock::new);
@@ -93,6 +100,18 @@ public class EchoChestBlock extends BaseEntityBlock {
 	@Override
 	protected MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
 		return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest ? new EchoChestMenuProvider(chest) : null;
+	}
+
+	/** Why an Echo Chest item does not stack with a blank one: what it will be set to when placed. */
+	@Override
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
+		super.appendHoverText(stack, context, lines, flag);
+		EchoChestAssignment assignment = stack.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.NONE);
+		assignment.category().ifPresent(category -> lines.add(
+				Component.translatable("item.echostorage.echo_chest.category", category.displayName()).withStyle(ChatFormatting.GRAY)));
+		if (assignment.strict()) {
+			lines.add(Component.translatable("item.echostorage.echo_chest.strict").withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	@Override
