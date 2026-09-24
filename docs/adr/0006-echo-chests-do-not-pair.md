@@ -7,7 +7,7 @@ Pairing collides with three decisions at once. Each chest has an id assigned at 
 pair would have two — and the Echo Interface needs to list one entry, not half of one. Each chest
 has a Category, so pairing would need a merge policy and a rule for what happens when one half's
 Category changes. And because a configured chest carries its name and Category as data components
-(ADR: broken chests stack only while blank), a pair would carry two names.
+(ADR-0008), a pair would carry two names.
 
 Implementing it would mean a merge/split state machine and a concept of half-a-chest threaded
 through link resolution, the interface list and the stacking rule — the same class of machinery
