@@ -12,5 +12,6 @@ public final class EchoScreens {
 		MenuScreens.register(EchoMenus.PROBE, ProbeScreen::new);
 		MenuScreens.register(EchoMenus.ECHO_CHEST, EchoChestScreen::new);
 		MenuScreens.register(EchoMenus.ECHO_BUNDLE, EchoBundleScreen::new);
+		MenuScreens.register(EchoMenus.ECHO_INTERFACE, EchoInterfaceScreen::new);
 	}
 }

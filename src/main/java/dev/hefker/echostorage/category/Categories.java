@@ -5,6 +5,10 @@ import java.util.Optional;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 /**
  * The preset Categories. v1 ships only those its tag layer can do well (ADR-0001); wood,
@@ -27,6 +31,11 @@ public final class Categories {
 	/** A Category saved as its name. A name no preset has any more fails to load. */
 	public static final Codec<Category> CODEC = Codec.STRING.comapFlatMap(
 			name -> byName(name).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown Category: " + name)),
+			Category::name);
+
+	/** A Category sent as its name. Both sides ship the same presets, so every name sent is known. */
+	public static final StreamCodec<ByteBuf, Category> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(
+			name -> byName(name).orElseThrow(() -> new DecoderException("Unknown Category: " + name)),
 			Category::name);
 
 	private Categories() {

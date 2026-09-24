@@ -1,6 +1,7 @@
 package dev.hefker.echostorage.menu;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
@@ -15,6 +16,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An open Echo Chest: its 27 slots over the player's inventory, laid out like a vanilla chest.
@@ -47,25 +49,37 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private final Container container;
 	private final ContainerData assignment;
 	private final EchoChestMenuData data;
+	/** Who may go on using the menu when it was opened from an Echo Interface; null when opened in person. */
+	@Nullable
+	private final Predicate<Player> remoteReach;
 
 	/** Client-side constructor: the container is a stand-in the server syncs contents into. */
 	public EchoChestMenu(int containerId, Inventory playerInventory, EchoChestMenuData data) {
-		this(containerId, playerInventory, new SimpleContainer(EchoChestBlockEntity.SLOTS), new SimpleContainerData(DATA_COUNT), data);
+		this(containerId, playerInventory, new SimpleContainer(EchoChestBlockEntity.SLOTS), new SimpleContainerData(DATA_COUNT), data, null);
 	}
 
-	public EchoChestMenu(int containerId, Inventory playerInventory, EchoChestBlockEntity chest, EchoChestMenuData data) {
-		this(containerId, playerInventory, chest, assignmentOf(chest), data);
+	/**
+	 * Server-side. With a {@code remoteReach} the chest was opened from an Echo Interface: the
+	 * player stays in the menu while that says so rather than while they stand at the chest, and
+	 * the lid stays shut, since vanilla's lid counts only players standing near.
+	 */
+	public EchoChestMenu(int containerId, Inventory playerInventory, EchoChestBlockEntity chest, EchoChestMenuData data,
+			@Nullable Predicate<Player> remoteReach) {
+		this(containerId, playerInventory, chest, assignmentOf(chest), data, remoteReach);
 	}
 
 	private EchoChestMenu(int containerId, Inventory playerInventory, Container container, ContainerData assignment,
-			EchoChestMenuData data) {
+			EchoChestMenuData data, @Nullable Predicate<Player> remoteReach) {
 		super(EchoMenus.ECHO_CHEST, containerId);
 		checkContainerSize(container, EchoChestBlockEntity.SLOTS);
 		checkContainerDataCount(assignment, DATA_COUNT);
 		this.container = container;
 		this.assignment = assignment;
 		this.data = data;
-		container.startOpen(playerInventory.player);
+		this.remoteReach = remoteReach;
+		if (remoteReach == null) {
+			container.startOpen(playerInventory.player);
+		}
 		addDataSlots(assignment);
 
 		int playerInventoryTop = 103 + (ROWS - 4) * 18;
@@ -151,7 +165,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean stillValid(Player player) {
-		return container.stillValid(player);
+		return remoteReach == null ? container.stillValid(player) : remoteReach.test(player);
 	}
 
 	@Override
@@ -186,7 +200,9 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		container.stopOpen(player);
+		if (remoteReach == null) {
+			container.stopOpen(player);
+		}
 	}
 
 	/** The server's data slots: read from the chest, and written straight back to it. */

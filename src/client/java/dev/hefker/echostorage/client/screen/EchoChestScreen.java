@@ -21,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * An open Echo Chest, drawn on the vanilla chest texture, whose title is a text field: click
@@ -62,6 +61,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	/** Null when the config turns search off. */
 	private EditBox searchField;
 	private SearchQuery query = SearchQuery.of("");
+	private TypingFocus typing;
 	/** The name as the server last heard it from this screen. */
 	private String sentName;
 
@@ -87,6 +87,8 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		nameField.setHint(EchoChestBlockEntity.unnamedTitle(menu.category()));
 		nameField.setTooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.rename")));
 		addRenderableWidget(nameField);
+		typing = new TypingFocus(this);
+		typing.add(nameField, this::sendName);
 
 		int buttonX = leftPos + imageWidth + BUTTON_GAP;
 		categoryButton = CycleButton.<Optional<Category>>builder(CategoryChoices::label)
@@ -120,6 +122,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 			searchField.setResponder(typed -> query = SearchQuery.of(typed));
 			searchField.setValue(searched);
 			addRenderableWidget(searchField);
+			// Finishing leaves the query standing; only the keyboard is given back.
+			typing.add(searchField, () -> {
+			});
 		}
 	}
 
@@ -145,37 +150,12 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		boolean enter = keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER;
-		if (keyCode != GLFW.GLFW_KEY_ESCAPE && nameField.isFocused()) {
-			if (enter) {
-				finishRenaming();
-			} else {
-				nameField.keyPressed(keyCode, scanCode, modifiers);
-			}
-			// Typing must not reach the inventory key, hotbar swaps or drop.
-			return true;
-		}
-		if (keyCode != GLFW.GLFW_KEY_ESCAPE && searchField != null && searchField.isFocused()) {
-			if (enter) {
-				finishSearching();
-			} else {
-				searchField.keyPressed(keyCode, scanCode, modifiers);
-			}
-			// As with the name: typing must not reach the inventory key.
-			return true;
-		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return typing.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (nameField.isFocused() && !nameField.isMouseOver(mouseX, mouseY)) {
-			finishRenaming();
-		}
-		// Otherwise the box keeps the keyboard, and hotbar keys stop working on the slots.
-		if (searchField != null && searchField.isFocused() && !searchField.isMouseOver(mouseX, mouseY)) {
-			finishSearching();
-		}
+		typing.mouseClicked(mouseX, mouseY);
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
 
@@ -184,18 +164,6 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	public void onClose() {
 		sendName();
 		super.onClose();
-	}
-
-	private void finishRenaming() {
-		nameField.setFocused(false);
-		setFocused(null);
-		sendName();
-	}
-
-	/** Leaves the query standing; only the keyboard is given back. */
-	private void finishSearching() {
-		searchField.setFocused(false);
-		setFocused(null);
 	}
 
 	private void sendName() {

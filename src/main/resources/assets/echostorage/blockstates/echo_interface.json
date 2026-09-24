@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "echostorage:block/echo_interface" }
+  }
+}

@@ -1,5 +1,6 @@
 package dev.hefker.echostorage.network;
 
+import dev.hefker.echostorage.menu.EchoInterfaceMenu;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -19,6 +20,11 @@ public final class NetClient {
 	public static void registerClientReceivers() {
 		ClientPlayNetworking.registerGlobalReceiver(SeamPingPayload.TYPE,
 				(payload, context) -> ClientSeamProbe.onPing(payload));
+		ClientPlayNetworking.registerGlobalReceiver(EchoInterfaceRowsPayload.TYPE, (payload, context) -> {
+			if (context.player().containerMenu instanceof EchoInterfaceMenu menu && menu.containerId == payload.containerId()) {
+				menu.setRows(payload.rows());
+			}
+		});
 	}
 
 	/** Sends a payload to the server. The only client-to-server send in the mod. */

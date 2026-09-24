@@ -95,6 +95,11 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		return id;
 	}
 
+	/** Whether this chest is still the one in the world at its position: not broken, not replaced. */
+	public boolean isStanding() {
+		return !isRemoved() && level != null && level.getBlockEntity(getBlockPos()) == this;
+	}
+
 	/** Called when a player places the chest, so data copied from another chest cannot clone its id. */
 	void assignNewId() {
 		id = UUID.randomUUID();

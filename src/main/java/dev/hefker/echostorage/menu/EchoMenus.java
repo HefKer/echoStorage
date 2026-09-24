@@ -21,6 +21,8 @@ public final class EchoMenus {
 			new ExtendedScreenHandlerType<>(ProbeMenu::new, ProbeMenuData.STREAM_CODEC);
 	public static final MenuType<EchoChestMenu> ECHO_CHEST =
 			new ExtendedScreenHandlerType<>(EchoChestMenu::new, EchoChestMenuData.STREAM_CODEC);
+	public static final MenuType<EchoInterfaceMenu> ECHO_INTERFACE =
+			new ExtendedScreenHandlerType<>(EchoInterfaceMenu::new, EchoInterfaceMenuData.STREAM_CODEC);
 	/** Vanilla's own menu type: the bundle screen has no open-data, so there is nothing to adapt. */
 	public static final MenuType<EchoBundleMenu> ECHO_BUNDLE = new MenuType<>(EchoBundleMenu::new, FeatureFlags.VANILLA_SET);
 
@@ -31,5 +33,6 @@ public final class EchoMenus {
 		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("probe"), PROBE);
 		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("echo_chest"), ECHO_CHEST);
 		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("echo_bundle"), ECHO_BUNDLE);
+		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 	}
 }
