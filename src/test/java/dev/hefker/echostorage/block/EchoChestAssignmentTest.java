@@ -58,6 +58,12 @@ class EchoChestAssignmentTest {
 		assertEquals(new EchoChestAssignment(Optional.empty(), true), load("{\"category\": \"wood\", \"strict\": true}"));
 	}
 
+	@Test
+	void aGarbageValueLoadsAsNothingSetRatherThanFailing() {
+		assertEquals(EchoChestAssignment.NONE, load("{\"category\": 5, \"strict\": \"yes\"}"));
+		assertEquals(new EchoChestAssignment(Optional.of(Categories.ORES), false), load("{\"category\": \"ores\", \"strict\": [1]}"));
+	}
+
 	private static String save(EchoChestAssignment assignment) {
 		return EchoChestAssignment.CODEC.encodeStart(JsonOps.INSTANCE, assignment).getOrThrow().toString();
 	}

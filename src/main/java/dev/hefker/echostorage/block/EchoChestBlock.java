@@ -48,7 +48,8 @@ import org.jetbrains.annotations.Nullable;
  * (ADR-0006): there is no chest-type property, so there is no half-a-chest to become.
  *
  * <p>Breaking it spills the contents like any chest and drops the chest itself, name,
- * Category and strictness and all, through its loot table — reorganising a storage wall should never cost materials.
+ * Category and strictness and all, through its loot table — reorganising a storage wall
+ * should never cost materials.
  */
 public class EchoChestBlock extends BaseEntityBlock {
 	public static final MapCodec<EchoChestBlock> CODEC = simpleCodec(EchoChestBlock::new);

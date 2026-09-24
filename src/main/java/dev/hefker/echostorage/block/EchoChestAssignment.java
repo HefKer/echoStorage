@@ -16,8 +16,9 @@ import net.minecraft.network.codec.StreamCodec;
  * what the player set on it (ADR-0008). Only put on the item when something is set, so a blank
  * chest still stacks with a freshly crafted one.
  *
- * <p>The Category is saved by name and read leniently: a name no preset has any more loads as
- * none, because a failing component would lose the item, and the chest's name with it.
+ * <p>The Category is saved by name and read leniently: a name no preset has any more, or a
+ * value of the wrong type, loads as none, because a failing component would lose the item,
+ * and the chest's name with it.
  *
  * @param category what the chest is assigned to hold, if anything
  * @param strict   whether the chest refuses strays on shift-click and hopper insert
@@ -25,12 +26,12 @@ import net.minecraft.network.codec.StreamCodec;
 public record EchoChestAssignment(Optional<Category> category, boolean strict) {
 	public static final EchoChestAssignment NONE = new EchoChestAssignment(Optional.empty(), false);
 
-	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.optionalFieldOf("category")
+	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.lenientOptionalFieldOf("category")
 			.xmap(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
 
 	public static final Codec<EchoChestAssignment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			CATEGORY_FIELD.forGetter(EchoChestAssignment::category),
-			Codec.BOOL.optionalFieldOf("strict", false).forGetter(EchoChestAssignment::strict)
+			Codec.BOOL.lenientOptionalFieldOf("strict", false).forGetter(EchoChestAssignment::strict)
 	).apply(instance, EchoChestAssignment::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, EchoChestAssignment> STREAM_CODEC = StreamCodec.composite(
