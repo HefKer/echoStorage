@@ -172,6 +172,20 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
+	public void aBlockThatLeavesAContainerBehindIsNeverPlacedFromTheBundle(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		// A powder snow bucket places a block and hands back its bucket, which a bundle cannot.
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT,
+				new ItemStack(Items.STONE, 3), new ItemStack(Items.POWDER_SNOW_BUCKET)));
+
+		useOnFloor(helper, player);
+
+		helper.assertBlockPresent(Blocks.STONE, ABOVE_FLOOR);
+		helper.assertValueEqual(count(player.getMainHandItem(), Items.POWDER_SNOW_BUCKET), 1, "buckets left in the bundle");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
 	public void aCreativePlayerPlacesFromTheBundleWithoutEmptyingIt(GameTestHelper helper) {
 		ServerPlayer player = player(helper);
 		player.setGameMode(GameType.CREATIVE);

@@ -26,6 +26,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -149,6 +150,9 @@ public class EchoBundleItem extends Item {
 	 * were in the hand. A creative player places without using any up, as with a block in hand.
 	 * With nothing placeable inside, or with the config switch off, the use falls through to
 	 * {@link #use}.
+	 *
+	 * <p>A block that leaves a container behind, like a powder snow bucket, is never placed from
+	 * here: the bundle has nowhere to put the empty bucket.
 	 */
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
@@ -157,7 +161,8 @@ public class EchoBundleItem extends Item {
 		if (!EchoConfig.get().bundlePlace() || contents == null || bundle.getCount() != 1) {
 			return InteractionResult.PASS;
 		}
-		Optional<ItemStack> block = contents.mostRecent(entry -> entry.getItem() instanceof BlockItem);
+		Optional<ItemStack> block = contents.mostRecent(
+				entry -> entry.getItem() instanceof BlockItem && !(entry.getItem() instanceof DispensibleContainerItem));
 		if (block.isEmpty()) {
 			return InteractionResult.PASS;
 		}
@@ -168,6 +173,10 @@ public class EchoBundleItem extends Item {
 				context.getClickedPos(), context.isInside());
 		InteractionResult result = ((BlockItem) placing.getItem())
 				.place(new BlockPlaceContext(context.getLevel(), context.getPlayer(), context.getHand(), placing, hit));
+		if (result.indicateItemUse() && context.getPlayer() != null) {
+			// Vanilla counts the use against the bundle in hand; the block was used as well.
+			context.getPlayer().awardStat(Stats.ITEM_USED.get(placing.getItem()));
+		}
 		if (placing.isEmpty()) {
 			EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
 			mutable.take(block.get(), 1);

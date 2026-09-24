@@ -4,10 +4,11 @@ import java.util.UUID;
 
 import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.Vacuum;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,22 +39,26 @@ abstract class ItemEntityMixin {
 			return;
 		}
 		ItemStack stack = self.getItem();
-		Item item = stack.getItem();
-		int before = stack.getCount();
+		ItemStack before = stack.copy();
 		Vacuum.run(player.getInventory(), stack);
-		int taken = before - stack.getCount();
+		int taken = before.getCount() - stack.getCount();
 		if (taken == 0) {
 			return;
 		}
 
 		// What vanilla does for a pickup, for the part the bundles took; it handles the rest.
+		// No inventory slot changed but the bundle's, so the trigger behind "Diamonds!" and
+		// recipe unlocks is told about the item itself.
 		player.take(self, taken);
-		player.awardStat(Stats.ITEM_PICKED_UP.get(item), taken);
+		player.awardStat(Stats.ITEM_PICKED_UP.get(before.getItem()), taken);
+		if (player instanceof ServerPlayer serverPlayer) {
+			CriteriaTriggers.INVENTORY_CHANGED.trigger(serverPlayer, player.getInventory(), before.copyWithCount(taken));
+		}
 		if (stack.isEmpty()) {
 			self.discard();
 			stack.setCount(taken);
-			player.onItemPickup(self);
 			callback.cancel();
 		}
+		player.onItemPickup(self);
 	}
 }
