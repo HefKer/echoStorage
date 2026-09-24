@@ -4,6 +4,7 @@ import dev.hefker.echostorage.EchoStorage;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
 
 /**
@@ -20,6 +21,8 @@ public final class EchoMenus {
 			new ExtendedScreenHandlerType<>(ProbeMenu::new, ProbeMenuData.STREAM_CODEC);
 	public static final MenuType<EchoChestMenu> ECHO_CHEST =
 			new ExtendedScreenHandlerType<>(EchoChestMenu::new, EchoChestMenuData.STREAM_CODEC);
+	/** Vanilla's own menu type: the bundle screen has no open-data, so there is nothing to adapt. */
+	public static final MenuType<EchoBundleMenu> ECHO_BUNDLE = new MenuType<>(EchoBundleMenu::new, FeatureFlags.VANILLA_SET);
 
 	private EchoMenus() {
 	}
@@ -27,5 +30,6 @@ public final class EchoMenus {
 	public static void register() {
 		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("probe"), PROBE);
 		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("echo_chest"), ECHO_CHEST);
+		Registry.register(BuiltInRegistries.MENU, EchoStorage.id("echo_bundle"), ECHO_BUNDLE);
 	}
 }

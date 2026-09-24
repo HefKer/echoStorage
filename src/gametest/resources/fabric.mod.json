@@ -9,7 +9,8 @@
 			"dev.hefker.echostorage.gametest.EchoChestGameTest",
 			"dev.hefker.echostorage.gametest.CategoryGameTest",
 			"dev.hefker.echostorage.gametest.EchoChestCategoryGameTest",
-			"dev.hefker.echostorage.gametest.EchoChestQuickStackGameTest"
+			"dev.hefker.echostorage.gametest.EchoChestQuickStackGameTest",
+			"dev.hefker.echostorage.gametest.EchoBundleConveniencesGameTest"
 		]
 	},
 	"depends": {

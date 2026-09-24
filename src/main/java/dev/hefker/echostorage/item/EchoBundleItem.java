@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.menu.EchoBundleMenuProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -13,18 +15,24 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.lang3.math.Fraction;
 
 /**
@@ -50,6 +58,15 @@ public class EchoBundleItem extends Item {
 	/** What the player has set on this bundle from its screen; the defaults if nothing. */
 	public static EchoBundleSettings settingsOf(ItemStack stack) {
 		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_SETTINGS, EchoBundleSettings.DEFAULT);
+	}
+
+	/** Writes {@code settings}, leaving no component behind once they are back to the defaults. */
+	public static void setSettings(ItemStack stack, EchoBundleSettings settings) {
+		if (settings.equals(EchoBundleSettings.DEFAULT)) {
+			stack.remove(EchoComponents.ECHO_BUNDLE_SETTINGS);
+		} else {
+			stack.set(EchoComponents.ECHO_BUNDLE_SETTINGS, settings);
+		}
 	}
 
 	private static EchoBundleContents contentsOf(ItemStack stack) {
@@ -108,15 +125,55 @@ public class EchoBundleItem extends Item {
 		return true;
 	}
 
+	/** Sneak-use opens the bundle's own screen; any other use empties it, as a vanilla bundle does. */
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		ItemStack bundle = player.getItemInHand(hand);
+		if (player.isSecondaryUseActive()) {
+			if (!level.isClientSide()) {
+				int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : Inventory.SLOT_OFFHAND;
+				player.openMenu(new EchoBundleMenuProvider(slot, bundle.getHoverName()));
+			}
+			return InteractionResultHolder.sidedSuccess(bundle, level.isClientSide());
+		}
 		if (dropContents(bundle, player)) {
 			playSound(player, SoundEvents.BUNDLE_DROP_CONTENTS);
 			player.awardStat(Stats.ITEM_USED.get(this));
 			return InteractionResultHolder.sidedSuccess(bundle, level.isClientSide());
 		}
 		return InteractionResultHolder.fail(bundle);
+	}
+
+	/**
+	 * Place from the bundle: using it on a block places the block most recently put in, as if it
+	 * were in the hand. A creative player places without using any up, as with a block in hand.
+	 * With nothing placeable inside, or with the config switch off, the use falls through to
+	 * {@link #use}.
+	 */
+	@Override
+	public InteractionResult useOn(UseOnContext context) {
+		ItemStack bundle = context.getItemInHand();
+		EchoBundleContents contents = bundle.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
+		if (!EchoConfig.get().bundlePlace() || contents == null || bundle.getCount() != 1) {
+			return InteractionResult.PASS;
+		}
+		Optional<ItemStack> block = contents.mostRecent(entry -> entry.getItem() instanceof BlockItem);
+		if (block.isEmpty()) {
+			return InteractionResult.PASS;
+		}
+
+		// A copy of one, so a failed placement changes nothing and the real hand is never emptied.
+		ItemStack placing = block.get().copyWithCount(1);
+		BlockHitResult hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(),
+				context.getClickedPos(), context.isInside());
+		InteractionResult result = ((BlockItem) placing.getItem())
+				.place(new BlockPlaceContext(context.getLevel(), context.getPlayer(), context.getHand(), placing, hit));
+		if (placing.isEmpty()) {
+			EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
+			mutable.take(block.get(), 1);
+			bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		}
+		return result;
 	}
 
 	/**
@@ -177,6 +234,12 @@ public class EchoBundleItem extends Item {
 			int fullness = Mth.mulAndTruncate(contents.weight(), TOOLTIP_MAX_WEIGHT);
 			lines.add(Component.translatable("item.minecraft.bundle.fullness", fullness, TOOLTIP_MAX_WEIGHT)
 					.withStyle(ChatFormatting.GRAY));
+		}
+		EchoBundleSettings settings = settingsOf(stack);
+		settings.category().ifPresent(category -> lines.add(
+				Component.translatable("item.echostorage.echo_bundle.category", category.displayName()).withStyle(ChatFormatting.GRAY)));
+		if (settings.vacuum()) {
+			lines.add(Component.translatable("item.echostorage.echo_bundle.vacuums").withStyle(ChatFormatting.GRAY));
 		}
 	}
 

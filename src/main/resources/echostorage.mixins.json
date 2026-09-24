@@ -2,7 +2,10 @@
 	"required": true,
 	"package": "dev.hefker.echostorage.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [],
+	"mixins": [
+		"BlockItemMixin",
+		"ItemEntityMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

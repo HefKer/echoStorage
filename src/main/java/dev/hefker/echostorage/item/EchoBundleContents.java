@@ -2,6 +2,7 @@ package dev.hefker.echostorage.item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.mojang.serialization.Codec;
@@ -109,6 +110,11 @@ public final class EchoBundleContents {
 	/** Whether any entry is {@code item}, whatever its components. */
 	public boolean contains(Item item) {
 		return items.stream().anyMatch(entry -> entry.is(item));
+	}
+
+	/** The most recently added entry that passes {@code test}, if any. */
+	public Optional<ItemStack> mostRecent(Predicate<ItemStack> test) {
+		return items.stream().filter(test).findFirst();
 	}
 
 	/** Whether every entry passes {@code test}; true of an empty bundle. */
