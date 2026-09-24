@@ -39,7 +39,7 @@ import org.lwjgl.glfw.GLFW;
  *
  * <p>Last is a search box, unless the config turns it off. It dims the chest's slots whose item
  * names do not match, and moves nothing. It sees only this chest: ADR-0002 keeps search to what
- * is already on screen.
+ * is already on screen. A bundle in the chest matches by its own name, never by what it holds.
  */
 public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final ResourceLocation TEXTURE =
@@ -61,7 +61,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private CycleButton<Boolean> strictButton;
 	/** Null when the config turns search off. */
 	private EditBox searchField;
-	private SearchQuery search = SearchQuery.of("");
+	private SearchQuery query = SearchQuery.of("");
 	/** The name as the server last heard it from this screen. */
 	private String sentName;
 
@@ -117,7 +117,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 			Component searchHint = Component.translatable("container.echostorage.echo_chest.search");
 			searchField = new EditBox(font, buttonX, topPos + 3 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT, searchHint);
 			searchField.setHint(searchHint);
-			searchField.setResponder(typed -> search = SearchQuery.of(typed));
+			searchField.setResponder(typed -> query = SearchQuery.of(typed));
 			searchField.setValue(searched);
 			addRenderableWidget(searchField);
 		}
@@ -161,6 +161,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 			} else {
 				searchField.keyPressed(keyCode, scanCode, modifiers);
 			}
+			// As with the name: typing must not reach the inventory key.
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -210,9 +211,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		// The name field stands in for the title.
 		graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, LABEL_COLOR, false);
 		// Labels are drawn after the items, so this dims them rather than hiding behind them.
-		if (!search.isBlank()) {
+		if (!query.isBlank()) {
 			for (Slot slot : menu.slots.subList(0, EchoChestBlockEntity.SLOTS)) {
-				if (!slot.hasItem() || !search.matches(slot.getItem().getHoverName().getString())) {
+				if (!slot.hasItem() || !query.matches(slot.getItem().getHoverName().getString())) {
 					graphics.fill(RenderType.guiOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, SEARCH_MISS_DIM);
 				}
 			}

@@ -22,6 +22,12 @@ class SearchQueryTest {
 	}
 
 	@Test
+	void caseIsIgnoredOnBothSides() {
+		assertTrue(SearchQuery.of("ORE").matches("iron ore"));
+		assertTrue(SearchQuery.of("ore").matches("IRON ORE"));
+	}
+
+	@Test
 	void surroundingWhitespaceInTheQueryIsIgnored() {
 		assertTrue(SearchQuery.of("  ore ").matches("Iron Ore"));
 	}
