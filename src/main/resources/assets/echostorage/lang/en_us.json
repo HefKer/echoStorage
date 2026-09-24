@@ -6,6 +6,8 @@
   "container.echostorage.echo_bundle.vacuum": "Pick up",
   "container.echostorage.echo_bundle.vacuum.tooltip": "When on, items you pick up go into this bundle first if it wants them. Off until you turn it on.",
   "block.echostorage.echo_chest": "Echo Chest",
+  "item.echostorage.echo_chest.category": "Category: %s",
+  "item.echostorage.echo_chest.strict": "Strict",
   "container.echostorage.echo_chest.rename": "Click to rename",
   "container.echostorage.category": "Category",
   "container.echostorage.category.none": "No Category",
