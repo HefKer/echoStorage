@@ -1,12 +1,9 @@
 package dev.hefker.echostorage.client.screen;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoChestName;
-import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.network.NetClient;
@@ -80,13 +77,13 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		addRenderableWidget(nameField);
 
 		int buttonX = leftPos + imageWidth + BUTTON_GAP;
-		categoryButton = CycleButton.<Optional<Category>>builder(EchoChestScreen::categoryLabel)
-				.withValues(categoryChoices())
+		categoryButton = CycleButton.<Optional<Category>>builder(CategoryChoices::label)
+				.withValues(CategoryChoices.all())
 				.withInitialValue(menu.category())
 				.withTooltip(choice -> Tooltip.create(Component.translatable("container.echostorage.echo_chest.category.tooltip")))
 				.displayOnlyValue()
 				.create(buttonX, topPos, BUTTON_WIDTH, BUTTON_HEIGHT,
-						Component.translatable("container.echostorage.echo_chest.category"),
+						CategoryChoices.BUTTON_LABEL,
 						(button, choice) -> clickButton(choice.map(EchoChestMenu::assignButton).orElse(EchoChestMenu.CLEAR_CATEGORY_BUTTON)));
 		addRenderableWidget(categoryButton);
 
@@ -123,18 +120,6 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private void clickButton(int button) {
 		menu.clickMenuButton(minecraft.player, button);
 		minecraft.gameMode.handleInventoryButtonClick(menu.containerId, button);
-	}
-
-	private static List<Optional<Category>> categoryChoices() {
-		List<Optional<Category>> choices = new ArrayList<>();
-		choices.add(Optional.empty());
-		Categories.ALL.forEach(category -> choices.add(Optional.of(category)));
-		return choices;
-	}
-
-	private static Component categoryLabel(Optional<Category> category) {
-		return category.map(Category::displayName)
-				.orElseGet(() -> Component.translatable("container.echostorage.echo_chest.category.none"));
 	}
 
 	@Override

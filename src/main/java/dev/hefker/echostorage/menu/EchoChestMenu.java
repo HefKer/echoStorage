@@ -98,15 +98,12 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The button that assigns the chest to {@code category}. */
 	public static int assignButton(Category category) {
-		if (!Categories.ALL.contains(category)) {
-			throw new IllegalArgumentException("not a preset: " + category.name());
-		}
-		return CLEAR_CATEGORY_BUTTON + encode(Optional.of(category));
+		return CategoryData.assignButton(CLEAR_CATEGORY_BUTTON, category);
 	}
 
 	/** The chest's Category as last synced: on the server the chest's own, on the client a copy. */
 	public Optional<Category> category() {
-		return decode(assignment.get(CATEGORY_DATA));
+		return CategoryData.decode(assignment.get(CATEGORY_DATA));
 	}
 
 	public boolean isStrict() {
@@ -134,7 +131,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			return true;
 		}
 		int category = button - CLEAR_CATEGORY_BUTTON;
-		if (category >= 0 && category <= Categories.ALL.size()) {
+		if (CategoryData.isValid(category)) {
 			assignment.set(CATEGORY_DATA, category);
 			return true;
 		}
@@ -150,19 +147,6 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		if (!player.level().isClientSide()) {
 			QuickStack.run(container, this::refuses, player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
 		}
-	}
-
-	/**
-	 * A Category as a data-slot value: 0 is none, so a client menu that has not heard from the
-	 * server yet reads as unassigned rather than as the first preset.
-	 */
-	private static int encode(Optional<Category> category) {
-		return category.map(assigned -> Categories.ALL.indexOf(assigned) + 1).orElse(0);
-	}
-
-	/** The inverse of {@link #encode}; a value no preset has reads as none. */
-	private static Optional<Category> decode(int value) {
-		return value >= 1 && value <= Categories.ALL.size() ? Optional.of(Categories.ALL.get(value - 1)) : Optional.empty();
 	}
 
 	@Override
@@ -211,7 +195,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			@Override
 			public int get(int index) {
 				return switch (index) {
-					case CATEGORY_DATA -> encode(chest.category());
+					case CATEGORY_DATA -> CategoryData.encode(chest.category());
 					case STRICT_DATA -> chest.isStrict() ? 1 : 0;
 					default -> 0;
 				};
@@ -220,7 +204,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			@Override
 			public void set(int index, int value) {
 				switch (index) {
-					case CATEGORY_DATA -> chest.assign(decode(value).orElse(null));
+					case CATEGORY_DATA -> chest.assign(CategoryData.decode(value).orElse(null));
 					case STRICT_DATA -> chest.setStrict(value != 0);
 					default -> {
 					}
