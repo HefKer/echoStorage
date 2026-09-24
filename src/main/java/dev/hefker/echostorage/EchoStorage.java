@@ -2,6 +2,8 @@ package dev.hefker.echostorage;
 
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.command.SeamCommand;
+import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.config.EchoConfigFile;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoMenus;
@@ -22,6 +24,8 @@ public class EchoStorage implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Echo Storage starting on {}", Services.PLATFORM.platformName());
+
+		EchoConfig.set(EchoConfigFile.load(Services.PLATFORM.configDir().resolve(MOD_ID + ".toml")));
 
 		Net.registerPayloads();
 		Net.registerServerReceivers();

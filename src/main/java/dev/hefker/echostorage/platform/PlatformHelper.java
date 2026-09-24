@@ -1,5 +1,7 @@
 package dev.hefker.echostorage.platform;
 
+import java.nio.file.Path;
+
 /**
  * The loader-specific questions the rest of the mod is allowed to ask.
  *
@@ -15,4 +17,7 @@ package dev.hefker.echostorage.platform;
 public interface PlatformHelper {
 	/** Human-readable loader name, e.g. {@code "Fabric"}. Used in logs and crash reports. */
 	String platformName();
+
+	/** The directory the loader keeps mod config files in. */
+	Path configDir();
 }

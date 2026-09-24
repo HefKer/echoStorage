@@ -1,6 +1,9 @@
 package dev.hefker.echostorage.platform.fabric;
 
+import java.nio.file.Path;
+
 import dev.hefker.echostorage.platform.PlatformHelper;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * The Fabric implementation of {@link PlatformHelper}. This class and the
@@ -11,5 +14,10 @@ public final class FabricPlatformHelper implements PlatformHelper {
 	@Override
 	public String platformName() {
 		return "Fabric";
+	}
+
+	@Override
+	public Path configDir() {
+		return FabricLoader.getInstance().getConfigDir();
 	}
 }
