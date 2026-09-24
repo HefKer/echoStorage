@@ -1,0 +1,21 @@
+package dev.hefker.echostorage.link;
+
+import java.util.List;
+
+import net.minecraft.core.BlockPos;
+
+/**
+ * What one run of link resolution found.
+ *
+ * @param chests   the linked Echo Chests, nearest first
+ * @param path     the connectors reached, grouped by how many steps out from the interface they
+ *                 are, nearest first; what the link visual traces
+ * @param complete false if an unloaded chunk cut the traversal short, so a chest not found may
+ *                 still be linked
+ */
+public record Resolution(List<LinkedChest> chests, List<List<BlockPos>> path, boolean complete) {
+	public Resolution {
+		chests = List.copyOf(chests);
+		path = path.stream().<List<BlockPos>>map(List::copyOf).toList();
+	}
+}
