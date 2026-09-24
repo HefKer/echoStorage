@@ -17,10 +17,18 @@ public final class EchoComponents {
 					.cacheEncoding()
 					.build();
 
+	/** Absent on a bundle nobody has set anything on; read it through {@link EchoBundleItem#settingsOf}. */
+	public static final DataComponentType<EchoBundleSettings> ECHO_BUNDLE_SETTINGS =
+			DataComponentType.<EchoBundleSettings>builder()
+					.persistent(EchoBundleSettings.CODEC)
+					.networkSynchronized(EchoBundleSettings.STREAM_CODEC)
+					.build();
+
 	private EchoComponents() {
 	}
 
 	public static void register() {
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, EchoStorage.id("echo_bundle_contents"), ECHO_BUNDLE_CONTENTS);
+		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, EchoStorage.id("echo_bundle_settings"), ECHO_BUNDLE_SETTINGS);
 	}
 }

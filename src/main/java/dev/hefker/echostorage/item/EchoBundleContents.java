@@ -209,6 +209,34 @@ public final class EchoBundleContents {
 			return removed;
 		}
 
+		/**
+		 * Takes out up to {@code max} of exactly {@code like} — same item, same components —
+		 * gathering from as many entries as it needs, most recent first.
+		 */
+		public ItemStack take(ItemStack like, int max) {
+			int taken = 0;
+			for (int i = 0; i < items.size() && taken < max; ) {
+				ItemStack entry = items.get(i);
+				if (!ItemStack.isSameItemSameComponents(entry, like)) {
+					i++;
+					continue;
+				}
+				int amount = Math.min(entry.getCount(), max - taken);
+				taken += amount;
+				if (amount == entry.getCount()) {
+					items.remove(i);
+				} else {
+					items.set(i, entry.copyWithCount(entry.getCount() - amount));
+					i++;
+				}
+			}
+			if (taken == 0) {
+				return ItemStack.EMPTY;
+			}
+			weight = weight.subtract(weightOf(like, taken));
+			return like.copyWithCount(taken);
+		}
+
 		public Fraction weight() {
 			return weight;
 		}

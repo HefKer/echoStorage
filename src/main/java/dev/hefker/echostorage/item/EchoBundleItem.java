@@ -47,6 +47,11 @@ public class EchoBundleItem extends Item {
 		return contentsOf(stack).weight().floatValue();
 	}
 
+	/** What the player has set on this bundle from its screen; the defaults if nothing. */
+	public static EchoBundleSettings settingsOf(ItemStack stack) {
+		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_SETTINGS, EchoBundleSettings.DEFAULT);
+	}
+
 	private static EchoBundleContents contentsOf(ItemStack stack) {
 		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
 	}
