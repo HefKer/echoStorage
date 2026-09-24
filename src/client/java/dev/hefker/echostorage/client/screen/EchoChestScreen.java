@@ -5,15 +5,18 @@ import java.util.Optional;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.network.NetClient;
 import dev.hefker.echostorage.network.RenameEchoChestPayload;
+import dev.hefker.echostorage.search.SearchQuery;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,6 +36,10 @@ import org.lwjgl.glfw.GLFW;
  *
  * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
  * only fill a slot. Its tooltip says so, since the two otherwise look like the same action.
+ *
+ * <p>Last is a search box, unless the config turns it off. It dims the chest's slots whose item
+ * names do not match, and moves nothing. It sees only this chest: ADR-0002 keeps search to what
+ * is already on screen.
  */
 public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final ResourceLocation TEXTURE =
@@ -44,6 +51,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final int PLAYER_INVENTORY_HEIGHT = 96;
 	private static final int LABEL_COLOR = 0x404040;
 	private static final int STRAY_TINT = 0x60D08040;
+	private static final int SEARCH_MISS_DIM = 0xA0000000;
 	private static final int BUTTON_GAP = 4;
 	private static final int BUTTON_WIDTH = 90;
 	private static final int BUTTON_HEIGHT = 20;
@@ -51,6 +59,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private EditBox nameField;
 	private CycleButton<Optional<Category>> categoryButton;
 	private CycleButton<Boolean> strictButton;
+	/** Null when the config turns search off. */
+	private EditBox searchField;
+	private SearchQuery search = SearchQuery.of("");
 	/** The name as the server last heard it from this screen. */
 	private String sentName;
 
@@ -66,6 +77,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		super.init();
 		// init runs again on resize; keep whatever is being typed.
 		String value = nameField == null ? sentName : nameField.getValue();
+		String searched = searchField == null ? "" : searchField.getValue();
 
 		nameField = new EditBox(font, leftPos + titleLabelX, topPos + titleLabelY, imageWidth - 2 * titleLabelX, 10, title);
 		nameField.setBordered(false);
@@ -100,6 +112,15 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 				.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
 				.bounds(buttonX, topPos + 2 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
 				.build());
+
+		if (EchoConfig.get().searchInOpenContainer()) {
+			Component searchHint = Component.translatable("container.echostorage.echo_chest.search");
+			searchField = new EditBox(font, buttonX, topPos + 3 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT, searchHint);
+			searchField.setHint(searchHint);
+			searchField.setResponder(typed -> search = SearchQuery.of(typed));
+			searchField.setValue(searched);
+			addRenderableWidget(searchField);
+		}
 	}
 
 	/** Follows changes that did not come from this screen: another player's, or the server's answer. */
@@ -124,13 +145,22 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		boolean enter = keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER;
 		if (keyCode != GLFW.GLFW_KEY_ESCAPE && nameField.isFocused()) {
-			if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+			if (enter) {
 				finishRenaming();
 			} else {
 				nameField.keyPressed(keyCode, scanCode, modifiers);
 			}
 			// Typing must not reach the inventory key, hotbar swaps or drop.
+			return true;
+		}
+		if (keyCode != GLFW.GLFW_KEY_ESCAPE && searchField != null && searchField.isFocused()) {
+			if (enter) {
+				finishSearching();
+			} else {
+				searchField.keyPressed(keyCode, scanCode, modifiers);
+			}
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -140,6 +170,10 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (nameField.isFocused() && !nameField.isMouseOver(mouseX, mouseY)) {
 			finishRenaming();
+		}
+		// Otherwise the box keeps the keyboard, and hotbar keys stop working on the slots.
+		if (searchField != null && searchField.isFocused() && !searchField.isMouseOver(mouseX, mouseY)) {
+			finishSearching();
 		}
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
@@ -157,6 +191,12 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		sendName();
 	}
 
+	/** Leaves the query standing; only the keyboard is given back. */
+	private void finishSearching() {
+		searchField.setFocused(false);
+		setFocused(null);
+	}
+
 	private void sendName() {
 		String typed = nameField.getValue();
 		if (!typed.equals(sentName)) {
@@ -169,6 +209,14 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
 		// The name field stands in for the title.
 		graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, LABEL_COLOR, false);
+		// Labels are drawn after the items, so this dims them rather than hiding behind them.
+		if (!search.isBlank()) {
+			for (Slot slot : menu.slots.subList(0, EchoChestBlockEntity.SLOTS)) {
+				if (!slot.hasItem() || !search.matches(slot.getItem().getHoverName().getString())) {
+					graphics.fill(RenderType.guiOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, SEARCH_MISS_DIM);
+				}
+			}
+		}
 	}
 
 	@Override

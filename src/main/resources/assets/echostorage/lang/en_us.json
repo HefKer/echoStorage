@@ -14,6 +14,7 @@
   "container.echostorage.echo_chest.strict.tooltip": "When on, shift-click and hoppers refuse items outside the Category. Placing by hand always works.",
   "container.echostorage.echo_chest.quick_stack": "Quick-stack",
   "container.echostorage.echo_chest.quick_stack.tooltip": "Puts away everything in your inventory, not your hotbar, that this chest already holds. Bundles inside that hold an item are topped up first. Shift-click only fills slots and never fills a bundle.",
+  "container.echostorage.echo_chest.search": "Search",
   "category.echostorage.food": "Food",
   "category.echostorage.ores": "Ores",
   "category.echostorage.materials": "Materials",
