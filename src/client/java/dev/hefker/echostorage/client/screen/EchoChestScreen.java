@@ -33,8 +33,8 @@ import net.minecraft.world.inventory.Slot;
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
  *
- * <p>Below them is quick-stack, unless the config turns it off, which tops up bundles inside the
- * chest where a shift-click would only fill a slot. Its tooltip says so, since the two otherwise
+ * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
+ * only fill a slot, unless the config turns it off. Its tooltip says so, since the two otherwise
  * look like the same action.
  *
  * <p>Last is a search box, unless the config turns it off. It dims the chest's slots whose item
@@ -116,8 +116,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 			addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
 							button -> clickButton(EchoChestMenu.QUICK_STACK_BUTTON))
 					.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
-					.bounds(buttonX, topPos + nextButton++ * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
+					.bounds(buttonX, topPos + nextButton * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
 					.build());
+			nextButton++;
 		}
 
 		if (EchoConfig.get().searchInOpenContainer()) {

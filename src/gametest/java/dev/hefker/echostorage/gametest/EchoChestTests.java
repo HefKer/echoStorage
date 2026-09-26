@@ -1,6 +1,7 @@
 package dev.hefker.echostorage.gametest;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
@@ -103,10 +104,18 @@ final class EchoChestTests {
 	 * the server thread start to finish, so no other test sees the change.
 	 */
 	static void withConfig(EchoConfig config, Runnable action) {
+		withConfig(config, () -> {
+			action.run();
+			return null;
+		});
+	}
+
+	/** {@link #withConfig(EchoConfig, Runnable)} for an action with a result. */
+	static <T> T withConfig(EchoConfig config, Supplier<T> action) {
 		EchoConfig before = EchoConfig.get();
 		EchoConfig.set(config);
 		try {
-			action.run();
+			return action.get();
 		} finally {
 			EchoConfig.set(before);
 		}

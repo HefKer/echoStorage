@@ -172,10 +172,8 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 
 	/** Presses the interface's quick-stack button with {@code interfaceQuickStack} set as given. */
 	private static boolean quickStackToAll(ServerPlayer player, boolean switchedOn) {
-		boolean[] handled = new boolean[1];
-		withConfig(EchoConfig.DEFAULTS.withInterfaceQuickStack(switchedOn),
-				() -> handled[0] = player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON));
-		return handled[0];
+		return withConfig(EchoConfig.DEFAULTS.withInterfaceQuickStack(switchedOn),
+				() -> player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON));
 	}
 
 	/**
