@@ -25,6 +25,20 @@ A named set of items an Echo Chest can be assigned to hold, resolved from item t
 item predicates and datapack overrides.
 _Avoid_: filter, group, class
 
+**Stray**:
+An item outside the Category of the Echo Chest it is in or being put into. A chest with no
+Category has no strays.
+_Avoid_: misfit, foreign item, unsorted item
+
+**Strict**:
+The Echo Chest setting under which the chest refuses strays from every source except the
+player's own hand. Has no effect on a chest with no Category.
+_Avoid_: locked, whitelist mode, filtered
+
+**Permissive**:
+The default setting, the opposite of Strict: strays are accepted from any source.
+_Avoid_: open, unfiltered
+
 **Link**:
 A path of sculk connecting an Echo Chest to an Echo Interface. Built by the player,
 visible in the world, and the only thing that defines what an interface can reach.
@@ -36,6 +50,7 @@ can add their own; in v1 it is sculk vein and sculk block.
 _Avoid_: cable, conduit, wire, node
 
 **Quick-stack**:
-A player-initiated action that moves matching items from the player's inventory into
-one or more Echo Chests. Never happens on its own.
+A player-initiated action that moves items from the player's inventory into one or more
+Echo Chests, each item going to a chest whose Category it falls in or that already holds it.
+Never happens on its own.
 _Avoid_: auto-sort, deposit, dump
