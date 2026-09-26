@@ -16,7 +16,7 @@ Category, for keeping an inventory manageable while away from base.
 _Avoid_: big bundle, sack, pouch
 
 **Echo Interface**:
-A placed block that lists the Echo Chests linked to it by sculk and opens a chosen one
+A placed block that lists the Echo Chests Linked to it and opens a chosen one
 from where the player stands. It shows chests, never their merged contents.
 _Avoid_: terminal, controller, network hub, access point
 
@@ -40,14 +40,20 @@ The default setting, the opposite of Strict: strays are accepted from any source
 _Avoid_: open, unfiltered
 
 **Link**:
-A path of sculk connecting an Echo Chest to an Echo Interface. Built by the player,
-visible in the world, and the only thing that defines what an interface can reach.
+A path of Connectors from an Echo Interface to an Echo Chest, optionally ending in one hop
+through the air from an Echo Relay to a chest it has heard. Built by the player, visible in
+the world, and the only thing that defines what an interface can reach.
 _Avoid_: connection, channel, network, pairing
 
 **Connector**:
 A block that can carry a Link. Membership is a block tag, so packs and future versions
-can add their own; in v1 it is sculk vein and sculk block.
+can add their own; it is sculk vein, sculk block and the Echo Relay.
 _Avoid_: cable, conduit, wire, node
+
+**Echo Relay**:
+A Connector that hears an Echo Chest being opened nearby and, from then on, carries a
+Link to it through the air while it stays in range with no wool in between.
+_Avoid_: receiver, listener, antenna, node
 
 **Quick-stack**:
 A player-initiated action that moves items from the player's inventory into one or more
