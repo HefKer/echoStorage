@@ -9,6 +9,7 @@ import java.util.UUID;
 import dev.hefker.echostorage.EchoStorage;
 import dev.hefker.echostorage.link.Connectors;
 import dev.hefker.echostorage.link.LinkWorld;
+import dev.hefker.echostorage.link.LinkedChest;
 import dev.hefker.echostorage.link.LinkedChests;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.Links;
@@ -46,7 +47,7 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 	private static final String ROWS_TAG = "Rows";
 
 	private final LinkedChests rows = new LinkedChests();
-	private Resolution lastResolution = new Resolution(List.of(), List.of(), true);
+	private Resolution lastResolution = new Resolution(List.of(), List.of(), List.of(), true);
 	private long resolvedAt = Long.MIN_VALUE;
 
 	public EchoInterfaceBlockEntity(BlockPos pos, BlockState state) {
@@ -193,6 +194,16 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 		@Override
 		public UUID chestAt(BlockPos pos) {
 			return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest ? chest.id() : null;
+		}
+
+		@Override
+		public List<LinkedChest> heardBy(BlockPos pos) {
+			return List.of();
+		}
+
+		@Override
+		public boolean isOccluded(BlockPos from, BlockPos to) {
+			return false;
 		}
 
 		@Override

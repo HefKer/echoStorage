@@ -166,7 +166,7 @@ class LinkedChestsTest {
 	}
 
 	private void update(boolean complete, LinkedChest... found) {
-		rows.update(new Resolution(List.of(found), List.of(), complete),
+		rows.update(new Resolution(List.of(found), List.of(), List.of(), complete),
 				chest -> labels.get(chest.id()),
 				pos -> !unloaded.contains(pos));
 	}
