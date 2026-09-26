@@ -1,5 +1,15 @@
 package dev.hefker.echostorage.gametest;
 
+import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
+import static dev.hefker.echostorage.gametest.EchoChestTests.NEIGHBOUR;
+import static dev.hefker.echostorage.gametest.EchoChestTests.breakChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.chestAt;
+import static dev.hefker.echostorage.gametest.EchoChestTests.droppedChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.holding;
+import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
+import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.placeFromItem;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -7,8 +17,6 @@ import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.item.EchoItems;
-import dev.hefker.echostorage.menu.EchoChestMenu;
-import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import dev.hefker.echostorage.network.EchoChestRenames;
 import dev.hefker.echostorage.network.RenameEchoChestPayload;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -20,13 +28,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
@@ -35,10 +39,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
  * rather than against a stand-in.
  */
 public class EchoChestGameTest implements FabricGameTest {
-	// GameTestHelper.assertValueEqual takes (actual, expected, what).
-	private static final BlockPos CHEST = new BlockPos(1, 1, 1);
-	private static final BlockPos NEIGHBOUR = new BlockPos(2, 1, 1);
-
 	// --- break and drop -------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -227,53 +227,5 @@ public class EchoChestGameTest implements FabricGameTest {
 
 		helper.assertValueEqual(chest.name(), "", "name");
 		helper.succeed();
-	}
-
-	// --- helpers --------------------------------------------------------------------------
-
-	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
-		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
-		return chestAt(helper, pos);
-	}
-
-	private static EchoChestBlockEntity chestAt(GameTestHelper helper, BlockPos pos) {
-		return helper.getBlockEntity(pos);
-	}
-
-	/** Places {@code stack} at {@code pos} the way a player would, through the block item. */
-	private static void placeFromItem(GameTestHelper helper, ItemStack stack, BlockPos pos) {
-		Player player = holding(helper, stack);
-		helper.placeAt(player, player.getMainHandItem(), pos.below(), Direction.UP);
-		helper.assertBlockPresent(EchoBlocks.ECHO_CHEST, pos);
-	}
-
-	/** Placement reads the stack from the player's hand, not from the stack it is handed. */
-	private static Player holding(GameTestHelper helper, ItemStack stack) {
-		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-		return player;
-	}
-
-	/** Breaks the block as a player's tool would: loot table drops and all. */
-	private static void breakChest(GameTestHelper helper, BlockPos pos) {
-		helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
-	}
-
-	private static ItemStack droppedChest(GameTestHelper helper) {
-		List<ItemStack> chests = helper.getEntities(EntityType.ITEM).stream()
-				.map(ItemEntity::getItem)
-				.filter(stack -> stack.is(EchoItems.ECHO_CHEST))
-				.toList();
-		helper.assertValueEqual(chests.size(), 1, "dropped Echo Chests");
-		return chests.getFirst();
-	}
-
-	private static ServerPlayer openedBy(GameTestHelper helper, EchoChestBlockEntity chest) {
-		@SuppressWarnings("removal")
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.moveTo(helper.absoluteVec(CHEST.getCenter()).add(0, 1, 0));
-		player.openMenu(new EchoChestMenuProvider(chest));
-		helper.assertTrue(player.containerMenu instanceof EchoChestMenu, "the Echo Chest menu did not open");
-		return player;
 	}
 }

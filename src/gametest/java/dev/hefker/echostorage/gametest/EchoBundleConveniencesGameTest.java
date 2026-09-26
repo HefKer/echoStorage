@@ -1,5 +1,8 @@
 package dev.hefker.echostorage.gametest;
 
+import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
+import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
+
 import java.util.Optional;
 
 import dev.hefker.echostorage.category.Categories;
@@ -293,12 +296,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	}
 
 	private static ItemStack bundle(EchoBundleSettings settings, ItemStack... contents) {
-		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(EchoBundleContents.EMPTY);
-		for (ItemStack stack : contents) {
-			mutable.tryInsert(stack.copy());
-		}
-		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		ItemStack bundle = bundleOf(contents);
 		bundle.set(EchoComponents.ECHO_BUNDLE_SETTINGS, settings);
 		return bundle;
 	}
@@ -316,9 +314,5 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	/** Whether {@code item} sits in a slot of its own, outside any bundle. */
 	private static boolean inventoryHoldsLoose(ServerPlayer player, Item item) {
 		return player.getInventory().countItem(item) > 0;
-	}
-
-	private static void assertStack(GameTestHelper helper, ItemStack expected, ItemStack actual, String what) {
-		helper.assertTrue(ItemStack.matches(expected, actual), what + ": expected " + expected + ", got " + actual);
 	}
 }

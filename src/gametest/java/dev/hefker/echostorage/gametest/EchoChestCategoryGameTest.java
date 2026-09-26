@@ -1,5 +1,18 @@
 package dev.hefker.echostorage.gametest;
 
+import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
+import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
+import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_PLAYER_MENU_SLOT;
+import static dev.hefker.echostorage.gametest.EchoChestTests.NEIGHBOUR;
+import static dev.hefker.echostorage.gametest.EchoChestTests.breakChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
+import static dev.hefker.echostorage.gametest.EchoChestTests.chestAt;
+import static dev.hefker.echostorage.gametest.EchoChestTests.droppedChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.menu;
+import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
+import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.placeFromItem;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,15 +24,12 @@ import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
-import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.menu.EchoChestMenuData;
-import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
@@ -29,9 +39,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -47,14 +54,6 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
  * put in by shift-click or hopper.
  */
 public class EchoChestCategoryGameTest implements FabricGameTest {
-	// GameTestHelper.assertValueEqual takes (actual, expected, what).
-	private static final BlockPos CHEST = new BlockPos(1, 1, 1);
-	private static final BlockPos NEIGHBOUR = new BlockPos(2, 1, 1);
-	/** The first slot of the player's main inventory, above the hotbar. */
-	private static final int FIRST_MAIN_INVENTORY_SLOT = 9;
-	/** The same slot in the Echo Chest menu, which lists the chest's 27 first. */
-	private static final int FIRST_PLAYER_MENU_SLOT = EchoChestBlockEntity.SLOTS;
-
 	// --- persistence ----------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -357,7 +356,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		breakChest(helper, CHEST);
 		placeFromItem(helper, droppedChest(helper), CHEST);
 
-		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.of(Categories.ORES), "category after replacing");
 		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
 		helper.succeed();
@@ -370,7 +369,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		breakChest(helper, CHEST);
 		placeFromItem(helper, droppedChest(helper), CHEST);
 
-		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.of(Categories.FOOD), "category after replacing");
 		helper.assertFalse(replaced.isStrict(), "a permissive chest comes back permissive");
 		helper.succeed();
@@ -383,7 +382,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		breakChest(helper, CHEST);
 		placeFromItem(helper, droppedChest(helper), CHEST);
 
-		EchoChestBlockEntity replaced = helper.getBlockEntity(CHEST);
+		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.empty(), "category after replacing");
 		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
 		helper.succeed();
@@ -401,7 +400,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		placeFromItem(helper, stale, CHEST);
 
-		EchoChestBlockEntity placed = helper.getBlockEntity(CHEST);
+		EchoChestBlockEntity placed = chestAt(helper, CHEST);
 		helper.assertValueEqual(placed.category(), Optional.empty(), "category after placing");
 		helper.assertTrue(placed.isStrict(), "strictness after placing");
 		helper.assertValueEqual(placed.name(), "Logs", "name after placing");
@@ -424,7 +423,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		placeFromItem(helper, copy, NEIGHBOUR);
 
-		EchoChestBlockEntity placed = helper.getBlockEntity(NEIGHBOUR);
+		EchoChestBlockEntity placed = chestAt(helper, NEIGHBOUR);
 		helper.assertValueEqual(placed.category(), Optional.of(Categories.ORES), "category after placing");
 		helper.assertTrue(placed.isStrict(), "strictness after placing");
 		helper.succeed();
@@ -444,48 +443,11 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 	// --- helpers --------------------------------------------------------------------------
 
-	private static EchoChestBlockEntity placeChest(GameTestHelper helper, BlockPos pos) {
-		helper.setBlock(pos, EchoBlocks.ECHO_CHEST);
-		return helper.getBlockEntity(pos);
-	}
-
-	/** Places {@code stack} at {@code pos} the way a player would, through the block item. */
-	private static void placeFromItem(GameTestHelper helper, ItemStack stack, BlockPos pos) {
-		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-		helper.placeAt(player, player.getMainHandItem(), pos.below(), Direction.UP);
-		helper.assertBlockPresent(EchoBlocks.ECHO_CHEST, pos);
-	}
-
-	/** Breaks the block as a player's tool would: loot table drops and all. */
-	private static void breakChest(GameTestHelper helper, BlockPos pos) {
-		helper.getLevel().destroyBlock(helper.absolutePos(pos), true);
-	}
-
-	private static ItemStack droppedChest(GameTestHelper helper) {
-		List<ItemStack> chests = helper.getEntities(EntityType.ITEM).stream()
-				.map(ItemEntity::getItem)
-				.filter(stack -> stack.is(EchoItems.ECHO_CHEST))
-				.toList();
-		helper.assertValueEqual(chests.size(), 1, "dropped Echo Chests");
-		return chests.getFirst();
-	}
-
 	/** The lines the Echo Chest adds under the item's name. */
 	private static List<Component> tooltipOf(ItemStack stack) {
 		List<Component> lines = new ArrayList<>();
 		stack.getItem().appendHoverText(stack, Item.TooltipContext.EMPTY, lines, TooltipFlag.NORMAL);
 		return lines;
-	}
-
-	private static ItemStack bundleOf(ItemStack... contents) {
-		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(EchoBundleContents.EMPTY);
-		for (ItemStack stack : contents) {
-			mutable.tryInsert(stack.copy());
-		}
-		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
-		return bundle;
 	}
 
 	private static EchoChestBlockEntity strictChestOf(GameTestHelper helper, Category category) {
@@ -498,19 +460,6 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	/** Vanilla's hopper insert, which hoppers and droppers both use; returns what did not fit. */
 	private static ItemStack hopperInto(EchoChestBlockEntity chest, ItemStack stack) {
 		return HopperBlockEntity.addItem(null, chest, stack, Direction.DOWN);
-	}
-
-	private static ServerPlayer openedBy(GameTestHelper helper, EchoChestBlockEntity chest) {
-		@SuppressWarnings("removal")
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.moveTo(helper.absoluteVec(CHEST.getCenter()).add(0, 1, 0));
-		player.openMenu(new EchoChestMenuProvider(chest));
-		helper.assertTrue(player.containerMenu instanceof EchoChestMenu, "the Echo Chest menu did not open");
-		return player;
-	}
-
-	private static EchoChestMenu menu(ServerPlayer player) {
-		return (EchoChestMenu) player.containerMenu;
 	}
 
 	private static CompoundTag save(GameTestHelper helper, EchoChestBlockEntity chest) {

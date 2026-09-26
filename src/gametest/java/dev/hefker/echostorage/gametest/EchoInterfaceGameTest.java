@@ -1,5 +1,7 @@
 package dev.hefker.echostorage.gametest;
 
+import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +41,6 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 	private static final BlockPos PATH_BLOCK = new BlockPos(4, 1, 0);
 	/** A second linked chest, beside the path and so nearer the interface than the far one. */
 	private static final BlockPos NEAR_CHEST = new BlockPos(2, 1, 1);
-	private static final int FIRST_MAIN_INVENTORY_SLOT = 9;
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aSculkPathLinksAChestAndTheInterfaceListsIt(GameTestHelper helper) {
