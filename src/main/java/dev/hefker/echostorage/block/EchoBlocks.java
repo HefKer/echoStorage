@@ -26,6 +26,15 @@ public final class EchoBlocks {
 	public static final BlockEntityType<EchoInterfaceBlockEntity> ECHO_INTERFACE_ENTITY =
 			BlockEntityType.Builder.of(EchoInterfaceBlockEntity::new, ECHO_INTERFACE).build(null);
 
+	public static final Block ECHO_RELAY = new EchoRelayBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_CYAN)
+			.strength(1.5F)
+			.sound(SoundType.SCULK_SENSOR)
+			.lightLevel(state -> 1));
+
+	public static final BlockEntityType<EchoRelayBlockEntity> ECHO_RELAY_ENTITY =
+			BlockEntityType.Builder.of(EchoRelayBlockEntity::new, ECHO_RELAY).build(null);
+
 	private EchoBlocks() {
 	}
 
@@ -34,5 +43,7 @@ public final class EchoBlocks {
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_chest"), ECHO_CHEST_ENTITY);
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_interface"), ECHO_INTERFACE_ENTITY);
+		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_relay"), ECHO_RELAY);
+		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_relay"), ECHO_RELAY_ENTITY);
 	}
 }

@@ -7,9 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.hefker.echostorage.EchoStorage;
-import dev.hefker.echostorage.link.Connectors;
-import dev.hefker.echostorage.link.LinkWorld;
-import dev.hefker.echostorage.link.LinkedChest;
 import dev.hefker.echostorage.link.LinkedChests;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.Links;
@@ -27,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * An Echo Interface: the Echo Chests its Links reach, as rows it keeps between visits (ADR-0004).
@@ -129,25 +125,39 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 
 	/**
 	 * The link visual: sculk particles run out along the last resolved path, a step at a time,
-	 * shown to {@code viewer} alone. Called each tick the viewer has the screen open.
+	 * shown to {@code viewer} alone. As they reach an Echo Relay, a vibration goes out to each
+	 * chest it linked and an echo comes back. Called each tick the viewer has the screen open.
 	 */
 	public void traceFor(ServerPlayer viewer) {
 		List<List<BlockPos>> path = lastResolution.path();
 		if (path.isEmpty() || !(level instanceof ServerLevel serverLevel)) {
 			return;
 		}
-		long tick = serverLevel.getGameTime();
-		if (tick % TRACE_TICKS_PER_STEP != 0) {
-			return;
+		int tick = (int) (serverLevel.getGameTime() % (path.size() * TRACE_TICKS_PER_STEP + TRACE_PAUSE_TICKS));
+		if (tick % TRACE_TICKS_PER_STEP == 0 && tick / TRACE_TICKS_PER_STEP < path.size()) {
+			for (BlockPos pos : path.get(tick / TRACE_TICKS_PER_STEP)) {
+				serverLevel.sendParticles(viewer, ParticleTypes.SCULK_CHARGE_POP, false,
+						pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0.15, 0.15, 0.15, 0.0);
+			}
 		}
-		int step = (int) (tick / TRACE_TICKS_PER_STEP % (path.size() + TRACE_PAUSE_TICKS / TRACE_TICKS_PER_STEP));
-		if (step >= path.size()) {
-			return;
+		for (Resolution.Hop hop : lastResolution.hops()) {
+			int reached = stepOf(path, hop.relay()) * TRACE_TICKS_PER_STEP;
+			if (tick == reached) {
+				EchoRelayBlockEntity.vibrate(serverLevel, viewer, hop.relay(), hop.chest());
+			} else if (tick == reached + EchoRelayBlockEntity.travelTicks(hop.relay(), hop.chest())) {
+				EchoRelayBlockEntity.vibrate(serverLevel, viewer, hop.chest(), hop.relay());
+			}
 		}
-		for (BlockPos pos : path.get(step)) {
-			serverLevel.sendParticles(viewer, ParticleTypes.SCULK_CHARGE_POP, false,
-					pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, 0.15, 0.15, 0.15, 0.0);
+	}
+
+	/** How many steps out along {@code path} the connector at {@code pos} is. */
+	private static int stepOf(List<List<BlockPos>> path, BlockPos pos) {
+		for (int step = 0; step < path.size(); step++) {
+			if (path.get(step).contains(pos)) {
+				return step;
+			}
 		}
+		throw new IllegalStateException("A hop from " + pos + ", which the path does not reach");
 	}
 
 	private Optional<EchoChestBlockEntity> chestAt(BlockPos pos) {
@@ -176,42 +186,5 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
 		super.saveAdditional(tag, registries);
 		tag.put(ROWS_TAG, Row.CODEC.listOf().encodeStart(NbtOps.INSTANCE, rows.rows()).getOrThrow());
-	}
-
-	/** The world as link resolution sees it. Never loads a chunk: every look is behind {@link #isLoaded}. */
-	private record LevelLinks(ServerLevel level) implements LinkWorld {
-		@Override
-		public boolean isLoaded(BlockPos pos) {
-			return level.isLoaded(pos);
-		}
-
-		@Override
-		public boolean isConnector(BlockPos pos) {
-			return level.getBlockState(pos).is(Connectors.TAG);
-		}
-
-		@Nullable
-		@Override
-		public UUID chestAt(BlockPos pos) {
-			return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest ? chest.id() : null;
-		}
-
-		@Override
-		public List<LinkedChest> heardBy(BlockPos pos) {
-			return List.of();
-		}
-
-		@Override
-		public boolean isOccluded(BlockPos from, BlockPos to) {
-			return false;
-		}
-
-		@Override
-		public UUID giveNewId(BlockPos pos) {
-			EchoChestBlockEntity chest = (EchoChestBlockEntity) level.getBlockEntity(pos);
-			chest.assignNewId();
-			EchoStorage.LOGGER.info("Echo Chest at {} shared its id with another chest and was given a new one", pos);
-			return chest.id();
-		}
 	}
 }

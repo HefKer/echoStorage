@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.Block;
 
 /**
  * The blocks that can carry a Link. Read from a tag, never hardcoded, so packs and later
- * versions add their own; the mod ships sculk vein and sculk block.
+ * versions add their own; the mod ships sculk vein, sculk block and the Echo Relay.
  */
 public final class Connectors {
 	public static final TagKey<Block> TAG = TagKey.create(Registries.BLOCK, EchoStorage.id("connectors"));

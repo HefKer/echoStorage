@@ -48,6 +48,7 @@ class PortabilityRulesTest {
 			Map.entry("net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item")),
 			Map.entry("net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip")),
 			Map.entry("net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry", List.of("dev.hefker.echostorage.client.render")),
+			Map.entry("net.fabricmc.fabric.api.blockrenderlayer", List.of("dev.hefker.echostorage.client.render")),
 			Map.entry("net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric")),
 			Map.entry("net.fabricmc.fabric.api.gametest", List.of("dev.hefker.echostorage.gametest")));
 
