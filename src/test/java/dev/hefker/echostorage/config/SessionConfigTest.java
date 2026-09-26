@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class SessionConfigTest {
 	private static final EchoConfig LOCAL = new EchoConfig(false, true, false, true, false, true);
-	private static final EchoConfig SERVERS = new EchoConfig(true, false, true, false, true, false);
+	private static final EchoConfig SERVER_CONFIG = new EchoConfig(true, false, true, false, true, false);
 
 	@BeforeEach
 	void loadLocal() {
@@ -22,15 +22,15 @@ class SessionConfigTest {
 	}
 
 	@Test
-	void theServersConfigAppliesForTheSession() {
-		SessionConfig.applyRemote(SERVERS);
+	void theServerConfigAppliesForTheSession() {
+		SessionConfig.applyRemote(SERVER_CONFIG);
 
-		assertEquals(SERVERS, EchoConfig.get());
+		assertEquals(SERVER_CONFIG, EchoConfig.get());
 	}
 
 	@Test
 	void leavingTheServerRestoresTheLocalConfig() {
-		SessionConfig.applyRemote(SERVERS);
+		SessionConfig.applyRemote(SERVER_CONFIG);
 		SessionConfig.restoreLocal();
 
 		assertEquals(LOCAL, EchoConfig.get());
@@ -44,8 +44,8 @@ class SessionConfigTest {
 	}
 
 	@Test
-	void aSecondServersConfigStillRestoresTheLocalOne() {
-		SessionConfig.applyRemote(SERVERS);
+	void aSecondServerConfigStillRestoresTheLocalOne() {
+		SessionConfig.applyRemote(SERVER_CONFIG);
 		SessionConfig.applyRemote(EchoConfig.DEFAULTS);
 		SessionConfig.restoreLocal();
 

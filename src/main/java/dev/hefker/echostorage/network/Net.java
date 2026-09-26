@@ -10,8 +10,9 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * The mod's whole networking surface (ADR-0003 rule 3).
  *
- * <p>Every payload is registered here, every server-bound handler is wired here, and every
- * server-to-client send goes through {@link #sendTo}. {@code NetClient}, in the client source
+ * <p>Every payload is registered here, every server-bound handler is wired here, every
+ * server-to-client send goes through {@link #sendTo}, and the connection events that send
+ * anything are hooked here. {@code NetClient}, in the client source
  * set, is the same facade's client half. No other class in the mod may import a Fabric
  * networking API — {@code PortabilityRulesTest} fails the build if one does.
  *

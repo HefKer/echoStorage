@@ -14,6 +14,14 @@ class EchoConfigPayloadTest {
 	}
 
 	@Test
+	void eachSwitchKeepsItsOwnPlaceOnTheWire() {
+		EchoConfigPayload odd = new EchoConfigPayload(new EchoConfig(true, false, true, false, true, false));
+		EchoConfigPayload even = new EchoConfigPayload(new EchoConfig(false, true, false, true, false, true));
+		assertEquals(odd, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, odd));
+		assertEquals(even, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, even));
+	}
+
+	@Test
 	void payloadTypeIsNamespacedToTheMod() {
 		assertEquals("echostorage:echo_config", EchoConfigPayload.TYPE.id().toString());
 	}

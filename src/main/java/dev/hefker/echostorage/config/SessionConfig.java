@@ -8,6 +8,9 @@ package dev.hefker.echostorage.config;
  * <p>The local config is captured when the first server's config arrives, not at load, so
  * this needs no hook into startup. Singleplayer goes through the same path: the integrated
  * server sends the values both sides already hold, and nothing changes.
+ *
+ * <p>It lives in the common source set, not the client one, only so it can be unit-tested
+ * without a client classpath; nothing on the server calls it.
  */
 public final class SessionConfig {
 	/** The client's own config while a server's is applied; {@code null} when none is. */
@@ -17,11 +20,11 @@ public final class SessionConfig {
 	}
 
 	/** Makes the server's config the one {@link EchoConfig#get()} returns until {@link #restoreLocal()}. */
-	public static synchronized void applyRemote(EchoConfig servers) {
+	public static synchronized void applyRemote(EchoConfig serverConfig) {
 		if (local == null) {
 			local = EchoConfig.get();
 		}
-		EchoConfig.set(servers);
+		EchoConfig.set(serverConfig);
 	}
 
 	/** Puts the client's own config back. Does nothing if no server's config was applied. */
