@@ -1,6 +1,8 @@
 package dev.hefker.echostorage.network;
 
+import dev.hefker.echostorage.config.EchoConfig;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,8 +10,9 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * The mod's whole networking surface (ADR-0003 rule 3).
  *
- * <p>Every payload is registered here, every server-bound handler is wired here, and every
- * server-to-client send goes through {@link #sendTo}. {@code NetClient}, in the client source
+ * <p>Every payload is registered here, every server-bound handler is wired here, every
+ * server-to-client send goes through {@link #sendTo}, and the connection events that send
+ * anything are hooked here. {@code NetClient}, in the client source
  * set, is the same facade's client half. No other class in the mod may import a Fabric
  * networking API — {@code PortabilityRulesTest} fails the build if one does.
  *
@@ -31,6 +34,7 @@ public final class Net {
 		PayloadTypeRegistry.playS2C().register(EchoInterfaceRowsPayload.TYPE, EchoInterfaceRowsPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(OpenLinkedChestPayload.TYPE, OpenLinkedChestPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(DismissLinkedChestPayload.TYPE, DismissLinkedChestPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playS2C().register(EchoConfigPayload.TYPE, EchoConfigPayload.STREAM_CODEC);
 	}
 
 	/** Wires the server-bound handlers. Payload types must already be registered. */
@@ -43,6 +47,15 @@ public final class Net {
 				(payload, context) -> EchoInterfaces.onOpen(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(DismissLinkedChestPayload.TYPE,
 				(payload, context) -> EchoInterfaces.onDismiss(context.player(), payload));
+	}
+
+	/**
+	 * Sends every joining player the server's config. Always, even to a singleplayer host,
+	 * whose client already holds the same values.
+	 */
+	public static void registerConnectionEvents() {
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+				sendTo(handler.getPlayer(), new EchoConfigPayload(EchoConfig.get())));
 	}
 
 	/** Sends a payload to one player. The only server-to-client send in the mod. */

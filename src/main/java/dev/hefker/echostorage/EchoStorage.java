@@ -29,6 +29,7 @@ public class EchoStorage implements ModInitializer {
 
 		Net.registerPayloads();
 		Net.registerServerReceivers();
+		Net.registerConnectionEvents();
 		EchoComponents.register();
 		EchoBlocks.register();
 		EchoItems.register();

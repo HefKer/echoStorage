@@ -10,6 +10,7 @@ public class EchoStorageClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		NetClient.registerClientReceivers();
+		NetClient.registerConnectionEvents();
 		EchoScreens.register();
 		EchoTooltips.register();
 		EchoItemProperties.register();

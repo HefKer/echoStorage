@@ -1,6 +1,8 @@
 package dev.hefker.echostorage.network;
 
+import dev.hefker.echostorage.config.SessionConfig;
 import dev.hefker.echostorage.menu.EchoInterfaceMenu;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -25,6 +27,13 @@ public final class NetClient {
 				menu.setRows(payload.rows());
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(EchoConfigPayload.TYPE,
+				(payload, context) -> SessionConfig.applyRemote(payload.config()));
+	}
+
+	/** Puts the client's own config back on leaving a server, so the next world starts clean. */
+	public static void registerConnectionEvents() {
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> SessionConfig.restoreLocal());
 	}
 
 	/** Sends a payload to the server. The only client-to-server send in the mod. */
