@@ -83,9 +83,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	private UUID id = UUID.randomUUID();
 	@Nullable
 	private Component name;
-	@Nullable
-	private Category category;
-	private boolean strict;
+	private EchoChestAssignment assignment = EchoChestAssignment.DEFAULT;
 
 	public EchoChestBlockEntity(BlockPos pos, BlockState state) {
 		super(EchoBlocks.ECHO_CHEST_ENTITY, pos, state);
@@ -124,7 +122,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/** The Category this chest is assigned to hold, if any. */
 	public Optional<Category> category() {
-		return Optional.ofNullable(category);
+		return assignment.category();
 	}
 
 	/**
@@ -132,7 +130,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 * chest, and never moves or refuses what is already inside.
 	 */
 	public void assign(@Nullable Category category) {
-		this.category = category;
+		assignment = assignment.withCategory(Optional.ofNullable(category));
 		setChanged();
 	}
 
@@ -141,17 +139,17 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 * quick-stack and every automated insert (ADR-0009).
 	 */
 	public boolean isStrict() {
-		return strict;
+		return assignment.strict();
 	}
 
 	public void setStrict(boolean strict) {
-		this.strict = strict;
+		assignment = assignment.withStrict(strict);
 		setChanged();
 	}
 
 	/** Whether {@code stack} is kept out: only by a strict chest, and only if it is not in the Category. */
 	public boolean refuses(ItemStack stack) {
-		return refuses(category(), strict, stack);
+		return refuses(assignment.category(), assignment.strict(), stack);
 	}
 
 	/** The rule itself, shared with the menu so a client screen can predict it. */
@@ -206,8 +204,10 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		name = tag.contains(NAME_TAG, CompoundTag.TAG_STRING)
 				? parseCustomNameSafe(tag.getString(NAME_TAG), registries)
 				: null;
-		category = tag.contains(CATEGORY_TAG) ? loadCategory(tag) : null;
-		strict = tag.getBoolean(STRICT_TAG);
+		// Separate tags rather than EchoChestAssignment.CODEC: that is the layout worlds already hold.
+		assignment = new EchoChestAssignment(
+				tag.contains(CATEGORY_TAG) ? loadCategory(tag) : Optional.empty(),
+				tag.getBoolean(STRICT_TAG));
 		items.clear();
 		ContainerHelper.loadAllItems(tag, items, registries);
 	}
@@ -216,11 +216,9 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 * A Category saved under a name that no longer ships loads as none, so the chest comes back
 	 * unassigned rather than failing to load its contents and name with it.
 	 */
-	@Nullable
-	private Category loadCategory(CompoundTag tag) {
+	private Optional<Category> loadCategory(CompoundTag tag) {
 		return Categories.CODEC.parse(NbtOps.INSTANCE, tag.get(CATEGORY_TAG))
-				.resultOrPartial(error -> EchoStorage.LOGGER.warn("Echo Chest at {} lost its Category: {}", getBlockPos(), error))
-				.orElse(null);
+				.resultOrPartial(error -> EchoStorage.LOGGER.warn("Echo Chest at {} lost its Category: {}", getBlockPos(), error));
 	}
 
 	@Override
@@ -230,10 +228,9 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		if (name != null) {
 			tag.putString(NAME_TAG, Component.Serializer.toJson(name, registries));
 		}
-		if (category != null) {
-			tag.put(CATEGORY_TAG, Categories.CODEC.encodeStart(NbtOps.INSTANCE, category).getOrThrow());
-		}
-		if (strict) {
+		assignment.category().ifPresent(category ->
+				tag.put(CATEGORY_TAG, Categories.CODEC.encodeStart(NbtOps.INSTANCE, category).getOrThrow()));
+		if (assignment.strict()) {
 			tag.putBoolean(STRICT_TAG, true);
 		}
 		ContainerHelper.saveAllItems(tag, items, registries);
@@ -244,9 +241,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	protected void applyImplicitComponents(BlockEntity.DataComponentInput components) {
 		super.applyImplicitComponents(components);
 		name = components.get(DataComponents.CUSTOM_NAME);
-		EchoChestAssignment assignment = components.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.NONE);
-		category = assignment.category().orElse(null);
-		strict = assignment.strict();
+		assignment = components.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
 	}
 
 	/** Writes the assignment only when something is set, so a blank chest drops a plain item. */
@@ -256,7 +251,6 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		if (name != null) {
 			components.set(DataComponents.CUSTOM_NAME, name);
 		}
-		EchoChestAssignment assignment = new EchoChestAssignment(category(), strict);
 		if (!assignment.isBlank()) {
 			components.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, assignment);
 		}

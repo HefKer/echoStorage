@@ -107,7 +107,7 @@ public class EchoChestBlock extends BaseEntityBlock {
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
 		super.appendHoverText(stack, context, lines, flag);
-		EchoChestAssignment assignment = stack.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.NONE);
+		EchoChestAssignment assignment = stack.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
 		assignment.category().ifPresent(category -> lines.add(
 				Component.translatable("item.echostorage.echo_chest.category", category.displayName()).withStyle(ChatFormatting.GRAY)));
 		if (assignment.strict()) {

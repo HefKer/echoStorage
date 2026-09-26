@@ -70,6 +70,24 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
+	public void aChestSavedWithCategoryAndStrictTagsLoadsAndSavesThemUnchanged(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		CompoundTag saved = save(helper, chest);
+		// The save layout worlds already hold: the Category by name and Strict as its own tag.
+		saved.putString("Category", "ores");
+		saved.putBoolean("Strict", true);
+
+		EchoChestBlockEntity loaded = load(helper, chest, saved);
+		CompoundTag resaved = save(helper, loaded);
+
+		helper.assertValueEqual(loaded.category(), Optional.of(Categories.ORES), "category after load");
+		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.assertValueEqual(resaved.getString("Category"), "ores", "Category tag written back");
+		helper.assertTrue(resaved.getBoolean("Strict"), "Strict tag written back");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
 	public void aChestNeverAssignedLoadsUnassignedAndPermissive(GameTestHelper helper) {
 		EchoChestBlockEntity chest = placeChest(helper, CHEST);
 
@@ -77,6 +95,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		helper.assertValueEqual(loaded.category(), Optional.empty(), "category after load");
 		helper.assertFalse(loaded.isStrict(), "a chest is permissive by default");
+		helper.assertFalse(save(helper, loaded).contains("Strict"), "a permissive chest writes no Strict tag");
 		helper.succeed();
 	}
 

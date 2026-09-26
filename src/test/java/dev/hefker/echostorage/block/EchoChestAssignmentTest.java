@@ -32,7 +32,7 @@ class EchoChestAssignmentTest {
 		EchoChestAssignment assignment = new EchoChestAssignment(Optional.of(Categories.WOOL), true);
 
 		assertEquals(assignment, CodecRoundTrip.of(EchoChestAssignment.STREAM_CODEC, assignment));
-		assertEquals(EchoChestAssignment.NONE, CodecRoundTrip.of(EchoChestAssignment.STREAM_CODEC, EchoChestAssignment.NONE));
+		assertEquals(EchoChestAssignment.DEFAULT, CodecRoundTrip.of(EchoChestAssignment.STREAM_CODEC, EchoChestAssignment.DEFAULT));
 	}
 
 	@Test
@@ -42,9 +42,9 @@ class EchoChestAssignmentTest {
 
 	@Test
 	void nothingSetIsNoCategoryAndPermissive() {
-		assertEquals(new EchoChestAssignment(Optional.empty(), false), EchoChestAssignment.NONE);
-		assertEquals(EchoChestAssignment.NONE, load("{}"));
-		assertTrue(EchoChestAssignment.NONE.isBlank());
+		assertEquals(new EchoChestAssignment(Optional.empty(), false), EchoChestAssignment.DEFAULT);
+		assertEquals(EchoChestAssignment.DEFAULT, load("{}"));
+		assertTrue(EchoChestAssignment.DEFAULT.isBlank());
 	}
 
 	@Test
@@ -54,13 +54,29 @@ class EchoChestAssignmentTest {
 	}
 
 	@Test
+	void withCategoryChangesOnlyTheCategory() {
+		EchoChestAssignment strict = new EchoChestAssignment(Optional.of(Categories.ORES), true);
+
+		assertEquals(new EchoChestAssignment(Optional.of(Categories.WOOL), true), strict.withCategory(Optional.of(Categories.WOOL)));
+		assertEquals(new EchoChestAssignment(Optional.empty(), true), strict.withCategory(Optional.empty()));
+	}
+
+	@Test
+	void withStrictChangesOnlyTheStrictness() {
+		EchoChestAssignment assigned = new EchoChestAssignment(Optional.of(Categories.ORES), false);
+
+		assertEquals(new EchoChestAssignment(Optional.of(Categories.ORES), true), assigned.withStrict(true));
+		assertEquals(assigned, assigned.withStrict(true).withStrict(false));
+	}
+
+	@Test
 	void aCategoryThatNoLongerShipsLoadsAsNoneAndKeepsStrictness() {
 		assertEquals(new EchoChestAssignment(Optional.empty(), true), load("{\"category\": \"wood\", \"strict\": true}"));
 	}
 
 	@Test
 	void aGarbageValueLoadsAsNothingSetRatherThanFailing() {
-		assertEquals(EchoChestAssignment.NONE, load("{\"category\": 5, \"strict\": \"yes\"}"));
+		assertEquals(EchoChestAssignment.DEFAULT, load("{\"category\": 5, \"strict\": \"yes\"}"));
 		assertEquals(new EchoChestAssignment(Optional.of(Categories.ORES), false), load("{\"category\": \"ores\", \"strict\": [1]}"));
 	}
 
