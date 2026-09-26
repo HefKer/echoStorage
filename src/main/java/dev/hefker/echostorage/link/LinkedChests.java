@@ -104,9 +104,7 @@ public final class LinkedChests {
 				UUIDUtil.CODEC.fieldOf("id").forGetter(Row::id),
 				BlockPos.CODEC.fieldOf("pos").forGetter(Row::pos),
 				Codec.STRING.lenientOptionalFieldOf("name", "").forGetter(Row::name),
-				Codec.STRING.lenientOptionalFieldOf("category").<Optional<Category>>xmap(
-						name -> name.flatMap(Categories::byName),
-						category -> category.map(Category::name)).forGetter(Row::category),
+				Categories.OPTIONAL_FIELD.forGetter(Row::category),
 				State.CODEC.fieldOf("state").forGetter(Row::state)
 		).apply(row, Row::new));
 

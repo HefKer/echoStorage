@@ -3,7 +3,6 @@ package dev.hefker.echostorage.block;
 import java.util.Optional;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -26,18 +25,13 @@ import net.minecraft.network.codec.StreamCodec;
 public record EchoChestAssignment(Optional<Category> category, boolean strict) {
 	public static final EchoChestAssignment NONE = new EchoChestAssignment(Optional.empty(), false);
 
-	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.lenientOptionalFieldOf("category")
-			.xmap(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
-
 	public static final Codec<EchoChestAssignment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			CATEGORY_FIELD.forGetter(EchoChestAssignment::category),
+			Categories.OPTIONAL_FIELD.forGetter(EchoChestAssignment::category),
 			Codec.BOOL.lenientOptionalFieldOf("strict", false).forGetter(EchoChestAssignment::strict)
 	).apply(instance, EchoChestAssignment::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, EchoChestAssignment> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8)
-					.map(name -> name.flatMap(Categories::byName), category -> category.map(Category::name)),
-			EchoChestAssignment::category,
+			Categories.OPTIONAL_STREAM_CODEC, EchoChestAssignment::category,
 			ByteBufCodecs.BOOL, EchoChestAssignment::strict,
 			EchoChestAssignment::new);
 

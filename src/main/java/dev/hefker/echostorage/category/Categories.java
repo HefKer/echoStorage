@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -37,6 +38,17 @@ public final class Categories {
 	public static final StreamCodec<ByteBuf, Category> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(
 			name -> byName(name).orElseThrow(() -> new DecoderException("Unknown Category: " + name)),
 			Category::name);
+
+	/**
+	 * An optional Category saved by name under {@code "category"}, read leniently: a name no preset
+	 * has any more, or a value of the wrong type, loads as none rather than failing what holds it.
+	 */
+	public static final MapCodec<Optional<Category>> OPTIONAL_FIELD = Codec.STRING.lenientOptionalFieldOf("category")
+			.xmap(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
+
+	/** An optional Category sent by name. A name the receiver has no preset for arrives as none. */
+	public static final StreamCodec<ByteBuf, Optional<Category>> OPTIONAL_STREAM_CODEC = ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8)
+			.map(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
 
 	private Categories() {
 	}

@@ -3,7 +3,6 @@ package dev.hefker.echostorage.item;
 import java.util.Optional;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -26,18 +25,13 @@ import net.minecraft.network.codec.StreamCodec;
 public record EchoBundleSettings(Optional<Category> category, boolean vacuum) {
 	public static final EchoBundleSettings DEFAULT = new EchoBundleSettings(Optional.empty(), false);
 
-	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.lenientOptionalFieldOf("category")
-			.xmap(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
-
 	public static final Codec<EchoBundleSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			CATEGORY_FIELD.forGetter(EchoBundleSettings::category),
+			Categories.OPTIONAL_FIELD.forGetter(EchoBundleSettings::category),
 			Codec.BOOL.lenientOptionalFieldOf("vacuum", false).forGetter(EchoBundleSettings::vacuum)
 	).apply(instance, EchoBundleSettings::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, EchoBundleSettings> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8)
-					.map(name -> name.flatMap(Categories::byName), category -> category.map(Category::name)),
-			EchoBundleSettings::category,
+			Categories.OPTIONAL_STREAM_CODEC, EchoBundleSettings::category,
 			ByteBufCodecs.BOOL, EchoBundleSettings::vacuum,
 			EchoBundleSettings::new);
 
