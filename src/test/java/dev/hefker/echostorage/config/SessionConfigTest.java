@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class SessionConfigTest {
-	private static final EchoConfig LOCAL = new EchoConfig(false, true, false, true, false, true);
-	private static final EchoConfig SERVER_CONFIG = new EchoConfig(true, false, true, false, true, false);
+	private static final EchoConfig LOCAL = new EchoConfig(true, false, true, false, true);
+	private static final EchoConfig SERVER_CONFIG = new EchoConfig(false, true, false, true, false);
 
 	@BeforeEach
 	void loadLocal() {

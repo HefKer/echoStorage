@@ -24,9 +24,6 @@ public final class EchoConfigFile {
 		}
 	}
 
-	private static final Switch WIRELESS_LINKING = new Switch("links.wireless",
-			" Let an Echo Interface reach Echo Chests with no sculk Link between them.",
-			EchoConfig::wirelessLinking);
 	private static final Switch SEARCH_IN_OPEN_CONTAINER = new Switch("search.in_open_container",
 			" Offer a search box on an open container's screen.",
 			EchoConfig::searchInOpenContainer);
@@ -43,8 +40,8 @@ public final class EchoConfigFile {
 			" Using an Echo Bundle on a block places a block out of it.",
 			EchoConfig::bundlePlace);
 
-	private static final List<Switch> SWITCHES = List.of(WIRELESS_LINKING, SEARCH_IN_OPEN_CONTAINER,
-			SEARCH_BY_CHEST_NAME, BUNDLE_VACUUM, BUNDLE_REFILL, BUNDLE_PLACE);
+	private static final List<Switch> SWITCHES = List.of(SEARCH_IN_OPEN_CONTAINER, SEARCH_BY_CHEST_NAME,
+			BUNDLE_VACUUM, BUNDLE_REFILL, BUNDLE_PLACE);
 
 	private EchoConfigFile() {
 	}
@@ -73,7 +70,6 @@ public final class EchoConfigFile {
 			}
 		}
 		return new EchoConfig(
-				value(toml, WIRELESS_LINKING),
 				value(toml, SEARCH_IN_OPEN_CONTAINER),
 				value(toml, SEARCH_BY_CHEST_NAME),
 				value(toml, BUNDLE_VACUUM),

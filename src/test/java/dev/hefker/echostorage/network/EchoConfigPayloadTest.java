@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 class EchoConfigPayloadTest {
 	@Test
 	void everySwitchSurvivesTheWire() {
-		EchoConfigPayload sent = new EchoConfigPayload(new EchoConfig(true, false, false, false, false, false));
+		EchoConfigPayload sent = new EchoConfigPayload(new EchoConfig(true, false, false, false, false));
 		assertEquals(sent, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, sent));
 	}
 
 	@Test
 	void eachSwitchKeepsItsOwnPlaceOnTheWire() {
-		EchoConfigPayload odd = new EchoConfigPayload(new EchoConfig(true, false, true, false, true, false));
-		EchoConfigPayload even = new EchoConfigPayload(new EchoConfig(false, true, false, true, false, true));
+		EchoConfigPayload odd = new EchoConfigPayload(new EchoConfig(true, false, true, false, true));
+		EchoConfigPayload even = new EchoConfigPayload(new EchoConfig(false, true, false, true, false));
 		assertEquals(odd, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, odd));
 		assertEquals(even, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, even));
 	}

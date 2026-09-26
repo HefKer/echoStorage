@@ -21,7 +21,6 @@ class EchoConfigFileTest {
 		assertEquals(EchoConfig.DEFAULTS, EchoConfigFile.load(file));
 
 		String written = Files.readString(file);
-		assertTrue(written.contains("wireless = false"), written);
 		assertTrue(written.contains("vacuum = true"), written);
 		assertTrue(written.contains("#"), "the file should explain its switches:\n" + written);
 	}
@@ -29,15 +28,15 @@ class EchoConfigFileTest {
 	@Test
 	void aSwitchTurnedOffInTheFileIsOff() throws IOException {
 		Path file = write("""
-				[links]
-				wireless = true
+				[search]
+				by_chest_name = false
 				[bundle]
 				vacuum = false
 				""");
 
 		EchoConfig config = EchoConfigFile.load(file);
 
-		assertEquals(new EchoConfig(true, true, true, false, true, true), config);
+		assertEquals(new EchoConfig(true, false, false, true, true), config);
 	}
 
 	@Test
@@ -54,8 +53,7 @@ class EchoConfigFileTest {
 		assertTrue(rewritten.contains("vacuum pulls in junk on our server"), rewritten);
 		assertTrue(rewritten.contains("vacuum = false"), rewritten);
 		assertTrue(rewritten.contains("refill = true"), rewritten);
-		assertTrue(rewritten.contains("wireless = false"), rewritten);
-		assertEquals(new EchoConfig(false, true, true, false, true, true), EchoConfigFile.load(file));
+		assertEquals(new EchoConfig(true, true, false, true, true), EchoConfigFile.load(file));
 	}
 
 	@Test
@@ -73,13 +71,25 @@ class EchoConfigFileTest {
 	@Test
 	void aSwitchThatIsNotTrueOrFalseKeepsItsDefault() throws IOException {
 		Path file = write("""
-				[links]
-				wireless = "yes"
+				[search]
+				in_open_container = "yes"
 				[bundle]
 				place = false
 				""");
 
-		assertEquals(new EchoConfig(false, true, true, true, true, false), EchoConfigFile.load(file));
+		assertEquals(new EchoConfig(true, true, true, true, false), EchoConfigFile.load(file));
+	}
+
+	@Test
+	void aFileFromBeforeTheWirelessSwitchWasRemovedStillLoads() throws IOException {
+		Path file = write("""
+				[links]
+				wireless = true
+				[bundle]
+				vacuum = false
+				""");
+
+		assertEquals(new EchoConfig(true, true, false, true, true), EchoConfigFile.load(file));
 	}
 
 	private Path write(String toml) throws IOException {

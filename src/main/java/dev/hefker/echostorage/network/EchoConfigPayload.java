@@ -19,7 +19,6 @@ public record EchoConfigPayload(EchoConfig config) implements CustomPacketPayloa
 			new CustomPacketPayload.Type<>(EchoStorage.id("echo_config"));
 
 	private static final StreamCodec<ByteBuf, EchoConfig> CONFIG_CODEC = StreamCodec.composite(
-			ByteBufCodecs.BOOL, EchoConfig::wirelessLinking,
 			ByteBufCodecs.BOOL, EchoConfig::searchInOpenContainer,
 			ByteBufCodecs.BOOL, EchoConfig::searchByChestName,
 			ByteBufCodecs.BOOL, EchoConfig::bundleVacuum,
