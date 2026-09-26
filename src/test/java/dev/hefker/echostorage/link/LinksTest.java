@@ -247,7 +247,7 @@ class LinksTest {
 		world.relay(relay, far);
 
 		assertEquals(List.of(new LinkedChest(nearBySculk, INTERFACE.east(3).north()), new LinkedChest(farByAir, far)),
-				resolve().chests(), "4 steps of sculk is nearer than 1 step and a hop of 8");
+				resolve().chests(), "4 steps of sculk is nearer than 1 step and a hop of 5.7");
 	}
 
 	@Test

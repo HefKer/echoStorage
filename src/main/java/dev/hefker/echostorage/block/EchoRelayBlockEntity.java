@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -107,13 +108,11 @@ public class EchoRelayBlockEntity extends BlockEntity {
 	static int vibrate(ServerLevel level, @Nullable ServerPlayer viewer, BlockPos from, BlockPos to) {
 		int travel = travelTicks(from, to);
 		VibrationParticleOption particle = new VibrationParticleOption(new BlockPositionSource(to), travel);
-		double x = from.getX() + 0.5;
-		double y = from.getY() + 0.5;
-		double z = from.getZ() + 0.5;
+		Vec3 start = Vec3.atCenterOf(from);
 		if (viewer == null) {
-			level.sendParticles(particle, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(particle, start.x, start.y, start.z, 1, 0.0, 0.0, 0.0, 0.0);
 		} else {
-			level.sendParticles(viewer, particle, false, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(viewer, particle, false, start.x, start.y, start.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		return travel;
 	}

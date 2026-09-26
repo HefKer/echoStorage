@@ -44,15 +44,16 @@ record LevelLinks(ServerLevel level) implements LinkWorld {
 
 	/**
 	 * Vanilla's rule for a vibration reaching a sculk sensor: blocked only if a line from every
-	 * side of the source's centre to the listener's centre meets wool or another block tagged
-	 * {@code occludes_vibration_signals}.
+	 * side of the chest's centre to the relay's centre meets wool or another block tagged
+	 * {@code occludes_vibration_signals}. The chest is where the vibration starts, as an opening
+	 * chest is for a sculk sensor.
 	 */
 	@Override
-	public boolean isOccluded(BlockPos from, BlockPos to) {
-		Vec3 source = Vec3.atCenterOf(to);
-		Vec3 listener = Vec3.atCenterOf(from);
+	public boolean isOccluded(BlockPos relay, BlockPos chest) {
+		Vec3 chestCentre = Vec3.atCenterOf(chest);
+		Vec3 relayCentre = Vec3.atCenterOf(relay);
 		for (Direction side : Direction.values()) {
-			ClipBlockStateContext line = new ClipBlockStateContext(source.relative(side, 1.0E-5F), listener,
+			ClipBlockStateContext line = new ClipBlockStateContext(chestCentre.relative(side, 1.0E-5F), relayCentre,
 					state -> state.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS));
 			if (level.isBlockInLine(line).getType() != HitResult.Type.BLOCK) {
 				return false;

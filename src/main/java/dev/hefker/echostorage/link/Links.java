@@ -72,7 +72,7 @@ public final class Links {
 								case CLEAR -> {
 									// Only the chest heard: one broken and replaced since has a new id.
 									if (heard.id().equals(world.chestAt(heard.pos()))) {
-										reached(found, heard, steps + to.distManhattan(heard.pos()));
+										reached(found, heard, steps + Math.sqrt(to.distSqr(heard.pos())));
 										hops.add(new Resolution.Hop(to, heard.pos()));
 									}
 								}
@@ -90,19 +90,22 @@ public final class Links {
 			wave = next;
 		}
 		List<LinkedChest> chests = found.values().stream()
-				.sorted(Comparator.comparingInt(Found::distance))
+				.sorted(Comparator.comparingDouble(Found::distance))
 				.map(Found::chest)
 				.toList();
 		return new Resolution(withOwnIds(chests, world, known), path, hops, complete);
 	}
 
 	/** Keeps the shorter way to a chest reached both over sculk and through the air, or by two relays. */
-	private static void reached(Map<BlockPos, Found> found, LinkedChest chest, int distance) {
+	private static void reached(Map<BlockPos, Found> found, LinkedChest chest, double distance) {
 		found.merge(chest.pos(), new Found(chest, distance), (kept, other) -> other.distance() < kept.distance() ? other : kept);
 	}
 
-	/** A chest reached, and how many blocks the Link runs from the interface to reach it. */
-	private record Found(LinkedChest chest, int distance) {
+	/**
+	 * A chest reached, and how far the Link runs from the interface to reach it: a block a step
+	 * over connectors, then a relay's hop measured straight through the air.
+	 */
+	private record Found(LinkedChest chest, double distance) {
 	}
 
 	/**

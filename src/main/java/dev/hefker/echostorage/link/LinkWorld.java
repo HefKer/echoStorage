@@ -28,10 +28,11 @@ public interface LinkWorld {
 	List<LinkedChest> heardBy(BlockPos pos);
 
 	/**
-	 * Whether a block that stops vibrations, such as wool, stands between the blocks at
-	 * {@code from} and {@code to}. Only asked once every chunk between them is known to be loaded.
+	 * Whether a block that stops vibrations, such as wool, stands between the Echo Relay at
+	 * {@code relay} and the block at {@code chest}. Only asked once every chunk between them is
+	 * known to be loaded.
 	 */
-	boolean isOccluded(BlockPos from, BlockPos to);
+	boolean isOccluded(BlockPos relay, BlockPos chest);
 
 	/** Gives the Echo Chest at {@code pos} a fresh id, because another chest already has its id. */
 	UUID giveNewId(BlockPos pos);
