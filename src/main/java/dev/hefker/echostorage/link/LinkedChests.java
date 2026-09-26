@@ -97,8 +97,9 @@ public final class LinkedChests {
 	/** One listed chest, as it was when last reached. */
 	public record Row(UUID id, BlockPos pos, String name, Optional<Category> category, State state) {
 		/**
-		 * Saved with the interface. A Category that no longer ships, or a name or Category of the
-		 * wrong type, loads as none, so the row keeps its place rather than dropping off the list.
+		 * Saved with the interface. A Category that no longer ships, or one of the wrong type, loads
+		 * as none, and a name of the wrong type as no name, so the row keeps its place rather than
+		 * dropping off the list.
 		 */
 		public static final Codec<Row> CODEC = RecordCodecBuilder.create(row -> row.group(
 				UUIDUtil.CODEC.fieldOf("id").forGetter(Row::id),
