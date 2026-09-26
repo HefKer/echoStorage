@@ -1,9 +1,11 @@
 package dev.hefker.echostorage.block;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.world.Container;
@@ -11,22 +13,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Quick-stack: moves everything from the player that a chest already holds into that chest.
+ * Quick-stack: moves everything from the player that a chest wants into that chest — what is
+ * in its Category or what it already holds (ADR-0010) — unless the chest refuses it (ADR-0009).
  */
 public final class QuickStack {
 	private QuickStack() {
 	}
 
 	/**
-	 * Moves every stack in {@code source}'s slots {@code [from, to)} whose item {@code chest}
-	 * already holds, unless {@code refuses} keeps it out.
+	 * Moves every stack in {@code source}'s slots {@code [from, to)} that {@code wants} matches
+	 * into {@code chest}, unless {@code refuses} keeps it out.
 	 */
-	public static void run(Container chest, Predicate<ItemStack> refuses, Container source, int from, int to) {
-		Set<Item> held = heldBy(chest);
+	public static void run(Container chest, Predicate<ItemStack> wants, Predicate<ItemStack> refuses, Container source, int from, int to) {
 		for (int slot = from; slot < to; slot++) {
 			ItemStack stack = source.getItem(slot);
 			// A bundle on the player is their carried storage, never something to put away.
-			if (stack.isEmpty() || EchoBundleContents.isBundle(stack) || !held.contains(stack.getItem()) || refuses.test(stack)) {
+			if (stack.isEmpty() || EchoBundleContents.isBundle(stack) || !wants.test(stack) || refuses.test(stack)) {
 				continue;
 			}
 			ItemStack moving = stack.copy();
@@ -36,6 +38,25 @@ public final class QuickStack {
 				source.setItem(slot, moving);
 			}
 		}
+	}
+
+	/** What a chest with {@code category} wants: anything in the Category or that it already holds. */
+	public static Predicate<ItemStack> wanted(Container chest, Optional<Category> category) {
+		return holds(chest).or(inCategory(category));
+	}
+
+	/**
+	 * Whether {@code chest} already holds an item, reading through the bundles inside it. Taken
+	 * once, when called, so what this quick-stack moves in does not widen it.
+	 */
+	public static Predicate<ItemStack> holds(Container chest) {
+		Set<Item> held = heldBy(chest);
+		return stack -> held.contains(stack.getItem());
+	}
+
+	/** Whether an item is in {@code category}. With no Category nothing is. */
+	public static Predicate<ItemStack> inCategory(Optional<Category> category) {
+		return stack -> category.filter(assigned -> assigned.matches(stack)).isPresent();
 	}
 
 	private static Set<Item> heldBy(Container chest) {

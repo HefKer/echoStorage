@@ -84,6 +84,37 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
+	public void theButtonOnAPermissiveChestTopsUpAStrayItAlreadyHolds(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper);
+		chest.assign(Categories.ORES);
+		chest.setItem(0, new ItemStack(Items.BREAD, 1));
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
+
+		quickStack(player);
+
+		assertStack(helper, new ItemStack(Items.BREAD, 6), chest.getItem(0), "the stray");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theButtonFillsAnEmptyChestWithWhatIsInItsCategoryAndNothingElse(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper);
+		chest.assign(Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.BREAD, 5));
+
+		quickStack(player);
+
+		assertStack(helper, new ItemStack(Items.IRON_ORE, 20), chest.getItem(0), "chest");
+		helper.assertTrue(chest.getItem(1).isEmpty(), "the chest also took " + chest.getItem(1));
+		assertStack(helper, new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1),
+				"what is outside the Category");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
 	public void theButtonWorksOnAChestWithNoCategory(GameTestHelper helper) {
 		EchoChestBlockEntity chest = placeChest(helper);
 		chest.setStrict(true);

@@ -159,7 +159,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	 */
 	private void quickStack(Player player) {
 		if (!player.level().isClientSide()) {
-			QuickStack.run(container, this::refuses, player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
+			QuickStack.run(container, QuickStack.wanted(container, category()), this::refuses,
+					player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
 		}
 	}
 
