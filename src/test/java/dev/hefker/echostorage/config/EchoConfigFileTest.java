@@ -26,6 +26,31 @@ class EchoConfigFileTest {
 	}
 
 	@Test
+	void aFreshFileHasChestQuickStackOnAndInterfaceQuickStackOff() throws IOException {
+		Path file = dir.resolve("echostorage.toml");
+
+		EchoConfigFile.load(file);
+
+		String written = Files.readString(file);
+		assertTrue(written.contains("[quick_stack]"), written);
+		assertTrue(written.contains("chest = true"), written);
+		assertTrue(written.contains("interface = false"), written);
+	}
+
+	@Test
+	void theQuickStackSwitchesAreReadFromTheFile() throws IOException {
+		Path file = write("""
+				[quick_stack]
+				chest = false
+				interface = true
+				""");
+
+		EchoConfig config = EchoConfigFile.load(file);
+
+		assertEquals(new EchoConfig(true, true, true, true, true, false, true), config);
+	}
+
+	@Test
 	void aSwitchTurnedOffInTheFileIsOff() throws IOException {
 		Path file = write("""
 				[search]
@@ -36,7 +61,7 @@ class EchoConfigFileTest {
 
 		EchoConfig config = EchoConfigFile.load(file);
 
-		assertEquals(new EchoConfig(true, false, false, true, true), config);
+		assertEquals(new EchoConfig(true, false, false, true, true, true, false), config);
 	}
 
 	@Test
@@ -53,7 +78,7 @@ class EchoConfigFileTest {
 		assertTrue(rewritten.contains("vacuum pulls in junk on our server"), rewritten);
 		assertTrue(rewritten.contains("vacuum = false"), rewritten);
 		assertTrue(rewritten.contains("refill = true"), rewritten);
-		assertEquals(new EchoConfig(true, true, false, true, true), EchoConfigFile.load(file));
+		assertEquals(new EchoConfig(true, true, false, true, true, true, false), EchoConfigFile.load(file));
 	}
 
 	@Test
@@ -77,7 +102,7 @@ class EchoConfigFileTest {
 				place = false
 				""");
 
-		assertEquals(new EchoConfig(true, true, true, true, false), EchoConfigFile.load(file));
+		assertEquals(new EchoConfig(true, true, true, true, false, true, false), EchoConfigFile.load(file));
 	}
 
 	@Test
@@ -89,7 +114,7 @@ class EchoConfigFileTest {
 				vacuum = false
 				""");
 
-		assertEquals(new EchoConfig(true, true, false, true, true), EchoConfigFile.load(file));
+		assertEquals(new EchoConfig(true, true, false, true, true, true, false), EchoConfigFile.load(file));
 	}
 
 	private Path write(String toml) throws IOException {

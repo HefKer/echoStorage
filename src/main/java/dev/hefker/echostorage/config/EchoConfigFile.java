@@ -39,9 +39,15 @@ public final class EchoConfigFile {
 	private static final Switch BUNDLE_PLACE = new Switch("bundle.place",
 			" Using an Echo Bundle on a block places a block out of it.",
 			EchoConfig::bundlePlace);
+	private static final Switch CHEST_QUICK_STACK = new Switch("quick_stack.chest",
+			" Offer a quick-stack button on an Echo Chest's screen.",
+			EchoConfig::chestQuickStack);
+	private static final Switch INTERFACE_QUICK_STACK = new Switch("quick_stack.interface",
+			" Offer a quick-stack button on an Echo Interface's screen, into every linked chest at once.",
+			EchoConfig::interfaceQuickStack);
 
 	private static final List<Switch> SWITCHES = List.of(SEARCH_IN_OPEN_CONTAINER, SEARCH_BY_CHEST_NAME,
-			BUNDLE_VACUUM, BUNDLE_REFILL, BUNDLE_PLACE);
+			BUNDLE_VACUUM, BUNDLE_REFILL, BUNDLE_PLACE, CHEST_QUICK_STACK, INTERFACE_QUICK_STACK);
 
 	private EchoConfigFile() {
 	}
@@ -74,7 +80,9 @@ public final class EchoConfigFile {
 				value(toml, SEARCH_BY_CHEST_NAME),
 				value(toml, BUNDLE_VACUUM),
 				value(toml, BUNDLE_REFILL),
-				value(toml, BUNDLE_PLACE));
+				value(toml, BUNDLE_PLACE),
+				value(toml, CHEST_QUICK_STACK),
+				value(toml, INTERFACE_QUICK_STACK));
 	}
 
 	/** Writes each switch the file lacks at its default, with its comment. True if any were. */
