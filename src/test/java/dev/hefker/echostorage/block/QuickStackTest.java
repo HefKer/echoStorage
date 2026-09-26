@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import dev.hefker.echostorage.VanillaBootstrap;
+import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -25,6 +28,8 @@ import org.junit.jupiter.api.Test;
  */
 class QuickStackTest {
 	private static final int HOTBAR = 9;
+	/** Tag layers are empty without datapacks, so tests give their Category a later layer. */
+	private static final Category ORES = Category.of("ores", stack -> stack.is(Items.IRON_ORE) || stack.is(Items.COAL_ORE));
 
 	@BeforeAll
 	static void bootstrap() {
@@ -173,10 +178,107 @@ class QuickStackTest {
 		chest.setItem(0, new ItemStack(Items.BREAD, 1));
 		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 5));
 
-		QuickStack.run(chest, stack -> stack.is(Items.BREAD), player, HOTBAR, player.getContainerSize());
+		QuickStack.run(chest, QuickStack.holds(chest), stack -> stack.is(Items.BREAD), player, HOTBAR, player.getContainerSize());
 
 		assertStack(new ItemStack(Items.BREAD, 5), player.getItem(HOTBAR));
 		assertStack(new ItemStack(Items.BREAD, 1), chest.getItem(0));
+	}
+
+	// --- the chest's Category -------------------------------------------------------------
+
+	@Test
+	void anEmptyChestWithACategoryTakesWhatIsInItAndNothingElse() {
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+		player.setItem(HOTBAR + 1, new ItemStack(Items.BREAD, 5));
+
+		quickStack(Optional.of(ORES));
+
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+		assertTrue(player.getItem(HOTBAR).isEmpty(), "the ore stayed with the player");
+		assertStack(new ItemStack(Items.BREAD, 5), player.getItem(HOTBAR + 1));
+		assertOnlySlotFilled(0);
+	}
+
+	@Test
+	void aChestWithACategoryStillTakesWhatItHoldsOutsideIt() {
+		chest.setItem(0, new ItemStack(Items.BREAD, 1));
+		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 5));
+
+		quickStack(Optional.of(ORES));
+
+		assertStack(new ItemStack(Items.BREAD, 6), chest.getItem(0));
+	}
+
+	@Test
+	void aStrayTheChestHoldsIsLeftWithThePlayerWhenTheChestRefusesIt() {
+		chest.setItem(0, new ItemStack(Items.BREAD, 1));
+		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 5));
+		player.setItem(HOTBAR + 1, new ItemStack(Items.IRON_ORE, 5));
+
+		QuickStack.run(chest, QuickStack.wanted(chest, Optional.of(ORES)), stack -> !ORES.matches(stack),
+				player, HOTBAR, player.getContainerSize());
+
+		assertStack(new ItemStack(Items.BREAD, 5), player.getItem(HOTBAR));
+		assertStack(new ItemStack(Items.IRON_ORE, 5), chest.getItem(1));
+	}
+
+	@Test
+	void anItemInTheCategoryThatNoBundleHoldsGoesToSlotsNotIntoABundle() {
+		chest.setItem(5, bundleOf(new ItemStack(Items.COAL_ORE, 10)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack(Optional.of(ORES));
+
+		assertBundleHolds(chest.getItem(5), new ItemStack(Items.COAL_ORE, 10));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+	}
+
+	@Test
+	void aBundleIsToppedUpWithWhatItHoldsWhateverTheChestsCategory() {
+		chest.setItem(5, bundleOf(new ItemStack(Items.BREAD, 10)));
+		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 20));
+
+		quickStack(Optional.of(ORES));
+
+		assertBundleHolds(chest.getItem(5), new ItemStack(Items.BREAD, 30));
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void aBundleIsNeverStartedOnAnItemItDoesNotHoldWhateverItsOwnCategory() {
+		ItemStack bundle = bundleOf(new ItemStack(Items.COAL_ORE, 10));
+		bundle.set(EchoComponents.ECHO_BUNDLE_SETTINGS, new EchoBundleSettings(Optional.of(ORES), false));
+		chest.setItem(5, bundle);
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack(Optional.of(ORES));
+
+		assertBundleHolds(chest.getItem(5), new ItemStack(Items.COAL_ORE, 10));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+	}
+
+	// --- one match at a time, for global quick-stack's passes -----------------------------
+
+	@Test
+	void matchingOnlyWhatTheChestHoldsIgnoresItsCategory() {
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		QuickStack.run(chest, QuickStack.holds(chest), stack -> false, player, HOTBAR, player.getContainerSize());
+
+		assertStack(new ItemStack(Items.IRON_ORE, 20), player.getItem(HOTBAR));
+		assertTrue(chest.isEmpty(), "the chest took " + chest.getItem(0));
+	}
+
+	@Test
+	void matchingOnlyTheCategoryIgnoresWhatTheChestHolds() {
+		chest.setItem(0, new ItemStack(Items.BREAD, 1));
+		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 5));
+		player.setItem(HOTBAR + 1, new ItemStack(Items.IRON_ORE, 5));
+
+		QuickStack.run(chest, QuickStack.inCategory(Optional.of(ORES)), stack -> false, player, HOTBAR, player.getContainerSize());
+
+		assertStack(new ItemStack(Items.BREAD, 5), player.getItem(HOTBAR));
+		assertStack(new ItemStack(Items.IRON_ORE, 5), chest.getItem(1));
 	}
 
 	private void assertOnlySlotFilled(int filled) {
@@ -210,7 +312,11 @@ class QuickStackTest {
 	}
 
 	private void quickStack() {
-		QuickStack.run(chest, stack -> false, player, HOTBAR, player.getContainerSize());
+		quickStack(Optional.empty());
+	}
+
+	private void quickStack(Optional<Category> category) {
+		QuickStack.run(chest, QuickStack.wanted(chest, category), stack -> false, player, HOTBAR, player.getContainerSize());
 	}
 
 	private static void assertStack(ItemStack expected, ItemStack actual) {

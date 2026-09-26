@@ -100,15 +100,24 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 	}
 
 	/**
-	 * Global quick-stack: {@link QuickStack} into every linked chest in turn, from the player's
-	 * main inventory. It reaches exactly what the list reaches — there is no second, wider
-	 * definition of nearby.
+	 * Global quick-stack: {@link QuickStack} into every linked chest, from the player's main
+	 * inventory, in two passes (ADR-0010): first into the chests that already hold an item, then
+	 * into those whose Category matches it, so like items join each other before a Category
+	 * chest starts a new pile, whatever order the list is in. It reaches exactly what the list
+	 * reaches — there is no second, wider definition of nearby.
 	 */
 	public void quickStack(Player player) {
 		resolve();
-		for (Row row : rows.rows()) {
-			linkedChest(row.id()).ifPresent(chest -> QuickStack.run(chest, chest::refuses,
-					player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE));
+		List<EchoChestBlockEntity> chests = rows.rows().stream()
+				.flatMap(row -> linkedChest(row.id()).stream())
+				.toList();
+		for (EchoChestBlockEntity chest : chests) {
+			QuickStack.run(chest, QuickStack.holds(chest), chest::refuses,
+					player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
+		}
+		for (EchoChestBlockEntity chest : chests) {
+			QuickStack.run(chest, QuickStack.inCategory(chest.category()), chest::refuses,
+					player.getInventory(), Inventory.getSelectionSize(), Inventory.INVENTORY_SIZE);
 		}
 	}
 

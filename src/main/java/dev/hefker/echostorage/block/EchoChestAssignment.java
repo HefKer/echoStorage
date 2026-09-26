@@ -21,7 +21,7 @@ import net.minecraft.network.codec.StreamCodec;
  * and the chest's name with it.
  *
  * @param category what the chest is assigned to hold, if anything
- * @param strict   whether the chest refuses strays on shift-click and hopper insert
+ * @param strict   whether the chest refuses strays from everything but the player's hand (ADR-0009)
  */
 public record EchoChestAssignment(Optional<Category> category, boolean strict) {
 	public static final EchoChestAssignment NONE = new EchoChestAssignment(Optional.empty(), false);
