@@ -32,6 +32,9 @@ import net.minecraft.world.entity.player.Inventory;
  * <p>A row is labelled as its chest is — the typed name, else the Category in italics, else
  * "Echo Chest" — and the search box, unless the config turns it off, dims rows whose label does
  * not match. Those labels are names the player typed or chose, so searching them is allowed.
+ *
+ * <p>Global quick-stack sits beside the search box only when the config turns it on; it is off
+ * by default (ADR-0010).
  */
 public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMenu> {
 	private static final int COLUMNS = 3;
@@ -74,15 +77,17 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 		typing = new TypingFocus(this);
 		int footerY = topPos + TOP + ROWS_PER_COLUMN * (ROW_HEIGHT + GAP) + GAP;
 
-		// The menu does nothing with this on the client; the player's inventory syncs back.
-		addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_interface.quick_stack"),
-						button -> {
-							menu.clickMenuButton(minecraft.player, EchoInterfaceMenu.QUICK_STACK_BUTTON);
-							minecraft.gameMode.handleInventoryButtonClick(menu.containerId, EchoInterfaceMenu.QUICK_STACK_BUTTON);
-						})
-				.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_interface.quick_stack.tooltip")))
-				.bounds(leftPos + PADDING, footerY, FOOTER_WIDTH, FOOTER_HEIGHT)
-				.build());
+		if (EchoConfig.get().interfaceQuickStack()) {
+			// The menu does nothing with this on the client; the player's inventory syncs back.
+			addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_interface.quick_stack"),
+							button -> {
+								menu.clickMenuButton(minecraft.player, EchoInterfaceMenu.QUICK_STACK_BUTTON);
+								minecraft.gameMode.handleInventoryButtonClick(menu.containerId, EchoInterfaceMenu.QUICK_STACK_BUTTON);
+							})
+					.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_interface.quick_stack.tooltip")))
+					.bounds(leftPos + PADDING, footerY, FOOTER_WIDTH, FOOTER_HEIGHT)
+					.build());
+		}
 
 		searchField = null;
 		if (EchoConfig.get().searchByChestName()) {

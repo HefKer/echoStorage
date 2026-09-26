@@ -33,8 +33,9 @@ import net.minecraft.world.inventory.Slot;
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
  *
- * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
- * only fill a slot. Its tooltip says so, since the two otherwise look like the same action.
+ * <p>Below them is quick-stack, unless the config turns it off, which tops up bundles inside the
+ * chest where a shift-click would only fill a slot. Its tooltip says so, since the two otherwise
+ * look like the same action.
  *
  * <p>Last is a search box, unless the config turns it off. It dims the chest's slots whose item
  * names do not match, and moves nothing. It sees only this chest: ADR-0002 keeps search to what
@@ -108,16 +109,20 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 						(button, strict) -> clickButton(strict ? EchoChestMenu.STRICT_BUTTON : EchoChestMenu.PERMISSIVE_BUTTON));
 		addRenderableWidget(strictButton);
 
-		// The menu does nothing with this on the client; the slots sync back from the server.
-		addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
-						button -> clickButton(EchoChestMenu.QUICK_STACK_BUTTON))
-				.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
-				.bounds(buttonX, topPos + 2 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
-				.build());
+		// Switched-off widgets leave no gap: each takes the next free place in the column.
+		int nextButton = 2;
+		if (EchoConfig.get().chestQuickStack()) {
+			// The menu does nothing with this on the client; the slots sync back from the server.
+			addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
+							button -> clickButton(EchoChestMenu.QUICK_STACK_BUTTON))
+					.tooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.quick_stack.tooltip")))
+					.bounds(buttonX, topPos + nextButton++ * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT)
+					.build());
+		}
 
 		if (EchoConfig.get().searchInOpenContainer()) {
 			Component searchHint = Component.translatable("container.echostorage.echo_chest.search");
-			searchField = new EditBox(font, buttonX, topPos + 3 * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT, searchHint);
+			searchField = new EditBox(font, buttonX, topPos + nextButton * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT, searchHint);
 			searchField.setHint(searchHint);
 			searchField.setResponder(typed -> query = SearchQuery.of(typed));
 			searchField.setValue(searched);
