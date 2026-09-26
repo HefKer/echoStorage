@@ -136,7 +136,10 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
-	/** Whether this chest refuses items outside its Category on shift-click and hopper insert. */
+	/**
+	 * Whether this chest refuses strays from everything but the player's hand: shift-click,
+	 * quick-stack and every automated insert (ADR-0009).
+	 */
 	public boolean isStrict() {
 		return strict;
 	}
@@ -305,7 +308,11 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
-	/** What hoppers and droppers ask before inserting. A player placing by hand is never refused. */
+	/**
+	 * What every automated insert asks first — hoppers, droppers, {@code /loot insert}, other mods'
+	 * pipes — so a strict chest refuses strays from all of them (ADR-0009). A player placing by hand
+	 * never asks, and is never refused.
+	 */
 	@Override
 	public boolean canPlaceItem(int slot, ItemStack stack) {
 		return !refuses(stack);
