@@ -11,6 +11,7 @@ import java.util.Optional;
 import dev.hefker.echostorage.VanillaBootstrap;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -241,6 +242,19 @@ class QuickStackTest {
 
 		assertBundleHolds(chest.getItem(5), new ItemStack(Items.BREAD, 30));
 		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void aBundleIsNeverStartedOnAnItemItDoesNotHoldWhateverItsOwnCategory() {
+		ItemStack bundle = bundleOf(new ItemStack(Items.COAL_ORE, 10));
+		bundle.set(EchoComponents.ECHO_BUNDLE_SETTINGS, new EchoBundleSettings(Optional.of(ORES), false));
+		chest.setItem(5, bundle);
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack(Optional.of(ORES));
+
+		assertBundleHolds(chest.getItem(5), new ItemStack(Items.COAL_ORE, 10));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
 	}
 
 	// --- one match at a time, for global quick-stack's passes -----------------------------

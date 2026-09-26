@@ -23,7 +23,8 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
  * nested bundle is the quick-stack button's job alone (ADR-0007). A strict chest refuses a
- * shift-clicked stray, but a stack placed by hand always goes in: that is the player choosing to.
+ * stray from shift-click and quick-stack alike (ADR-0009), but a stack placed by hand always goes
+ * in: that is the player choosing to.
  *
  * <p>The chest's Category and strictness ride along as vanilla data slots, so an open screen
  * follows every change, and the screen changes them with vanilla menu-button clicks — which the

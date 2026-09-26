@@ -54,9 +54,9 @@ public final class QuickStack {
 		return stack -> held.contains(stack.getItem());
 	}
 
-	/** Whether an item is in {@code category}. With no Category nothing is. */
+	/** Whether an item is in {@code category}, by the chest's own rule. With no Category nothing is. */
 	public static Predicate<ItemStack> inCategory(Optional<Category> category) {
-		return stack -> category.filter(assigned -> assigned.matches(stack)).isPresent();
+		return stack -> category.isPresent() && !EchoChestBlockEntity.isStray(category, stack);
 	}
 
 	private static Set<Item> heldBy(Container chest) {
