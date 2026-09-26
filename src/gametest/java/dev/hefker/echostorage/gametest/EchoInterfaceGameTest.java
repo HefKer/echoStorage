@@ -6,6 +6,7 @@ import java.util.UUID;
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
+import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -25,7 +26,8 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * The Echo Interface in a real world: sculk links it to a chest out of arm's reach, a row opens
- * that chest from where the player stands, and global quick-stack reaches linked chests only.
+ * that chest from where the player stands, and global quick-stack reaches linked chests only,
+ * filling those that already hold an item before those whose Category merely matches it.
  */
 public class EchoInterfaceGameTest implements FabricGameTest {
 	private static final BlockPos INTERFACE = new BlockPos(0, 1, 0);
@@ -35,6 +37,8 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 	private static final BlockPos LONE_CHEST = new BlockPos(3, 1, 5);
 	/** One block of the path, for cutting it. */
 	private static final BlockPos PATH_BLOCK = new BlockPos(4, 1, 0);
+	/** A second linked chest, beside the path and so nearer the interface than the far one. */
+	private static final BlockPos NEAR_CHEST = new BlockPos(2, 1, 1);
 	private static final int FIRST_MAIN_INVENTORY_SLOT = 9;
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -129,7 +133,43 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void globalQuickStackPrefersTheFarChestHoldingAnItemOverANearChestOfItsCategory(GameTestHelper helper) {
+		assertHolderFilledBeforeCategory(helper, FAR_CHEST, NEAR_CHEST);
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void globalQuickStackPrefersTheNearChestHoldingAnItemOverAFarChestOfItsCategory(GameTestHelper helper) {
+		assertHolderFilledBeforeCategory(helper, NEAR_CHEST, FAR_CHEST);
+	}
+
 	// --- helpers --------------------------------------------------------------------------
+
+	/**
+	 * Both orders are tested because the list's order is the interface's, not the test's: in one
+	 * of them the Category chest is listed first, which is the case the first pass exists for.
+	 */
+	private static void assertHolderFilledBeforeCategory(GameTestHelper helper, BlockPos holding, BlockPos ofCategory) {
+		EchoInterfaceBlockEntity echoInterface = build(helper);
+		helper.setBlock(NEAR_CHEST, EchoBlocks.ECHO_CHEST);
+		EchoChestBlockEntity holder = helper.getBlockEntity(holding);
+		holder.setItem(0, new ItemStack(Items.IRON_ORE, 1));
+		EchoChestBlockEntity categoryChest = helper.getBlockEntity(ofCategory);
+		categoryChest.assign(Categories.ORES);
+		ServerPlayer player = openedBy(helper, echoInterface);
+		helper.assertValueEqual(echoInterface.rows().size(), 2, "linked chests");
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COAL_ORE, 5));
+
+		player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON);
+
+		helper.assertTrue(ItemStack.matches(holder.getItem(0), new ItemStack(Items.IRON_ORE, 21)),
+				"the chest already holding iron ore has " + holder.getItem(0));
+		helper.assertTrue(ItemStack.matches(categoryChest.getItem(0), new ItemStack(Items.COAL_ORE, 5)),
+				"the ores chest should have taken only the coal ore, has " + categoryChest.getItem(0));
+		helper.assertTrue(categoryChest.getItem(1).isEmpty(), "the ores chest also has " + categoryChest.getItem(1));
+		helper.succeed();
+	}
 
 	/** An interface in one corner, a chest in the far one, and sculk running along two edges between them. */
 	private static EchoInterfaceBlockEntity build(GameTestHelper helper) {
