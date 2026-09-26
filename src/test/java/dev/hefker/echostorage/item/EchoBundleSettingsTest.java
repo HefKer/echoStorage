@@ -44,6 +44,12 @@ class EchoBundleSettingsTest {
 		assertEquals(new EchoBundleSettings(Optional.empty(), true), load("{\"category\": \"lighting\", \"vacuum\": true}"));
 	}
 
+	@Test
+	void aGarbageValueLoadsAsTheDefaultRatherThanFailing() {
+		assertEquals(EchoBundleSettings.DEFAULT, load("{\"category\": 5, \"vacuum\": \"yes\"}"));
+		assertEquals(new EchoBundleSettings(Optional.of(Categories.ORES), false), load("{\"category\": \"ores\", \"vacuum\": [1]}"));
+	}
+
 	private static String save(EchoBundleSettings settings) {
 		return EchoBundleSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow().toString();
 	}

@@ -16,8 +16,9 @@ import net.minecraft.network.codec.StreamCodec;
  * vacuums up matching items on pickup. Per-bundle intent, so it lives on the item, never in the
  * config file — which can only switch vacuuming off for every bundle.
  *
- * <p>The Category is saved by name and read leniently: a name no preset has any more loads as
- * none, because a failing component would lose the whole bundle, contents and all.
+ * <p>Both fields are read leniently: a Category name no preset has any more loads as none, and a
+ * value of the wrong type loads as the default, because a failing component would lose the whole
+ * bundle, contents and all.
  *
  * @param category what the bundle vacuums, if assigned; with none it vacuums what it already holds
  * @param vacuum   whether the bundle vacuums at all; off until the player turns it on
@@ -25,12 +26,12 @@ import net.minecraft.network.codec.StreamCodec;
 public record EchoBundleSettings(Optional<Category> category, boolean vacuum) {
 	public static final EchoBundleSettings DEFAULT = new EchoBundleSettings(Optional.empty(), false);
 
-	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.optionalFieldOf("category")
+	private static final MapCodec<Optional<Category>> CATEGORY_FIELD = Codec.STRING.lenientOptionalFieldOf("category")
 			.xmap(name -> name.flatMap(Categories::byName), category -> category.map(Category::name));
 
 	public static final Codec<EchoBundleSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			CATEGORY_FIELD.forGetter(EchoBundleSettings::category),
-			Codec.BOOL.optionalFieldOf("vacuum", false).forGetter(EchoBundleSettings::vacuum)
+			Codec.BOOL.lenientOptionalFieldOf("vacuum", false).forGetter(EchoBundleSettings::vacuum)
 	).apply(instance, EchoBundleSettings::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, EchoBundleSettings> STREAM_CODEC = StreamCodec.composite(

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.google.gson.JsonArray;
 import com.mojang.serialization.JsonOps;
 import dev.hefker.echostorage.CodecRoundTrip;
 import dev.hefker.echostorage.category.Categories;
@@ -46,6 +47,18 @@ class RowCodecTest {
 		saved.addProperty("category", "gone");
 
 		assertEquals(Optional.empty(), Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().category());
+	}
+
+	@Test
+	void aRowSavedWithAGarbageNameAndCategoryLoadsWithNeitherAndKeepsItsPlace() {
+		var saved = Row.CODEC.encodeStart(JsonOps.INSTANCE, ORES).getOrThrow().getAsJsonObject();
+		saved.addProperty("category", 5);
+		JsonArray garbage = new JsonArray();
+		garbage.add(1);
+		saved.add("name", garbage);
+
+		assertEquals(new Row(ORES.id(), ORES.pos(), "", Optional.empty(), ORES.state()),
+				Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow());
 	}
 
 	@Test
