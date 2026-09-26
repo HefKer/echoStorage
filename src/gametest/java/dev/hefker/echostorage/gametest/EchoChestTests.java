@@ -4,6 +4,7 @@ import java.util.List;
 
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
@@ -95,6 +96,20 @@ final class EchoChestTests {
 		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
 		return bundle;
+	}
+
+	/**
+	 * Runs {@code action} with {@code config} in force, then puts the config back. A test runs on
+	 * the server thread start to finish, so no other test sees the change.
+	 */
+	static void withConfig(EchoConfig config, Runnable action) {
+		EchoConfig before = EchoConfig.get();
+		EchoConfig.set(config);
+		try {
+			action.run();
+		} finally {
+			EchoConfig.set(before);
+		}
 	}
 
 	static void assertStack(GameTestHelper helper, ItemStack expected, ItemStack actual, String what) {

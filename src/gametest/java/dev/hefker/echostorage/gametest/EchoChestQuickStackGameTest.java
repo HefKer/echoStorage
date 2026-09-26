@@ -8,9 +8,11 @@ import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.menu;
 import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
 import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
+import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
@@ -126,6 +128,26 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 		quickStack(player);
 
 		assertStack(helper, new ItemStack(Items.BREAD, 6), chest.getItem(0), "chest");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theButtonMovesNothingWithChestQuickStackSwitchedOff(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.setItem(0, new ItemStack(Items.COBBLESTONE, 10));
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.COBBLESTONE, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.IRON_ORE, 5));
+
+		withConfig(EchoConfig.DEFAULTS.withChestQuickStack(false), () -> quickStack(player));
+
+		assertStack(helper, new ItemStack(Items.COBBLESTONE, 10), chest.getItem(0), "chest");
+		helper.assertTrue(chest.getItem(1).isEmpty(), "the chest took " + chest.getItem(1));
+		assertStack(helper, new ItemStack(Items.COBBLESTONE, 20), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT),
+				"what the chest holds");
+		assertStack(helper, new ItemStack(Items.IRON_ORE, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1),
+				"what is in its Category");
 		helper.succeed();
 	}
 

@@ -7,6 +7,7 @@ import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.config.EchoConfig;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -138,6 +139,10 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
 		if (button == QUICK_STACK_BUTTON) {
+			// A switched-off button is refused here, not only hidden, so no client can press it (ADR-0010).
+			if (!EchoConfig.get().chestQuickStack()) {
+				return false;
+			}
 			quickStack(player);
 			return true;
 		}

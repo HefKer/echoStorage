@@ -2,6 +2,7 @@ package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
+import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import java.util.Optional;
 
@@ -279,16 +280,6 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		BlockHitResult hit = new BlockHitResult(helper.absoluteVec(Vec3.atCenterOf(FLOOR).add(0, 0.5, 0)), Direction.UP,
 				helper.absolutePos(FLOOR), false);
 		player.gameMode.useItemOn(player, player.serverLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
-	}
-
-	private static void withConfig(EchoConfig config, Runnable action) {
-		EchoConfig before = EchoConfig.get();
-		EchoConfig.set(config);
-		try {
-			action.run();
-		} finally {
-			EchoConfig.set(before);
-		}
 	}
 
 	private static EchoBundleSettings vacuuming(Optional<Category> category) {

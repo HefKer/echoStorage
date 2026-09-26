@@ -1,6 +1,7 @@
 package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
+import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -123,7 +125,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.COBBLESTONE, 20));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.BREAD, 5));
 
-		helper.assertTrue(player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON), "button handled");
+		helper.assertTrue(quickStackToAll(player, true), "button handled");
 
 		helper.assertTrue(ItemStack.matches(linked.getItem(0), new ItemStack(Items.COBBLESTONE, 21)),
 				"the linked chest has " + linked.getItem(0));
@@ -144,7 +146,37 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		assertHolderFilledBeforeCategory(helper, NEAR_CHEST, FAR_CHEST);
 	}
 
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void globalQuickStackMovesNothingWithInterfaceQuickStackSwitchedOff(GameTestHelper helper) {
+		EchoInterfaceBlockEntity echoInterface = build(helper);
+		EchoChestBlockEntity linked = helper.getBlockEntity(FAR_CHEST);
+		linked.assign(Categories.ORES);
+		linked.setItem(0, new ItemStack(Items.COBBLESTONE, 1));
+		ServerPlayer player = openedBy(helper, echoInterface);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.COBBLESTONE, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.IRON_ORE, 5));
+
+		quickStackToAll(player, false);
+
+		helper.assertTrue(ItemStack.matches(linked.getItem(0), new ItemStack(Items.COBBLESTONE, 1)),
+				"the linked chest has " + linked.getItem(0));
+		helper.assertTrue(linked.getItem(1).isEmpty(), "the linked chest took " + linked.getItem(1));
+		helper.assertTrue(ItemStack.matches(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT), new ItemStack(Items.COBBLESTONE, 20)),
+				"the cobblestone should have stayed with the player");
+		helper.assertTrue(ItemStack.matches(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1), new ItemStack(Items.IRON_ORE, 5)),
+				"the iron ore should have stayed with the player");
+		helper.succeed();
+	}
+
 	// --- helpers --------------------------------------------------------------------------
+
+	/** Presses the interface's quick-stack button with {@code interfaceQuickStack} set as given. */
+	private static boolean quickStackToAll(ServerPlayer player, boolean switchedOn) {
+		boolean[] handled = new boolean[1];
+		withConfig(EchoConfig.DEFAULTS.withInterfaceQuickStack(switchedOn),
+				() -> handled[0] = player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON));
+		return handled[0];
+	}
 
 	/**
 	 * Both orders are tested because the list's order is the interface's, not the test's: in one
@@ -162,7 +194,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 20));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COAL_ORE, 5));
 
-		player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON);
+		quickStackToAll(player, true);
 
 		helper.assertTrue(ItemStack.matches(holder.getItem(0), new ItemStack(Items.IRON_ORE, 21)),
 				"the chest already holding iron ore has " + holder.getItem(0));

@@ -3,6 +3,7 @@ package dev.hefker.echostorage.menu;
 import java.util.List;
 
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.network.EchoInterfaceRowsPayload;
 import dev.hefker.echostorage.network.Net;
@@ -68,6 +69,10 @@ public class EchoInterfaceMenu extends AbstractContainerMenu {
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
 		if (button == QUICK_STACK_BUTTON) {
+			// A switched-off button is refused here, not only hidden, so no client can press it (ADR-0010).
+			if (!EchoConfig.get().interfaceQuickStack()) {
+				return false;
+			}
 			if (echoInterface != null) {
 				echoInterface.quickStack(player);
 			}
