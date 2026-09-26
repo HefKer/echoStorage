@@ -6,7 +6,9 @@ package dev.hefker.echostorage.config;
  * is the Echo Chest's slot count: container size is world data, and shrinking it would strand
  * whatever sat in the removed slots.
  *
- * <p>{@link EchoConfigFile} loads it at startup; everything reads {@link #get()}.
+ * <p>{@link EchoConfigFile} loads it at startup; everything reads {@link #get()}. On a client
+ * connected to a server, {@link #get()} answers with the server's switches (see
+ * {@link SessionConfig}), so a switch read on the client follows the server too.
  *
  * @param wirelessLinking       whether an Echo Interface reaches Echo Chests without a sculk
  *                              Link. Only that; see ADR-0004
