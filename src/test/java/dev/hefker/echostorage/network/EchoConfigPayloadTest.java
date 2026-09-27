@@ -3,7 +3,10 @@ package dev.hefker.echostorage.network;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import dev.hefker.echostorage.CodecRoundTrip;
+import dev.hefker.echostorage.config.ConfigSwitch;
 import dev.hefker.echostorage.config.EchoConfig;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.Test;
 
 class EchoConfigPayloadTest {
@@ -15,10 +18,18 @@ class EchoConfigPayloadTest {
 
 	@Test
 	void eachSwitchKeepsItsOwnPlaceOnTheWire() {
-		EchoConfigPayload odd = new EchoConfigPayload(new EchoConfig(true, false, true, false, true, false, true));
-		EchoConfigPayload even = new EchoConfigPayload(new EchoConfig(false, true, false, true, false, true, false));
-		assertEquals(odd, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, odd));
-		assertEquals(even, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, even));
+		for (ConfigSwitch on : ConfigSwitch.ALL) {
+			EchoConfigPayload sent = new EchoConfigPayload(ConfigSwitch.build(option -> option == on));
+
+			assertEquals(sent, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, sent), "only " + on.path() + " on");
+		}
+	}
+
+	@Test
+	void theWireCarriesOneBooleanPerSwitch() {
+		ByteBuf buf = Unpooled.buffer();
+		EchoConfigPayload.STREAM_CODEC.encode(buf, new EchoConfigPayload(EchoConfig.DEFAULTS));
+		assertEquals(ConfigSwitch.ALL.size(), buf.readableBytes());
 	}
 
 	@Test
