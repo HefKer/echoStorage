@@ -3,9 +3,9 @@ package dev.hefker.echostorage.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Predicate;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.ParsingException;
@@ -15,40 +15,10 @@ import dev.hefker.echostorage.EchoStorage;
 
 /**
  * Reads {@link EchoConfig} from a TOML file, the format NeoForge's {@code ModConfigSpec} uses,
- * so a port could hand the same file to that system (ADR-0003 rule 6).
+ * so a port could hand the same file to that system (ADR-0003 rule 6). Its keys and comments
+ * come from {@link ConfigSwitch#ALL}.
  */
 public final class EchoConfigFile {
-	private record Switch(String path, String comment, Predicate<EchoConfig> read) {
-		boolean fallback() {
-			return read.test(EchoConfig.DEFAULTS);
-		}
-	}
-
-	private static final Switch SEARCH_IN_OPEN_CONTAINER = new Switch("search.in_open_container",
-			" Offer a search box on an open container's screen.",
-			EchoConfig::searchInOpenContainer);
-	private static final Switch SEARCH_BY_CHEST_NAME = new Switch("search.by_chest_name",
-			" Let an Echo Interface search its chests by name.",
-			EchoConfig::searchByChestName);
-	private static final Switch BUNDLE_VACUUM = new Switch("bundle.vacuum",
-			" Let an Echo Bundle vacuum up items on pickup. Each bundle still starts with it off.",
-			EchoConfig::bundleVacuum);
-	private static final Switch BUNDLE_REFILL = new Switch("bundle.refill",
-			" Placing the last block in hand pulls the next one from an Echo Bundle.",
-			EchoConfig::bundleRefill);
-	private static final Switch BUNDLE_PLACE = new Switch("bundle.place",
-			" Using an Echo Bundle on a block places a block out of it.",
-			EchoConfig::bundlePlace);
-	private static final Switch CHEST_QUICK_STACK = new Switch("quick_stack.chest",
-			" Offer a quick-stack button on an Echo Chest's screen.",
-			EchoConfig::chestQuickStack);
-	private static final Switch INTERFACE_QUICK_STACK = new Switch("quick_stack.interface",
-			" Offer a quick-stack button on an Echo Interface's screen, into every linked chest at once.",
-			EchoConfig::interfaceQuickStack);
-
-	private static final List<Switch> SWITCHES = List.of(SEARCH_IN_OPEN_CONTAINER, SEARCH_BY_CHEST_NAME,
-			BUNDLE_VACUUM, BUNDLE_REFILL, BUNDLE_PLACE, CHEST_QUICK_STACK, INTERFACE_QUICK_STACK);
-
 	private EchoConfigFile() {
 	}
 
@@ -75,20 +45,17 @@ public final class EchoConfigFile {
 				EchoStorage.LOGGER.warn("Could not write the missing settings to {}", file, e);
 			}
 		}
-		return new EchoConfig(
-				value(toml, SEARCH_IN_OPEN_CONTAINER),
-				value(toml, SEARCH_BY_CHEST_NAME),
-				value(toml, BUNDLE_VACUUM),
-				value(toml, BUNDLE_REFILL),
-				value(toml, BUNDLE_PLACE),
-				value(toml, CHEST_QUICK_STACK),
-				value(toml, INTERFACE_QUICK_STACK));
+		List<Boolean> values = new ArrayList<>(ConfigSwitch.ALL.size());
+		for (ConfigSwitch option : ConfigSwitch.ALL) {
+			values.add(value(toml, option));
+		}
+		return ConfigSwitch.build(values);
 	}
 
 	/** Writes each switch the file lacks at its default, with its comment. True if any were. */
 	private static boolean addMissing(CommentedConfig toml) {
 		boolean added = false;
-		for (Switch option : SWITCHES) {
+		for (ConfigSwitch option : ConfigSwitch.ALL) {
 			if (!toml.contains(option.path())) {
 				toml.set(option.path(), option.fallback());
 				toml.setComment(option.path(), option.comment());
@@ -98,7 +65,7 @@ public final class EchoConfigFile {
 		return added;
 	}
 
-	private static boolean value(CommentedConfig toml, Switch option) {
+	private static boolean value(CommentedConfig toml, ConfigSwitch option) {
 		Object value = toml.get(option.path());
 		if (value instanceof Boolean on) {
 			return on;
