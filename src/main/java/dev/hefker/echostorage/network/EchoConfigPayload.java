@@ -1,8 +1,5 @@
 package dev.hefker.echostorage.network;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import dev.hefker.echostorage.EchoStorage;
 import dev.hefker.echostorage.config.ConfigSwitch;
 import dev.hefker.echostorage.config.EchoConfig;
@@ -23,14 +20,12 @@ public record EchoConfigPayload(EchoConfig config) implements CustomPacketPayloa
 
 	/** One boolean per switch, in {@link ConfigSwitch#ALL} order. */
 	private static final StreamCodec<ByteBuf, EchoConfig> CONFIG_CODEC = StreamCodec.of(
-			(buf, config) -> ConfigSwitch.values(config).forEach(buf::writeBoolean),
-			buf -> {
-				List<Boolean> values = new ArrayList<>(ConfigSwitch.ALL.size());
-				for (int i = 0; i < ConfigSwitch.ALL.size(); i++) {
-					values.add(buf.readBoolean());
+			(buf, config) -> {
+				for (ConfigSwitch option : ConfigSwitch.ALL) {
+					buf.writeBoolean(option.valueIn(config));
 				}
-				return ConfigSwitch.build(values);
-			});
+			},
+			buf -> ConfigSwitch.build(option -> buf.readBoolean()));
 
 	public static final StreamCodec<ByteBuf, EchoConfigPayload> STREAM_CODEC =
 			CONFIG_CODEC.map(EchoConfigPayload::new, EchoConfigPayload::config);

@@ -2,10 +2,6 @@ package dev.hefker.echostorage.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import dev.hefker.echostorage.CodecRoundTrip;
 import dev.hefker.echostorage.config.ConfigSwitch;
 import dev.hefker.echostorage.config.EchoConfig;
@@ -22,13 +18,10 @@ class EchoConfigPayloadTest {
 
 	@Test
 	void eachSwitchKeepsItsOwnPlaceOnTheWire() {
-		for (int on = 0; on < ConfigSwitch.ALL.size(); on++) {
-			List<Boolean> values = new ArrayList<>(Collections.nCopies(ConfigSwitch.ALL.size(), false));
-			values.set(on, true);
-			EchoConfigPayload sent = new EchoConfigPayload(ConfigSwitch.build(values));
+		for (ConfigSwitch on : ConfigSwitch.ALL) {
+			EchoConfigPayload sent = new EchoConfigPayload(ConfigSwitch.build(option -> option == on));
 
-			assertEquals(sent, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, sent),
-					"only " + ConfigSwitch.ALL.get(on).path() + " on");
+			assertEquals(sent, CodecRoundTrip.of(EchoConfigPayload.STREAM_CODEC, sent), "only " + on.path() + " on");
 		}
 	}
 

@@ -47,38 +47,41 @@ public record ConfigSwitch(String path, String comment, Predicate<EchoConfig> re
 	/** The record's canonical constructor, taking one boolean per switch. */
 	private static final MethodHandle CONSTRUCTOR = canonicalConstructor();
 
-	public boolean in(EchoConfig config) {
+	static {
+		checkOrder();
+	}
+
+	/** This switch's value in {@code config}. */
+	public boolean valueIn(EchoConfig config) {
 		return read.test(config);
 	}
 
 	public boolean fallback() {
-		return in(EchoConfig.DEFAULTS);
-	}
-
-	/** Each switch's value in {@code config}, in {@link #ALL} order. */
-	public static List<Boolean> values(EchoConfig config) {
-		List<Boolean> values = new ArrayList<>(ALL.size());
-		for (ConfigSwitch option : ALL) {
-			values.add(option.in(config));
-		}
-		return values;
+		return valueIn(EchoConfig.DEFAULTS);
 	}
 
 	/**
-	 * The config whose switches take {@code values}, in {@link #ALL} order. Refuses a list of the
-	 * wrong length rather than shifting values onto their neighbours.
+	 * The config whose switches take the values {@code valueOf} gives, asked once per switch in
+	 * {@link #ALL} order, so a reader of a stream can hand them back as it reads.
 	 */
-	public static EchoConfig build(List<Boolean> values) {
-		if (values.size() != ALL.size()) {
-			throw new IllegalArgumentException("Expected " + ALL.size() + " switch values, got " + values.size());
+	public static EchoConfig build(Predicate<ConfigSwitch> valueOf) {
+		List<Boolean> values = new ArrayList<>(ALL.size());
+		for (ConfigSwitch option : ALL) {
+			values.add(valueOf.test(option));
 		}
 		try {
 			return (EchoConfig) CONSTRUCTOR.invokeWithArguments(values);
+		} catch (RuntimeException | Error e) {
+			throw e;
 		} catch (Throwable e) {
 			throw new IllegalStateException("Could not build an EchoConfig from " + values, e);
 		}
 	}
 
+	/**
+	 * Refuses a record whose components don't line up with {@link #ALL}: a count or a type that
+	 * differs here would otherwise shift every later value onto its neighbour.
+	 */
 	private static MethodHandle canonicalConstructor() {
 		RecordComponent[] components = EchoConfig.class.getRecordComponents();
 		if (components.length != ALL.size()) {
@@ -93,6 +96,21 @@ public record ConfigSwitch(String path, String comment, Predicate<EchoConfig> re
 			return MethodHandles.lookup().findConstructor(EchoConfig.class, MethodType.methodType(void.class, types));
 		} catch (ReflectiveOperationException e) {
 			throw new IllegalStateException("EchoConfig has no canonical constructor to build from", e);
+		}
+	}
+
+	/**
+	 * Builds a config with each switch alone on and checks that exactly that switch reads it back,
+	 * so {@link #ALL} listed out of the record's order fails at load rather than swapping switches.
+	 */
+	private static void checkOrder() {
+		for (ConfigSwitch on : ALL) {
+			EchoConfig config = build(option -> option == on);
+			for (ConfigSwitch option : ALL) {
+				if (option.valueIn(config) != (option == on)) {
+					throw new IllegalStateException(on.path() + " is listed out of EchoConfig's component order");
+				}
+			}
 		}
 	}
 }

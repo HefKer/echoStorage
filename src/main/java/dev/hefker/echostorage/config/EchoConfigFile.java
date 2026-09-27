@@ -3,9 +3,7 @@ package dev.hefker.echostorage.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.io.ParsingException;
@@ -45,11 +43,7 @@ public final class EchoConfigFile {
 				EchoStorage.LOGGER.warn("Could not write the missing settings to {}", file, e);
 			}
 		}
-		List<Boolean> values = new ArrayList<>(ConfigSwitch.ALL.size());
-		for (ConfigSwitch option : ConfigSwitch.ALL) {
-			values.add(value(toml, option));
-		}
-		return ConfigSwitch.build(values);
+		return ConfigSwitch.build(option -> value(toml, option));
 	}
 
 	/** Writes each switch the file lacks at its default, with its comment. True if any were. */
