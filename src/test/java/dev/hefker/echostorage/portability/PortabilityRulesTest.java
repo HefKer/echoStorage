@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * first use rather than quietly spreading.
  */
 class PortabilityRulesTest {
+	/** Declared as inputs of the test task in build.gradle; keep the two lists in sync. */
 	private static final List<Path> SOURCE_ROOTS =
 			List.of(Path.of("src/main/java"), Path.of("src/client/java"), Path.of("src/gametest/java"));
 
@@ -52,6 +53,7 @@ class PortabilityRulesTest {
 			Map.entry("net.fabricmc.loader.api", List.of("dev.hefker.echostorage.platform.fabric")),
 			Map.entry("net.fabricmc.fabric.api.gametest", List.of("dev.hefker.echostorage.gametest")));
 
+	/** Declared as an input of the test task in build.gradle, like SOURCE_ROOTS. */
 	private static final Path RESOURCE_ROOT = Path.of("src/main/resources");
 
 	private static final Pattern FABRIC_RESOURCE_KEY = Pattern.compile("\"fabric:[\\w/]+\"");

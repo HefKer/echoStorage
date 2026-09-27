@@ -76,6 +76,21 @@ configurations {
 
 tasks.named('test', Test) {
 	useJUnitPlatform()
+
+	// PortabilityRulesTest reads these trees from disk, so they are inputs even where their
+	// compiled output is not on the test classpath (gametest) or does not change (a comment).
+	// Keep this list in sync with SOURCE_ROOTS and RESOURCE_ROOT in PortabilityRulesTest.
+	[
+		mainSources: 'src/main/java',
+		clientSources: 'src/client/java',
+		gametestSources: 'src/gametest/java',
+		mainResources: 'src/main/resources',
+	].each { name, dir ->
+		inputs.dir(dir)
+				.withPropertyName(name)
+				.withPathSensitivity(PathSensitivity.RELATIVE)
+	}
+
 	testLogging {
 		events "failed"
 		exceptionFormat "full"
