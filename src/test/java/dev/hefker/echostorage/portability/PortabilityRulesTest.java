@@ -39,13 +39,13 @@ class PortabilityRulesTest {
 	 * matching is exact: a sub-package does not inherit its parent's permission.
 	 */
 	private static final Map<String, List<String>> CONFINED_IMPORTS = Map.ofEntries(
-			Map.entry("net.fabricmc.api", List.of("dev.hefker.echostorage", "dev.hefker.echostorage.client")),
+			Map.entry("net.fabricmc.api", List.of("dev.hefker.echostorage", "dev.hefker.echostorage.client", "dev.hefker.echostorage.gametest")),
 			Map.entry("net.fabricmc.fabric.api.networking", List.of("dev.hefker.echostorage.network")),
 			Map.entry("net.fabricmc.fabric.api.client.networking", List.of("dev.hefker.echostorage.network")),
 			Map.entry("net.fabricmc.fabric.api.screenhandler", List.of("dev.hefker.echostorage.menu")),
 			Map.entry("net.fabricmc.fabric.api.command", List.of("dev.hefker.echostorage.command")),
 			Map.entry("net.fabricmc.fabric.api.itemgroup", List.of("dev.hefker.echostorage.item")),
-			Map.entry("net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item")),
+			Map.entry("net.fabricmc.fabric.api.event.lifecycle", List.of("dev.hefker.echostorage.item", "dev.hefker.echostorage.gametest")),
 			Map.entry("net.fabricmc.fabric.api.client.rendering", List.of("dev.hefker.echostorage.client.tooltip")),
 			Map.entry("net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry", List.of("dev.hefker.echostorage.client.render")),
 			Map.entry("net.fabricmc.fabric.api.blockrenderlayer", List.of("dev.hefker.echostorage.client.render")),

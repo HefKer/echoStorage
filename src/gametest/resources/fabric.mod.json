@@ -5,6 +5,9 @@
 	"name": "Echo Storage game tests",
 	"environment": "*",
 	"entrypoints": {
+		"main": [
+			"dev.hefker.echostorage.gametest.GameTestDefaults"
+		],
 		"fabric-gametest": [
 			"dev.hefker.echostorage.gametest.EchoChestGameTest",
 			"dev.hefker.echostorage.gametest.CategoryGameTest",
