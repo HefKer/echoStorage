@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * first use rather than quietly spreading.
  */
 class PortabilityRulesTest {
-	/** Declared as inputs of the test task in build.gradle; keep the two lists in sync. */
+	/** Declared as inputs of the test task in build.gradle; keep that list in sync with this one. */
 	private static final List<Path> SOURCE_ROOTS =
 			List.of(Path.of("src/main/java"), Path.of("src/client/java"), Path.of("src/gametest/java"));
 
