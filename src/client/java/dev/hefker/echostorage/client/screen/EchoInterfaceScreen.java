@@ -40,7 +40,7 @@ import net.minecraft.world.item.ItemStack;
  * config turns it off, dims rows whose label does not match. Those labels are names the player
  * typed or chose, so searching them is allowed.
  *
- * <p>Global quick-stack sits beside the search box only when the config turns it on; it is off
+ * <p>Global Quick-stack sits beside the search box only when the config turns it on; it is off
  * by default (ADR-0010).
  */
 public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMenu> {

@@ -39,7 +39,7 @@ import net.minecraft.world.item.Item;
  * <p>An Echo Shulker Box has a Vacuum button under them, which sets whether the box picks up
  * what the player picks up once they carry it. No other kind of chest has one.
  *
- * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
+ * <p>Below them is Quick-stack, which tops up bundles inside the chest where a shift-click would
  * only fill a slot, unless the config turns it off. Its tooltip says so, since the two otherwise
  * look like the same action.
  *

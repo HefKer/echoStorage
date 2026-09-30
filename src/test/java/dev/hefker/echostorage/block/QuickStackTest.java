@@ -257,7 +257,7 @@ class QuickStackTest {
 		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
 	}
 
-	// --- one match at a time, for global quick-stack's passes -----------------------------
+	// --- one match at a time, for global Quick-stack's passes -----------------------------
 
 	@Test
 	void matchingOnlyWhatTheChestHoldsIgnoresItsCategory() {

@@ -16,8 +16,8 @@ package dev.hefker.echostorage.config;
  *                              each one still starts with its own toggle off
  * @param bundleRefill          whether placing the last block in hand pulls the next from a bundle
  * @param bundlePlace           whether using an Echo Bundle on a block places a block out of it
- * @param chestQuickStack       whether an Echo Chest's screen offers quick-stack into that chest
- * @param interfaceQuickStack   whether an Echo Interface offers quick-stack into every linked chest;
+ * @param chestQuickStack       whether an Echo Chest's screen offers Quick-stack into that chest
+ * @param interfaceQuickStack   whether an Echo Interface offers Quick-stack into every linked chest;
  *                              off by default, so a pack opts in (ADR-0010)
  */
 public record EchoConfig(

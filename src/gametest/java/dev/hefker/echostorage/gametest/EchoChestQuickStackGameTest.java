@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * The quick-stack button on an open Echo Chest, against a real chest and player. The button is
+ * The Quick-stack button on an open Echo Chest, against a real chest and player. The button is
  * the only thing that writes into a bundle inside a chest (ADR-0007); shift-click never does.
  */
 public class EchoChestQuickStackGameTest implements FabricGameTest {

@@ -172,7 +172,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * Whether this chest refuses strays from everything but the player's hand: shift-click,
-	 * quick-stack and every automated insert (ADR-0009).
+	 * Quick-stack and every automated insert (ADR-0009).
 	 */
 	public boolean isStrict() {
 		return assignment.strict();

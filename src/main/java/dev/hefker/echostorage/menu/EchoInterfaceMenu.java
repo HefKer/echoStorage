@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
  * a list that changed under the player's click can never open the wrong chest.
  */
 public class EchoInterfaceMenu extends AbstractContainerMenu {
-	/** An action: quick-stacks into every linked chest once on the server. */
+	/** An action: Quick-stacks into every linked chest once on the server. */
 	public static final int QUICK_STACK_BUTTON = 0;
 
 	/** Null on the client. */

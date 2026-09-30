@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>It also keeps its Vacuum toggle, set from its screen while it is placed and acted on only
  * while it is carried: see {@link dev.hefker.echostorage.item.Vacuum}.
  *
- * <p>No shulker box of any kind goes in, from any source: hoppers and quick-stack ask
+ * <p>No shulker box of any kind goes in, from any source: hoppers and Quick-stack ask
  * {@link #refuses}, Vacuum asks {@link #putIntoItem}, and the menu's slots refuse them as vanilla's
  * shulker box slots do, all because an Echo Shulker Box
  * {@link EchoShulkerBoxBlock#REFUSES_SHULKER_BOXES refuses shulker boxes}.

@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * The Echo Interface in a real world: sculk links it to a chest out of arm's reach, a row opens
- * that chest from where the player stands, and global quick-stack reaches linked chests only,
+ * that chest from where the player stands, and global Quick-stack reaches linked chests only,
  * filling those that already hold an item before those whose Category merely matches it.
  */
 public class EchoInterfaceGameTest implements FabricGameTest {
@@ -228,7 +228,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 
 	// --- helpers --------------------------------------------------------------------------
 
-	/** Presses the interface's quick-stack button with {@code interfaceQuickStack} set as given. */
+	/** Presses the interface's Quick-stack button with {@code interfaceQuickStack} set as given. */
 	private static boolean quickStackToAll(ServerPlayer player, boolean switchedOn) {
 		return withConfig(EchoConfig.DEFAULTS.withInterfaceQuickStack(switchedOn),
 				() -> player.containerMenu.clickMenuButton(player, EchoInterfaceMenu.QUICK_STACK_BUTTON));

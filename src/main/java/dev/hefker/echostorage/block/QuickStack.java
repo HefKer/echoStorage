@@ -61,7 +61,7 @@ public final class QuickStack {
 
 	/**
 	 * Whether {@code chest} already holds an item, reading through the bundles inside it. Taken
-	 * once, when called, so what this quick-stack moves in does not widen it.
+	 * once, when called, so what this Quick-stack moves in does not widen it.
 	 */
 	public static Predicate<ItemStack> holds(Container chest) {
 		Set<Item> held = heldBy(chest);

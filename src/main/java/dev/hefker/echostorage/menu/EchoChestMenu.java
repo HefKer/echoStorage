@@ -32,8 +32,8 @@ import org.jetbrains.annotations.Nullable;
  * many rows. One menu type serves every size; the open-data says how many rows to lay out.
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
- * nested bundle is the quick-stack button's job alone (ADR-0007). A strict chest refuses a
- * stray from shift-click and quick-stack alike (ADR-0009), but a stack placed by hand always goes
+ * nested bundle is the Quick-stack button's job alone (ADR-0007). A strict chest refuses a
+ * stray from shift-click and Quick-stack alike (ADR-0009), but a stack placed by hand always goes
  * in: that is the player choosing to.
  *
  * <p>An Echo Shulker Box's slots take no shulker box of any kind, even by hand, as vanilla's
@@ -49,7 +49,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	// had not yet seen someone else's change cannot undo it.
 	public static final int PERMISSIVE_BUTTON = 0;
 	public static final int STRICT_BUTTON = 1;
-	/** An action, not a state: runs quick-stack once on the server, however often it arrives. */
+	/** An action, not a state: runs Quick-stack once on the server, however often it arrives. */
 	public static final int QUICK_STACK_BUTTON = 2;
 	public static final int VACUUM_OFF_BUTTON = 3;
 	public static final int VACUUM_ON_BUTTON = 4;
