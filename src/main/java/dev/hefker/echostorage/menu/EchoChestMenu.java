@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import dev.hefker.echostorage.block.AbstractEchoChestBlock;
-import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestAssignment;
+import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlock;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
