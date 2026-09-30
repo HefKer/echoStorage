@@ -3,6 +3,7 @@ package dev.hefker.echostorage.gametest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
 import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,8 @@ import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
+import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -21,8 +24,11 @@ import dev.hefker.echostorage.network.EchoInterfaces;
 import dev.hefker.echostorage.network.OpenLinkedChestPayload;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,6 +40,11 @@ import net.minecraft.world.level.block.Blocks;
  * filling those that already hold an item before those whose Category merely matches it.
  */
 public class EchoInterfaceGameTest implements FabricGameTest {
+	@GameTestGenerator
+	public Collection<TestFunction> everyChestKind() {
+		return EchoChestTests.forEveryKind(EchoInterfaceGameTest.class);
+	}
+
 	private static final BlockPos INTERFACE = new BlockPos(0, 1, 0);
 	/** The far corner of the template, well beyond arm's reach of a player standing on the interface. */
 	private static final BlockPos FAR_CHEST = new BlockPos(7, 1, 7);
@@ -44,16 +55,29 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 	/** A second linked chest, beside the path and so nearer the interface than the far one. */
 	private static final BlockPos NEAR_CHEST = new BlockPos(2, 1, 1);
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void aSculkPathLinksAChestAndTheInterfaceListsIt(GameTestHelper helper) {
-		EchoInterfaceBlockEntity echoInterface = build(helper);
+	@EveryChestKind
+	public void aSculkPathLinksAChestAndTheInterfaceListsIt(GameTestHelper helper, ChestKind kind) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
 		EchoChestBlockEntity chest = helper.getBlockEntity(FAR_CHEST);
 		chest.rename("Ores");
 
 		echoInterface.resolve();
 
-		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), "Ores",
+		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), kind.id(), "Ores",
 				chest.category(), State.LINKED)));
+		helper.succeed();
+	}
+
+	@EveryChestKind
+	public void anUnnamedChestsRowIsLabelledWithItsKind(GameTestHelper helper, ChestKind kind) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
+
+		echoInterface.resolve();
+
+		Row row = echoInterface.rows().getFirst();
+		helper.assertValueEqual(row.item(), kind.id(), "the row's item");
+		helper.assertValueEqual(EchoChestBlockEntity.unnamedTitle(row.category(), BuiltInRegistries.ITEM.get(row.item())),
+				kind.block.getName(), "the row's label");
 		helper.succeed();
 	}
 
@@ -72,9 +96,9 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void pickingARowOpensThatChestFromBeyondArmsReach(GameTestHelper helper) {
-		EchoInterfaceBlockEntity echoInterface = build(helper);
+	@EveryChestKind
+	public void pickingARowOpensThatChestFromBeyondArmsReach(GameTestHelper helper, ChestKind kind) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
 		EchoChestBlockEntity chest = helper.getBlockEntity(FAR_CHEST);
 		ServerPlayer player = openedBy(helper, echoInterface);
 		helper.assertFalse(chest.stillValid(player), "the chest should be out of reach for this test to mean anything");
@@ -113,9 +137,9 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void globalQuickStackPutsAwayIntoLinkedChestsOnly(GameTestHelper helper) {
-		EchoInterfaceBlockEntity echoInterface = build(helper);
+	@EveryChestKind
+	public void globalQuickStackPutsAwayIntoLinkedChestsOnly(GameTestHelper helper, ChestKind kind) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
 		EchoChestBlockEntity linked = helper.getBlockEntity(FAR_CHEST);
 		linked.setItem(0, new ItemStack(Items.COBBLESTONE, 1));
 		helper.setBlock(LONE_CHEST, EchoBlocks.ECHO_CHEST);
@@ -202,8 +226,12 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	/** An interface in one corner, a chest in the far one, and sculk running along two edges between them. */
+	/** An interface in one corner, an Echo Chest in the far one, and sculk running along two edges between them. */
 	private static EchoInterfaceBlockEntity build(GameTestHelper helper) {
+		return build(helper, ChestKind.ECHO);
+	}
+
+	private static EchoInterfaceBlockEntity build(GameTestHelper helper, ChestKind kind) {
 		helper.setBlock(INTERFACE, EchoBlocks.ECHO_INTERFACE);
 		for (int x = 1; x <= FAR_CHEST.getX(); x++) {
 			helper.setBlock(new BlockPos(x, 1, 0), Blocks.SCULK);
@@ -211,7 +239,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		for (int z = 1; z < FAR_CHEST.getZ(); z++) {
 			helper.setBlock(new BlockPos(FAR_CHEST.getX(), 1, z), Blocks.SCULK);
 		}
-		helper.setBlock(FAR_CHEST, EchoBlocks.ECHO_CHEST);
+		helper.setBlock(FAR_CHEST, kind.block);
 		return helper.getBlockEntity(INTERFACE);
 	}
 
