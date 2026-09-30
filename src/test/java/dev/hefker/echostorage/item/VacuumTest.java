@@ -280,6 +280,22 @@ class VacuumTest {
 		assertEquals(1, shulkerBox.getCount());
 	}
 
+	@Test
+	void aBundleOfEitherKindIsNeverVacuumedIntoABoxThatWantsBundles() {
+		Category bundles = Category.of("bundles", EchoBundleContents::isBundle);
+		player.setItem(3, box(permissive(bundles), true, TestBundles.of(EchoBundleSettings.DEFAULT), new ItemStack(Items.BUNDLE)));
+		ItemStack before = player.getItem(3).copy();
+		ItemStack echoBundle = TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.FLINT, 1));
+		ItemStack vanillaBundle = new ItemStack(Items.BUNDLE);
+
+		Vacuum.run(player, echoBundle);
+		Vacuum.run(player, vanillaBundle);
+
+		assertEquals(1, echoBundle.getCount(), "the Echo Bundle went into the box");
+		assertEquals(1, vanillaBundle.getCount(), "the vanilla bundle went into the box");
+		assertTrue(ItemStack.matches(before, player.getItem(3)), "the box changed: " + player.getItem(3));
+	}
+
 	private static EchoBundleSettings vacuuming(Optional<Category> category) {
 		return new EchoBundleSettings(category, true);
 	}
