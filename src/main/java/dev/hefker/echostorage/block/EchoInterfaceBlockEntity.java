@@ -169,9 +169,10 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 
 	private static LinkedChests.Label labelOf(Level level, BlockPos pos) {
 		if (!(level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest)) {
-			return new LinkedChests.Label(LinkedChests.ECHO_CHEST_ITEM, Optional.empty(), "", Optional.empty());
+			return new LinkedChests.Label(LinkedChests.Icon.ECHO_CHEST, "", Optional.empty());
 		}
-		return new LinkedChests.Label(BuiltInRegistries.ITEM.getKey(chest.item()), chest.color(), chest.name(), chest.category());
+		return new LinkedChests.Label(
+				new LinkedChests.Icon(BuiltInRegistries.ITEM.getKey(chest.item()), chest.color()), chest.name(), chest.category());
 	}
 
 	// --- persistence ----------------------------------------------------------------------

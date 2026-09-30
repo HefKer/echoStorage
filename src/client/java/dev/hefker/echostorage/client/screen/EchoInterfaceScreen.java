@@ -149,7 +149,7 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 
 	/** The kind of chest a row lists. An item no longer registered, such as another mod's, shows as an Echo Chest. */
 	private static Item kind(Row row) {
-		return BuiltInRegistries.ITEM.getOptional(row.item()).orElse(EchoItems.ECHO_CHEST);
+		return BuiltInRegistries.ITEM.getOptional(row.icon().item()).orElse(EchoItems.ECHO_CHEST);
 	}
 
 	/** A row's button: its chest's icon at the left, in the chest's colour, greyed or not, and the label in the room beside it. */
@@ -159,7 +159,7 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 		ChestRowButton(int x, int y, int width, Row row, OnPress onPress) {
 			super(x, y, width, ROW_HEIGHT, label(row), onPress, DEFAULT_NARRATION);
 			this.icon = new ItemStack(kind(row));
-			row.color().ifPresent(color -> icon.set(DataComponents.BASE_COLOR, color));
+			row.icon().color().ifPresent(color -> icon.set(DataComponents.BASE_COLOR, color));
 		}
 
 		@Override

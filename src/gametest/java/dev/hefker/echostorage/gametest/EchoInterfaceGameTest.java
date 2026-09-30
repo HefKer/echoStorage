@@ -16,6 +16,7 @@ import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
 import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
 import dev.hefker.echostorage.item.EchoItems;
+import dev.hefker.echostorage.link.LinkedChests.Icon;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -67,7 +68,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 
 		echoInterface.resolve();
 
-		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), kind.id(), Optional.empty(), "Ores",
+		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), new Icon(kind.id(), Optional.empty()), "Ores",
 				chest.category(), State.LINKED)));
 		helper.succeed();
 	}
@@ -79,8 +80,8 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		echoInterface.resolve();
 
 		Row row = echoInterface.rows().getFirst();
-		helper.assertValueEqual(row.item(), kind.id(), "the row's item");
-		helper.assertValueEqual(EchoChestBlockEntity.unnamedTitle(row.category(), BuiltInRegistries.ITEM.get(row.item())),
+		helper.assertValueEqual(row.icon().item(), kind.id(), "the row's item");
+		helper.assertValueEqual(EchoChestBlockEntity.unnamedTitle(row.category(), BuiltInRegistries.ITEM.get(row.icon().item())),
 				kind.block.getName(), "the row's label");
 		helper.succeed();
 	}
@@ -95,7 +96,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 
 		echoInterface.resolve();
 
-		helper.assertValueEqual(echoInterface.rows().getFirst().color(), Optional.of(DyeColor.LIME), "the row's colour");
+		helper.assertValueEqual(echoInterface.rows().getFirst().icon().color(), Optional.of(DyeColor.LIME), "the row's colour");
 		helper.succeed();
 	}
 

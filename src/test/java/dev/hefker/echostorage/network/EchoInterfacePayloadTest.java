@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import dev.hefker.echostorage.CodecRoundTrip;
 import dev.hefker.echostorage.category.Categories;
-import dev.hefker.echostorage.link.LinkedChests;
+import dev.hefker.echostorage.link.LinkedChests.Icon;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoInterfaceMenuData;
@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 /** Everything the Echo Interface sends, each way, must arrive as it left. */
 class EchoInterfacePayloadTest {
 	private static final List<Row> ROWS = List.of(
-			new Row(UUID.randomUUID(), new BlockPos(1, 2, 3), LinkedChests.ECHO_CHEST_ITEM, Optional.empty(), "Ores", Optional.empty(), State.LINKED),
+			new Row(UUID.randomUUID(), new BlockPos(1, 2, 3), Icon.ECHO_CHEST, "Ores", Optional.empty(), State.LINKED),
 			new Row(UUID.randomUUID(), new BlockPos(-4, 70, 9),
-					ResourceLocation.fromNamespaceAndPath("echostorage", "echo_shulker_box"), Optional.of(DyeColor.RED), "", Optional.of(Categories.FOOD), State.LOST));
+					new Icon(ResourceLocation.fromNamespaceAndPath("echostorage", "echo_shulker_box"), Optional.of(DyeColor.RED)), "", Optional.of(Categories.FOOD), State.LOST));
 
 	@Test
 	void theOpenDataSurvivesTheWire() {

@@ -10,6 +10,7 @@ import com.google.gson.JsonArray;
 import com.mojang.serialization.JsonOps;
 import dev.hefker.echostorage.CodecRoundTrip;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.link.LinkedChests.Icon;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import io.netty.buffer.Unpooled;
@@ -27,11 +28,11 @@ import org.junit.jupiter.api.Test;
 class RowCodecTest {
 	private static final ResourceLocation DEEP = ResourceLocation.fromNamespaceAndPath("echostorage", "deep_echo_chest");
 	private static final ResourceLocation SHULKER = ResourceLocation.fromNamespaceAndPath("echostorage", "echo_shulker_box");
-	private static final Row ORES = new Row(UUID.randomUUID(), new BlockPos(3, 64, -9), DEEP, Optional.empty(), "Ores",
+	private static final Row ORES = new Row(UUID.randomUUID(), new BlockPos(3, 64, -9), new Icon(DEEP, Optional.empty()), "Ores",
 			Optional.of(Categories.ORES), State.UNLOADED);
-	private static final Row BLANK = new Row(UUID.randomUUID(), BlockPos.ZERO, LinkedChests.ECHO_CHEST_ITEM, Optional.empty(), "",
+	private static final Row BLANK = new Row(UUID.randomUUID(), BlockPos.ZERO, Icon.ECHO_CHEST, "",
 			Optional.empty(), State.LOST);
-	private static final Row DYED = new Row(UUID.randomUUID(), new BlockPos(0, 5, 0), SHULKER, Optional.of(DyeColor.LIME), "Food",
+	private static final Row DYED = new Row(UUID.randomUUID(), new BlockPos(0, 5, 0), new Icon(SHULKER, Optional.of(DyeColor.LIME)), "Food",
 			Optional.of(Categories.FOOD), State.LINKED);
 
 	@Test
@@ -65,7 +66,7 @@ class RowCodecTest {
 		garbage.add(1);
 		saved.add("name", garbage);
 
-		assertEquals(new Row(ORES.id(), ORES.pos(), ORES.item(), ORES.color(), "", Optional.empty(), ORES.state()),
+		assertEquals(new Row(ORES.id(), ORES.pos(), ORES.icon(), "", Optional.empty(), ORES.state()),
 				Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow());
 	}
 
@@ -74,7 +75,7 @@ class RowCodecTest {
 		var saved = Row.CODEC.encodeStart(JsonOps.INSTANCE, ORES).getOrThrow().getAsJsonObject();
 		saved.remove("item");
 
-		assertEquals(LinkedChests.ECHO_CHEST_ITEM, Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().item());
+		assertEquals(LinkedChests.ECHO_CHEST_ITEM, Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().icon().item());
 	}
 
 	@Test
@@ -82,7 +83,7 @@ class RowCodecTest {
 		var saved = Row.CODEC.encodeStart(JsonOps.INSTANCE, ORES).getOrThrow().getAsJsonObject();
 		saved.addProperty("item", "Not An Id!");
 
-		assertEquals(new Row(ORES.id(), ORES.pos(), LinkedChests.ECHO_CHEST_ITEM, ORES.color(), ORES.name(), ORES.category(), ORES.state()),
+		assertEquals(new Row(ORES.id(), ORES.pos(), new Icon(LinkedChests.ECHO_CHEST_ITEM, ORES.icon().color()), ORES.name(), ORES.category(), ORES.state()),
 				Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow());
 	}
 
@@ -91,7 +92,7 @@ class RowCodecTest {
 		var saved = Row.CODEC.encodeStart(JsonOps.INSTANCE, DYED).getOrThrow().getAsJsonObject();
 		saved.remove("color");
 
-		assertEquals(new Row(DYED.id(), DYED.pos(), DYED.item(), Optional.empty(), DYED.name(), DYED.category(), DYED.state()),
+		assertEquals(new Row(DYED.id(), DYED.pos(), new Icon(DYED.icon().item(), Optional.empty()), DYED.name(), DYED.category(), DYED.state()),
 				Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow());
 	}
 
@@ -100,7 +101,7 @@ class RowCodecTest {
 		var saved = Row.CODEC.encodeStart(JsonOps.INSTANCE, DYED).getOrThrow().getAsJsonObject();
 		saved.addProperty("color", "plaid");
 
-		assertEquals(Optional.empty(), Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().color());
+		assertEquals(Optional.empty(), Row.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().icon().color());
 	}
 
 	@Test
