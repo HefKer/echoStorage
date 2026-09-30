@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoRelayBlockEntity;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,7 +15,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Opens an {@link EchoChestMenu} on a chest, sending its typed name as open-data. The loader
+ * Opens an {@link EchoChestMenu} on a chest, sending its typed name, size and kind as open-data. The loader
  * adapter for this menu, as {@link ProbeMenuProvider} is for the probe.
  *
  * @param remoteReach set when the chest is opened from an Echo Interface; see {@link EchoChestMenu}
@@ -47,6 +48,6 @@ public record EchoChestMenuProvider(EchoChestBlockEntity chest, @Nullable Predic
 	}
 
 	private EchoChestMenuData openingData() {
-		return new EchoChestMenuData(chest.name());
+		return new EchoChestMenuData(chest.name(), chest.rows(), BuiltInRegistries.ITEM.getKey(chest.item()));
 	}
 }

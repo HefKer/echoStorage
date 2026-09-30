@@ -18,10 +18,14 @@ import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 /** The rows an Echo Interface lists, kept across resolutions so no labelled chest silently vanishes. */
 class LinkedChestsTest {
+	private static final ResourceLocation ECHO_CHEST = LinkedChests.ECHO_CHEST_ITEM;
+	private static final ResourceLocation DEEP_ECHO_CHEST = ResourceLocation.fromNamespaceAndPath("echostorage", "deep_echo_chest");
+
 	private final LinkedChests rows = new LinkedChests();
 	private final Map<UUID, LinkedChests.Label> labels = new HashMap<>();
 	private final Set<BlockPos> unloaded = new HashSet<>();
@@ -32,7 +36,7 @@ class LinkedChestsTest {
 
 		update(true, ores);
 
-		assertEquals(List.of(new Row(ores.id(), ores.pos(), "Ores", Optional.of(Categories.ORES), State.LINKED)), rows.rows());
+		assertEquals(List.of(new Row(ores.id(), ores.pos(), ECHO_CHEST, "Ores", Optional.of(Categories.ORES), State.LINKED)), rows.rows());
 	}
 
 	@Test
@@ -50,11 +54,21 @@ class LinkedChestsTest {
 	void aRowFollowsItsChestsNameAndCategory() {
 		LinkedChest chest = chest(1, "Ores", Optional.of(Categories.ORES));
 		update(true, chest);
-		labels.put(chest.id(), new LinkedChests.Label("", Optional.empty()));
+		labels.put(chest.id(), new LinkedChests.Label(ECHO_CHEST, "", Optional.empty()));
 
 		update(true, chest);
 
-		assertEquals(new Row(chest.id(), chest.pos(), "", Optional.empty(), State.LINKED), rows.rows().get(0));
+		assertEquals(new Row(chest.id(), chest.pos(), ECHO_CHEST, "", Optional.empty(), State.LINKED), rows.rows().get(0));
+	}
+
+	@Test
+	void aRowSaysWhichKindOfChestItLists() {
+		LinkedChest echo = chest(1, "", Optional.empty());
+		LinkedChest deep = chest(2, DEEP_ECHO_CHEST, "", Optional.empty());
+
+		update(true, echo, deep);
+
+		assertEquals(List.of(ECHO_CHEST, DEEP_ECHO_CHEST), rows.rows().stream().map(Row::item).toList());
 	}
 
 	@Test
@@ -64,7 +78,7 @@ class LinkedChestsTest {
 
 		update(true);
 
-		assertEquals(List.of(new Row(chest.id(), chest.pos(), "Ores", Optional.of(Categories.ORES), State.LOST)), rows.rows());
+		assertEquals(List.of(new Row(chest.id(), chest.pos(), ECHO_CHEST, "Ores", Optional.of(Categories.ORES), State.LOST)), rows.rows());
 	}
 
 	@Test
@@ -152,8 +166,12 @@ class LinkedChestsTest {
 	// --- helpers --------------------------------------------------------------------------
 
 	private LinkedChest chest(int x, String name, Optional<Category> category) {
+		return chest(x, ECHO_CHEST, name, category);
+	}
+
+	private LinkedChest chest(int x, ResourceLocation item, String name, Optional<Category> category) {
 		LinkedChest chest = new LinkedChest(UUID.randomUUID(), new BlockPos(x, 0, 0));
-		labels.put(chest.id(), new LinkedChests.Label(name, category));
+		labels.put(chest.id(), new LinkedChests.Label(item, name, category));
 		return chest;
 	}
 

@@ -3,6 +3,7 @@ package dev.hefker.echostorage.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -18,11 +19,13 @@ import net.minecraft.core.Direction;
  * Draws an Echo Chest as vanilla's single chest, lid animation and all. It bakes only the
  * single-chest layer: there is no double-chest model to fall into (ADR-0006).
  *
- * <p>The texture is the vanilla chest, cooled with a tint so the two can be told apart. That
- * is a stand-in until the chest has art of its own.
+ * <p>The texture is the vanilla chest, cooled with a tint so it can be told from one, and darker
+ * still, towards the deep dark, for a Deep Echo Chest. That is a stand-in until the chests have
+ * art of their own.
  */
 public class EchoChestRenderer implements BlockEntityRenderer<EchoChestBlockEntity> {
 	private static final int TINT = 0xFF9FC4C8;
+	private static final int DEEP_TINT = 0xFF4F7080;
 
 	private final ModelPart lid;
 	private final ModelPart lock;
@@ -54,10 +57,11 @@ public class EchoChestRenderer implements BlockEntityRenderer<EchoChestBlockEnti
 		lid.xRot = -(open * ((float) Math.PI / 2F));
 		lock.xRot = lid.xRot;
 
+		int tint = chest.getBlockState().is(EchoBlocks.DEEP_ECHO_CHEST) ? DEEP_TINT : TINT;
 		VertexConsumer vertices = Sheets.CHEST_LOCATION.buffer(buffers, RenderType::entityCutout);
-		lid.render(pose, vertices, light, overlay, TINT);
-		lock.render(pose, vertices, light, overlay, TINT);
-		bottom.render(pose, vertices, light, overlay, TINT);
+		lid.render(pose, vertices, light, overlay, tint);
+		lock.render(pose, vertices, light, overlay, tint);
+		bottom.render(pose, vertices, light, overlay, tint);
 
 		pose.popPose();
 	}

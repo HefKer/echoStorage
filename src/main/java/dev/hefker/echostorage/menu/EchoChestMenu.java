@@ -3,6 +3,7 @@ package dev.hefker.echostorage.menu;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
@@ -20,7 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An open Echo Chest: its 27 slots over the player's inventory, laid out like a vanilla chest.
+ * An open Echo Chest: its slots over the player's inventory, laid out like a vanilla chest of as
+ * many rows. One menu type serves every size; the open-data says how many rows to lay out.
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
  * nested bundle is the quick-stack button's job alone (ADR-0007). A strict chest refuses a
@@ -32,9 +34,6 @@ import org.jetbrains.annotations.Nullable;
  * server already ignores for a menu the player no longer has open or could not still use.
  */
 public class EchoChestMenu extends AbstractContainerMenu {
-	private static final int SLOTS_PER_ROW = 9;
-	private static final int ROWS = EchoChestBlockEntity.SLOTS / SLOTS_PER_ROW;
-
 	// Buttons say what the chest should become, never "flip it", so a click from a screen that
 	// had not yet seen someone else's change cannot undo it.
 	public static final int PERMISSIVE_BUTTON = 0;
@@ -57,7 +56,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** Client-side constructor: the container is a stand-in the server syncs contents into. */
 	public EchoChestMenu(int containerId, Inventory playerInventory, EchoChestMenuData data) {
-		this(containerId, playerInventory, new SimpleContainer(EchoChestBlockEntity.SLOTS), new SimpleContainerData(DATA_COUNT), data, null);
+		this(containerId, playerInventory, new SimpleContainer(data.rows() * EchoChestBlock.SLOTS_PER_ROW),
+				new SimpleContainerData(DATA_COUNT), data, null);
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private EchoChestMenu(int containerId, Inventory playerInventory, Container container, ContainerData assignment,
 			EchoChestMenuData data, @Nullable Predicate<Player> remoteReach) {
 		super(EchoMenus.ECHO_CHEST, containerId);
-		checkContainerSize(container, EchoChestBlockEntity.SLOTS);
+		checkContainerSize(container, data.rows() * EchoChestBlock.SLOTS_PER_ROW);
 		checkContainerDataCount(assignment, DATA_COUNT);
 		this.container = container;
 		this.assignment = assignment;
@@ -84,11 +84,11 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		}
 		addDataSlots(assignment);
 
-		int playerInventoryTop = 103 + (ROWS - 4) * 18;
+		int playerInventoryTop = 103 + (data.rows() - 4) * 18;
 
-		for (int row = 0; row < ROWS; row++) {
-			for (int column = 0; column < SLOTS_PER_ROW; column++) {
-				addSlot(new Slot(container, column + row * SLOTS_PER_ROW, 8 + column * 18, 18 + row * 18));
+		for (int row = 0; row < data.rows(); row++) {
+			for (int column = 0; column < EchoChestBlock.SLOTS_PER_ROW; column++) {
+				addSlot(new Slot(container, column + row * EchoChestBlock.SLOTS_PER_ROW, 8 + column * 18, 18 + row * 18));
 			}
 		}
 
@@ -110,6 +110,11 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	public EchoChestMenuData data() {
 		return data;
+	}
+
+	/** How many of the menu's slots are the chest's; the player's inventory follows them. */
+	public int chestSlots() {
+		return data.rows() * EchoChestBlock.SLOTS_PER_ROW;
 	}
 
 	/** The button that assigns the chest to {@code category}. */
@@ -177,7 +182,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	@Override
 	public ItemStack quickMoveStack(Player player, int index) {
-		int containerSlots = EchoChestBlockEntity.SLOTS;
+		int containerSlots = chestSlots();
 		Slot slot = slots.get(index);
 
 		if (!slot.hasItem()) {

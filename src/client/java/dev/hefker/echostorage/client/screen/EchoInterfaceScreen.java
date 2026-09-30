@@ -5,6 +5,7 @@ import java.util.List;
 
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.link.LinkedChests;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.menu.EchoInterfaceMenu;
@@ -12,14 +13,18 @@ import dev.hefker.echostorage.network.DismissLinkedChestPayload;
 import dev.hefker.echostorage.network.NetClient;
 import dev.hefker.echostorage.network.OpenLinkedChestPayload;
 import dev.hefker.echostorage.search.SearchQuery;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * An open Echo Interface: one button per linked Echo Chest, which opens that chest. It lists
@@ -29,8 +34,8 @@ import net.minecraft.world.entity.player.Inventory;
  * labelled chest silently dropping off the list is the problem the mod exists to solve. Its
  * tooltip says why it is greyed: in an unloaded chunk, or lost.
  *
- * <p>A row is labelled as its chest is — the typed name, else the Category in italics, else
- * "Echo Chest" — and the search box, unless the config turns it off, dims rows whose label does
+ * <p>A row is labelled as its chest is — the typed name, else the Category in italics, else the
+ * kind of chest, such as "Echo Chest" — beside that kind's icon, and the search box, unless the config turns it off, dims rows whose label does
  * not match. Those labels are names the player typed or chose, so searching them is allowed.
  *
  * <p>Global quick-stack sits beside the search box only when the config turns it on; it is off
@@ -45,6 +50,8 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 	private static final int ROW_WIDTH = 110;
 	private static final int ROW_HEIGHT = 18;
 	private static final int DISMISS_WIDTH = 14;
+	private static final int ICON_INSET = 2;
+	private static final int ICON_SIZE = 16;
 	private static final int FOOTER_HEIGHT = 20;
 	private static final int FOOTER_WIDTH = 120;
 	private static final int PANEL = 0xFFC6C6C6;
@@ -116,10 +123,8 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 			int x = leftPos + PADDING + i / ROWS_PER_COLUMN * (ROW_WIDTH + 2 * GAP);
 			int y = topPos + TOP + i % ROWS_PER_COLUMN * (ROW_HEIGHT + GAP);
 			boolean greyed = row.state() != LinkedChests.State.LINKED;
-			Button button = Button.builder(label(row),
-							pressed -> NetClient.sendToServer(new OpenLinkedChestPayload(menu.containerId, row.id())))
-					.bounds(x, y, greyed ? ROW_WIDTH - DISMISS_WIDTH - GAP : ROW_WIDTH, ROW_HEIGHT)
-					.build();
+			Button button = new ChestRowButton(x, y, greyed ? ROW_WIDTH - DISMISS_WIDTH - GAP : ROW_WIDTH, row,
+					pressed -> NetClient.sendToServer(new OpenLinkedChestPayload(menu.containerId, row.id())));
 			button.active = !greyed;
 			if (greyed) {
 				button.setTooltip(Tooltip.create(Component.translatable(
@@ -135,9 +140,31 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 		}
 	}
 
-	/** What a row is called: the chest's typed name, else its Category in italics, else "Echo Chest". */
+	/** What a row is called: the chest's typed name, else its Category in italics, else its kind. */
 	static Component label(Row row) {
-		return row.name().isEmpty() ? EchoChestBlockEntity.unnamedTitle(row.category()) : Component.literal(row.name());
+		return row.name().isEmpty() ? EchoChestBlockEntity.unnamedTitle(row.category(), kind(row)) : Component.literal(row.name());
+	}
+
+	/** The kind of chest a row lists. An item no longer registered, such as another mod's, shows as an Echo Chest. */
+	private static Item kind(Row row) {
+		return BuiltInRegistries.ITEM.getOptional(row.item()).orElse(EchoItems.ECHO_CHEST);
+	}
+
+	/** A row's button: its chest's icon at the left, greyed or not, and the label in the room beside it. */
+	private static final class ChestRowButton extends Button {
+		private final ItemStack icon;
+
+		ChestRowButton(int x, int y, int width, Row row, OnPress onPress) {
+			super(x, y, width, ROW_HEIGHT, label(row), onPress, DEFAULT_NARRATION);
+			this.icon = new ItemStack(kind(row));
+		}
+
+		@Override
+		public void renderString(GuiGraphics graphics, Font font, int color) {
+			graphics.renderItem(icon, getX() + ICON_INSET, getY() + (getHeight() - ICON_SIZE) / 2);
+			renderScrollingString(graphics, font, getMessage(), getX() + 2 * ICON_INSET + ICON_SIZE, getY(),
+					getRight() - ICON_INSET, getBottom(), color);
+		}
 	}
 
 	/** Remakes the row buttons when the server sends new rows, leaving the search box and its focus alone. */

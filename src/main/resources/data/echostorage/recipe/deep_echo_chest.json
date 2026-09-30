@@ -1,0 +1,17 @@
+{
+  "type": "echostorage:echo_chest_upgrade",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "SCS",
+    " S "
+  ],
+  "key": {
+    "S": { "item": "minecraft:echo_shard" },
+    "C": { "item": "echostorage:echo_chest" }
+  },
+  "result": {
+    "id": "echostorage:deep_echo_chest",
+    "count": 1
+  }
+}

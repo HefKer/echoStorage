@@ -1,4 +1,4 @@
 {
   "replace": false,
-  "values": ["echostorage:echo_chest"]
+  "values": ["echostorage:echo_chest", "echostorage:deep_echo_chest"]
 }

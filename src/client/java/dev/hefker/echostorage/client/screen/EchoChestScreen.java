@@ -17,14 +17,16 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 
 /**
- * An open Echo Chest, drawn on the vanilla chest texture, whose title is a text field: click
- * the name, type, press enter. No anvil, no name tag.
+ * An open Echo Chest, drawn on the vanilla chest texture with as many rows as the chest has,
+ * whose title is a text field: click the name, type, press enter. No anvil, no name tag.
  *
  * <p>The screen only reports what was typed. The server decides what the name becomes, so the
  * field may show untrimmed text until the chest is next opened.
@@ -44,8 +46,6 @@ import net.minecraft.world.inventory.Slot;
 public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final ResourceLocation TEXTURE =
 			ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-	private static final int ROWS = 3;
-	private static final int CHEST_HEIGHT = ROWS * 18 + 17;
 	/** Where the player-inventory strip starts in the vanilla texture. */
 	private static final int PLAYER_INVENTORY_V = 126;
 	private static final int PLAYER_INVENTORY_HEIGHT = 96;
@@ -56,6 +56,10 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private static final int BUTTON_WIDTH = 90;
 	private static final int BUTTON_HEIGHT = 20;
 
+	/** How much of the texture's top the chest's rows and title take. */
+	private final int chestHeight;
+	/** What the chest is called while its name field is empty and it has no Category. */
+	private final Item kind;
 	private EditBox nameField;
 	private CycleButton<Optional<Category>> categoryButton;
 	private CycleButton<Boolean> strictButton;
@@ -68,7 +72,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 
 	public EchoChestScreen(EchoChestMenu menu, Inventory playerInventory, Component title) {
 		super(menu, playerInventory, title);
-		this.imageHeight = 114 + ROWS * 18;
+		this.chestHeight = menu.data().rows() * 18 + 17;
+		this.kind = BuiltInRegistries.ITEM.get(menu.data().kind());
+		this.imageHeight = 114 + menu.data().rows() * 18;
 		this.inventoryLabelY = imageHeight - 94;
 		this.sentName = menu.data().name();
 	}
@@ -85,7 +91,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		nameField.setMaxLength(EchoChestName.MAX_LENGTH);
 		nameField.setTextColor(LABEL_COLOR);
 		nameField.setValue(value);
-		nameField.setHint(EchoChestBlockEntity.unnamedTitle(menu.category()));
+		nameField.setHint(EchoChestBlockEntity.unnamedTitle(menu.category(), kind));
 		nameField.setTooltip(Tooltip.create(Component.translatable("container.echostorage.echo_chest.rename")));
 		addRenderableWidget(nameField);
 		typing = new TypingFocus(this);
@@ -142,7 +148,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		if (!categoryButton.getValue().equals(category)) {
 			categoryButton.setValue(category);
 		}
-		nameField.setHint(EchoChestBlockEntity.unnamedTitle(category));
+		nameField.setHint(EchoChestBlockEntity.unnamedTitle(category, kind));
 		if (strictButton.getValue() != menu.isStrict()) {
 			strictButton.setValue(menu.isStrict());
 		}
@@ -186,7 +192,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, LABEL_COLOR, false);
 		// Labels are drawn after the items, so this dims them rather than hiding behind them.
 		if (!query.isBlank()) {
-			for (Slot slot : menu.slots.subList(0, EchoChestBlockEntity.SLOTS)) {
+			for (Slot slot : menu.slots.subList(0, menu.chestSlots())) {
 				if (!slot.hasItem() || !query.matches(slot.getItem().getHoverName().getString())) {
 					graphics.fill(RenderType.guiOverlay(), slot.x, slot.y, slot.x + 16, slot.y + 16, SEARCH_MISS_DIM);
 				}
@@ -196,10 +202,10 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 
 	@Override
 	protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-		graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, CHEST_HEIGHT);
-		graphics.blit(TEXTURE, leftPos, topPos + CHEST_HEIGHT, 0, PLAYER_INVENTORY_V, imageWidth, PLAYER_INVENTORY_HEIGHT);
+		graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, chestHeight);
+		graphics.blit(TEXTURE, leftPos, topPos + chestHeight, 0, PLAYER_INVENTORY_V, imageWidth, PLAYER_INVENTORY_HEIGHT);
 		// Under the items, so a stray is marked without being hidden.
-		for (Slot slot : menu.slots.subList(0, EchoChestBlockEntity.SLOTS)) {
+		for (Slot slot : menu.slots.subList(0, menu.chestSlots())) {
 			if (slot.hasItem() && menu.isStray(slot.getItem())) {
 				int x = leftPos + slot.x;
 				int y = topPos + slot.y;
