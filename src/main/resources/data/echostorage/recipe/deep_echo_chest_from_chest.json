@@ -1,15 +1,15 @@
 {
-  "type": "echostorage:echo_chest_upgrade",
+  "type": "minecraft:crafting_shaped",
   "category": "misc",
   "group": "deep_echo_chest",
   "pattern": [
-    "S",
-    "C",
-    "S"
+    " S ",
+    "SCS",
+    " S "
   ],
   "key": {
     "S": { "item": "minecraft:echo_shard" },
-    "C": { "item": "echostorage:echo_chest" }
+    "C": { "item": "minecraft:chest" }
   },
   "result": {
     "id": "echostorage:deep_echo_chest",

@@ -214,7 +214,7 @@ public class EchoChestGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	// --- the Deep Echo Chest upgrade ------------------------------------------------------
+	// --- crafting a Deep Echo Chest -------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void upgradingAnEchoChestKeepsItsNameCategoryAndStrictness(GameTestHelper helper) {
@@ -223,7 +223,7 @@ public class EchoChestGameTest implements FabricGameTest {
 		EchoChestAssignment assignment = new EchoChestAssignment(Optional.of(Categories.ORES), true);
 		chest.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, assignment);
 
-		ItemStack deep = craftUpgrade(helper, chest);
+		ItemStack deep = craft(helper, column(chest));
 
 		helper.assertTrue(deep.is(EchoItems.DEEP_ECHO_CHEST), "crafted " + deep);
 		helper.assertValueEqual(deep.get(DataComponents.CUSTOM_NAME), Component.literal("Ores"), "name");
@@ -238,7 +238,7 @@ public class EchoChestGameTest implements FabricGameTest {
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void upgradingABlankEchoChestGivesABlankDeepOneThatStacks(GameTestHelper helper) {
-		ItemStack deep = craftUpgrade(helper, new ItemStack(EchoItems.ECHO_CHEST));
+		ItemStack deep = craft(helper, column(new ItemStack(EchoItems.ECHO_CHEST)));
 
 		helper.assertTrue(ItemStack.isSameItemSameComponents(deep, new ItemStack(EchoItems.DEEP_ECHO_CHEST)),
 				"a blank chest should upgrade to a plain Deep Echo Chest, got " + deep);
@@ -246,28 +246,46 @@ public class EchoChestGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
-	public void theUpgradeNeedsTheCornersEmpty(GameTestHelper helper) {
-		List<ItemStack> grid = upgradeGrid(new ItemStack(EchoItems.ECHO_CHEST));
+	public void aChestInAPlusOfFourShardsMakesABlankDeepEchoChest(GameTestHelper helper) {
+		ItemStack deep = craft(helper, plus(new ItemStack(Items.CHEST)));
+
+		helper.assertTrue(ItemStack.isSameItemSameComponents(deep, new ItemStack(EchoItems.DEEP_ECHO_CHEST)),
+				"a chest should make a plain Deep Echo Chest, got " + deep);
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theChestRecipeNeedsTheCornersEmpty(GameTestHelper helper) {
+		List<ItemStack> grid = plus(new ItemStack(Items.CHEST));
 		grid.set(0, new ItemStack(Items.ECHO_SHARD));
 
 		helper.assertTrue(recipeFor(helper, grid).isEmpty(), "a shard in a corner still crafted");
 		helper.succeed();
 	}
 
-	/** Four echo shards in a plus around {@code chest}, crafted as a crafting table would. */
-	private static ItemStack craftUpgrade(GameTestHelper helper, ItemStack chest) {
-		List<ItemStack> grid = upgradeGrid(chest);
+	/** {@code grid} crafted as a crafting table would, failing the test if nothing matches. */
+	private static ItemStack craft(GameTestHelper helper, List<ItemStack> grid) {
 		RecipeHolder<CraftingRecipe> recipe = recipeFor(helper, grid)
 				.orElseThrow(() -> new GameTestAssertException("no recipe for " + grid));
 		return recipe.value().assemble(CraftingInput.of(3, 3, grid), helper.getLevel().registryAccess());
 	}
 
-	private static List<ItemStack> upgradeGrid(ItemStack chest) {
+	/** An echo shard above and below {@code centre}: the upgrade from an Echo Chest. */
+	private static List<ItemStack> column(ItemStack centre) {
+		return shardsAround(centre, 1, 7);
+	}
+
+	/** An echo shard on each side of {@code centre}: the recipe from a plain chest. */
+	private static List<ItemStack> plus(ItemStack centre) {
+		return shardsAround(centre, 1, 3, 5, 7);
+	}
+
+	private static List<ItemStack> shardsAround(ItemStack centre, int... shardSlots) {
 		List<ItemStack> grid = new ArrayList<>(Collections.nCopies(9, ItemStack.EMPTY));
-		for (int edge : new int[] {1, 3, 5, 7}) {
-			grid.set(edge, new ItemStack(Items.ECHO_SHARD));
+		for (int slot : shardSlots) {
+			grid.set(slot, new ItemStack(Items.ECHO_SHARD));
 		}
-		grid.set(4, chest);
+		grid.set(4, centre);
 		return grid;
 	}
 
