@@ -32,3 +32,10 @@ A carried Echo Shulker Box keeps its strictness. A Strict box vacuums only what 
 matches, into the bundles inside it as well as its own slots: vacuum is not the player's hand, so
 it is refused like Quick-stack. Strictness therefore touches two bulk actions, Quick-stack and
 Vacuum, and both refuse the same strays.
+
+## Amendment (2026-09-30): an Echo Shulker Box refuses shulker boxes even by hand
+
+One exception to "the hand always works": an Echo Shulker Box's slots refuse a shulker box of any
+kind, vanilla or Echo, even when the player places it by hand, as vanilla's shulker box slots do.
+Every other path refuses them too, strict or permissive. This is not strictness: it keeps a
+carried box from nesting inside another, and it applies to no other kind of Echo Chest.

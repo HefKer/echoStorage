@@ -23,3 +23,10 @@ Category is set, and carrying one without the other would keep half of the playe
   loads as unassigned and must never make the item or the chest fail to load.
 - The Category name shown on an unnamed chest stays display-only. It is never written as the
   item's custom name.
+
+## Amendment (2026-09-30): an Echo Shulker Box keeps its contents and stacks to one
+
+The Echo Shulker Box breaks both rules above, as a vanilla shulker box would. Broken, by hand or
+by a piston, it does not spill: its contents travel on the item it drops as, along with its
+colour, name, Category and strictness. Its item stacks to 1 even when blank, as vanilla's does.
+Its id still dies with the block, so placing it again makes a new chest.

@@ -42,6 +42,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.component.SeededContainerLoot;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -51,6 +52,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 /**
  * The Echo Shulker Box's own behaviour: what it keeps when broken, how it is crafted and dyed, and
@@ -238,6 +240,15 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 
 		helper.assertTrue(made.is(EchoItems.ECHO_SHULKER_BOX), "crafted " + made);
 		helper.assertFalse(made.has(DataComponents.BASE_COLOR), "an undyed box came out " + made.get(DataComponents.BASE_COLOR));
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aVanillaBoxWhoseLootHasNotRolledIsNoInputForTheShardRecipe(GameTestHelper helper) {
+		ItemStack unrolled = new ItemStack(Items.PURPLE_SHULKER_BOX);
+		unrolled.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.END_CITY_TREASURE, 7L));
+
+		helper.assertTrue(recipeFor(helper, column(unrolled)).isEmpty(), "a box with a loot table still crafted");
 		helper.succeed();
 	}
 

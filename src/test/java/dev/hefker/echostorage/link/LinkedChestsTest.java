@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.link.LinkedChests.Icon;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,7 @@ class LinkedChestsTest {
 
 		update(true, ores);
 
-		assertEquals(List.of(new Row(ores.id(), ores.pos(), ECHO_CHEST, Optional.empty(), "Ores", Optional.of(Categories.ORES), State.LINKED)), rows.rows());
+		assertEquals(List.of(new Row(ores.id(), ores.pos(), new Icon(ECHO_CHEST, Optional.empty()), "Ores", Optional.of(Categories.ORES), State.LINKED)), rows.rows());
 	}
 
 	@Test
@@ -56,11 +57,11 @@ class LinkedChestsTest {
 	void aRowFollowsItsChestsNameAndCategory() {
 		LinkedChest chest = chest(1, "Ores", Optional.of(Categories.ORES));
 		update(true, chest);
-		labels.put(chest.id(), new LinkedChests.Label(ECHO_CHEST, Optional.empty(), "", Optional.empty()));
+		labels.put(chest.id(), new LinkedChests.Label(new Icon(ECHO_CHEST, Optional.empty()), "", Optional.empty()));
 
 		update(true, chest);
 
-		assertEquals(new Row(chest.id(), chest.pos(), ECHO_CHEST, Optional.empty(), "", Optional.empty(), State.LINKED), rows.rows().get(0));
+		assertEquals(new Row(chest.id(), chest.pos(), new Icon(ECHO_CHEST, Optional.empty()), "", Optional.empty(), State.LINKED), rows.rows().get(0));
 	}
 
 	@Test
@@ -70,17 +71,17 @@ class LinkedChestsTest {
 
 		update(true, echo, deep);
 
-		assertEquals(List.of(ECHO_CHEST, DEEP_ECHO_CHEST), rows.rows().stream().map(Row::item).toList());
+		assertEquals(List.of(ECHO_CHEST, DEEP_ECHO_CHEST), rows.rows().stream().map(row -> row.icon().item()).toList());
 	}
 
 	@Test
 	void aRowCarriesItsChestsColour() {
 		LinkedChest box = chest(1, ECHO_SHULKER_BOX, "", Optional.empty());
-		labels.put(box.id(), new LinkedChests.Label(ECHO_SHULKER_BOX, Optional.of(DyeColor.LIME), "", Optional.empty()));
+		labels.put(box.id(), new LinkedChests.Label(new Icon(ECHO_SHULKER_BOX, Optional.of(DyeColor.LIME)), "", Optional.empty()));
 
 		update(true, box);
 
-		assertEquals(Optional.of(DyeColor.LIME), rows.rows().getFirst().color());
+		assertEquals(Optional.of(DyeColor.LIME), rows.rows().getFirst().icon().color());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ class LinkedChestsTest {
 
 		update(true);
 
-		assertEquals(List.of(new Row(chest.id(), chest.pos(), ECHO_CHEST, Optional.empty(), "Ores", Optional.of(Categories.ORES), State.LOST)), rows.rows());
+		assertEquals(List.of(new Row(chest.id(), chest.pos(), new Icon(ECHO_CHEST, Optional.empty()), "Ores", Optional.of(Categories.ORES), State.LOST)), rows.rows());
 	}
 
 	@Test
@@ -183,7 +184,7 @@ class LinkedChestsTest {
 
 	private LinkedChest chest(int x, ResourceLocation item, String name, Optional<Category> category) {
 		LinkedChest chest = new LinkedChest(UUID.randomUUID(), new BlockPos(x, 0, 0));
-		labels.put(chest.id(), new LinkedChests.Label(item, Optional.empty(), name, category));
+		labels.put(chest.id(), new LinkedChests.Label(new Icon(item, Optional.empty()), name, category));
 		return chest;
 	}
 

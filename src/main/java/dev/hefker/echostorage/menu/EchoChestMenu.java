@@ -3,10 +3,9 @@ package dev.hefker.echostorage.menu;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import dev.hefker.echostorage.block.AbstractEchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
-import dev.hefker.echostorage.block.EchoShulkerBoxBlock;
-import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -58,8 +57,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private final Container container;
 	private final ContainerData assignment;
 	private final EchoChestMenuData data;
-	/** Whether the chest is an Echo Shulker Box, which holds no shulker boxes. */
-	private final boolean carried;
+	/** Whether the chest holds no shulker boxes, even placed by hand: an Echo Shulker Box. */
+	private final boolean refusesShulkerBoxes;
 	/** Who may go on using the menu when it was opened from an Echo Interface; null when opened in person. */
 	@Nullable
 	private final Predicate<Player> remoteReach;
@@ -89,7 +88,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		this.assignment = assignment;
 		this.data = data;
 		this.remoteReach = remoteReach;
-		this.carried = Block.byItem(BuiltInRegistries.ITEM.get(data.kind())) instanceof EchoShulkerBoxBlock;
+		this.refusesShulkerBoxes = AbstractEchoChestBlock.refusesShulkerBoxes(Block.byItem(BuiltInRegistries.ITEM.get(data.kind())));
 		if (remoteReach == null) {
 			container.startOpen(playerInventory.player);
 		}
@@ -102,7 +101,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 				int slot = column + row * EchoChestBlock.SLOTS_PER_ROW;
 				int x = 8 + column * 18;
 				int y = 18 + row * 18;
-				addSlot(carried ? new ShulkerBoxSlot(container, slot, x, y) : new Slot(container, slot, x, y));
+				addSlot(refusesShulkerBoxes ? new ShulkerBoxSlot(container, slot, x, y) : new Slot(container, slot, x, y));
 			}
 		}
 
@@ -152,7 +151,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The chest's own rule, read from the synced data so the client predicts what the server does. */
 	private boolean refuses(ItemStack stack) {
-		return (carried && !EchoShulkerBoxBlockEntity.fits(stack)) || EchoChestBlockEntity.refuses(category(), isStrict(), stack);
+		return EchoChestBlockEntity.refuses(refusesShulkerBoxes, category(), isStrict(), stack);
 	}
 
 	@Override

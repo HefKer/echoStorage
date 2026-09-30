@@ -10,17 +10,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -28,12 +24,8 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -56,7 +48,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Opened from an Echo Interface it opens whatever is on the lid, since nothing lifts.
  */
-public class EchoShulkerBoxBlock extends BaseEntityBlock {
+public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 	public static final MapCodec<EchoShulkerBoxBlock> CODEC = simpleCodec(EchoShulkerBoxBlock::new);
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	/** How many stacks the tooltip names before it says how many more there are, as vanilla's does. */
@@ -86,6 +78,17 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected DirectionProperty facing() {
+		return FACING;
+	}
+
+	/** Its slots take no shulker box, even by hand, as vanilla's do (ADR-0009). */
+	@Override
+	public boolean refusesShulkerBoxes() {
+		return true;
+	}
+
+	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING);
 	}
@@ -93,14 +96,6 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		return defaultBlockState().setValue(FACING, context.getClickedFace());
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-		super.setPlacedBy(level, pos, state, placer, stack);
-		if (level.getBlockEntity(pos) instanceof EchoShulkerBoxBlockEntity box) {
-			box.assignNewId();
-		}
 	}
 
 	@Override
@@ -131,10 +126,16 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 		return level.noCollision(lid);
 	}
 
+	/**
+	 * Only the player's hand has to lift the lid: {@link #useWithoutItem} checks it, and nothing
+	 * else does. A spectator's right-click opens through here, and an Echo Interface opens the box
+	 * with a provider of its own; both skip the lid on purpose, as vanilla lets a spectator look
+	 * inside a blocked shulker box, and nothing lifts when a box is opened from afar.
+	 */
 	@Nullable
 	@Override
 	protected MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
-		return level.getBlockEntity(pos) instanceof EchoShulkerBoxBlockEntity box ? new EchoChestMenuProvider(box) : null;
+		return super.getMenuProvider(state, level, pos);
 	}
 
 	/** A creative player's break drops nothing, so a box with anything in it drops itself here. */
@@ -179,14 +180,7 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 		if (stacks > shown) {
 			lines.add(Component.translatable("container.shulkerBox.more", stacks - shown).withStyle(ChatFormatting.ITALIC));
 		}
-		EchoChestBlock.appendAssignment(stack, lines);
-	}
-
-	@Override
-	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		if (level.getBlockEntity(pos) instanceof EchoShulkerBoxBlockEntity box) {
-			box.recheckOpen();
-		}
+		appendAssignment(stack, lines);
 	}
 
 	@Nullable
@@ -199,11 +193,6 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
 		return createTickerHelper(type, EchoBlocks.ECHO_SHULKER_BOX_ENTITY, EchoShulkerBoxBlockEntity::tick);
-	}
-
-	@Override
-	protected RenderShape getRenderShape(BlockState state) {
-		return RenderShape.ENTITYBLOCK_ANIMATED;
 	}
 
 	@Override
@@ -223,25 +212,5 @@ public class EchoShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
 		return false;
-	}
-
-	@Override
-	protected boolean hasAnalogOutputSignal(BlockState state) {
-		return true;
-	}
-
-	@Override
-	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
-	}
-
-	@Override
-	protected BlockState rotate(BlockState state, Rotation rotation) {
-		return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-	}
-
-	@Override
-	protected BlockState mirror(BlockState state, Mirror mirror) {
-		return state.rotate(mirror.getRotation(state.getValue(FACING)));
 	}
 }
