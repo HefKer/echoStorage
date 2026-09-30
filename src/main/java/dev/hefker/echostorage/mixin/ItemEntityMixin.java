@@ -18,8 +18,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Auto-vacuum's hook: a pickup offers the stack to the player's Echo Bundles before vanilla puts
- * what is left in the inventory. On NeoForge this is an {@code ItemEntityPickupEvent.Pre} handler.
+ * Auto-vacuum's hook: a pickup offers the stack to the player's Echo Bundles and Echo Shulker
+ * Boxes before vanilla puts what is left in the inventory. On NeoForge this is an
+ * {@code ItemEntityPickupEvent.Pre} handler.
  */
 @Mixin(ItemEntity.class)
 abstract class ItemEntityMixin {
@@ -35,7 +36,7 @@ abstract class ItemEntityMixin {
 		ItemEntity self = (ItemEntity) (Object) this;
 		// The same conditions vanilla checks before it will let the player take the item at all.
 		if (self.level().isClientSide() || pickupDelay != 0 || (target != null && !target.equals(player.getUUID()))
-				|| !EchoConfig.get().bundleVacuum()) {
+				|| !EchoConfig.get().vacuum()) {
 			return;
 		}
 		ItemStack stack = self.getItem();
@@ -46,8 +47,8 @@ abstract class ItemEntityMixin {
 			return;
 		}
 
-		// What vanilla does for a pickup, for the part the bundles took; it handles the rest.
-		// No inventory slot changed but the bundle's, so the trigger behind "Diamonds!" and
+		// What vanilla does for a pickup, for the part the bundles and boxes took; it handles the rest.
+		// No inventory slot changed but theirs, so the trigger behind "Diamonds!" and
 		// recipe unlocks is told about the item itself.
 		player.take(self, taken);
 		player.awardStat(Stats.ITEM_PICKED_UP.get(before.getItem()), taken);

@@ -19,7 +19,7 @@ import net.minecraft.network.codec.StreamCodec;
  * value of the wrong type loads as the default, because a failing component would lose the whole
  * bundle, contents and all.
  *
- * @param category what the bundle vacuums, if assigned; with none it vacuums what it already holds
+ * @param category what the bundle vacuums, if assigned, besides what it already holds
  * @param vacuum   whether the bundle vacuums at all; off until the player turns it on
  */
 public record EchoBundleSettings(Optional<Category> category, boolean vacuum) {

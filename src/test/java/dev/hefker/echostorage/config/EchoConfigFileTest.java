@@ -21,7 +21,8 @@ class EchoConfigFileTest {
 		assertEquals(EchoConfig.DEFAULTS, EchoConfigFile.load(file));
 
 		String written = Files.readString(file);
-		assertTrue(written.contains("vacuum = true"), written);
+		assertTrue(written.contains("[vacuum]"), written);
+		assertTrue(written.contains("enabled = true"), written);
 		assertTrue(written.contains("#"), "the file should explain its switches:\n" + written);
 	}
 
@@ -55,8 +56,8 @@ class EchoConfigFileTest {
 		Path file = write("""
 				[search]
 				by_chest_name = false
-				[bundle]
-				vacuum = false
+				[vacuum]
+				enabled = false
 				""");
 
 		EchoConfig config = EchoConfigFile.load(file);
@@ -67,16 +68,16 @@ class EchoConfigFileTest {
 	@Test
 	void switchesMissingFromTheFileAreAddedWithoutLosingThePlayersOwn() throws IOException {
 		Path file = write("""
-				[bundle]
+				[vacuum]
 				# vacuum pulls in junk on our server
-				vacuum = false
+				enabled = false
 				""");
 
 		EchoConfigFile.load(file);
 
 		String rewritten = Files.readString(file);
 		assertTrue(rewritten.contains("vacuum pulls in junk on our server"), rewritten);
-		assertTrue(rewritten.contains("vacuum = false"), rewritten);
+		assertTrue(rewritten.contains("enabled = false"), rewritten);
 		assertTrue(rewritten.contains("refill = true"), rewritten);
 		assertEquals(new EchoConfig(true, true, false, true, true, true, false), EchoConfigFile.load(file));
 	}
@@ -110,11 +111,25 @@ class EchoConfigFileTest {
 		Path file = write("""
 				[links]
 				wireless = true
+				[vacuum]
+				enabled = false
+				""");
+
+		assertEquals(new EchoConfig(true, true, false, true, true, true, false), EchoConfigFile.load(file));
+	}
+
+	/** The switch was renamed before it was ever released, so the old value is not carried over. */
+	@Test
+	void aFileFromBeforeVacuumCoveredTheShulkerBoxLoadsWithVacuumAtItsDefault() throws IOException {
+		Path file = write("""
 				[bundle]
 				vacuum = false
 				""");
 
-		assertEquals(new EchoConfig(true, true, false, true, true, true, false), EchoConfigFile.load(file));
+		EchoConfig config = EchoConfigFile.load(file);
+
+		assertEquals(EchoConfig.DEFAULTS, config);
+		assertTrue(Files.readString(file).contains("enabled = true"), Files.readString(file));
 	}
 
 	private Path write(String toml) throws IOException {

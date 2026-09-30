@@ -104,7 +104,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		ServerPlayer player = player(helper);
 		player.getInventory().setItem(BUNDLE_SLOT, bundle(vacuuming(Optional.empty()), new ItemStack(Items.COBBLESTONE, 10)));
 
-		withConfig(EchoConfig.DEFAULTS.withBundleVacuum(false), () -> drop(helper, player, new ItemStack(Items.COBBLESTONE, 20)));
+		withConfig(EchoConfig.DEFAULTS.withVacuum(false), () -> drop(helper, player, new ItemStack(Items.COBBLESTONE, 20)));
 
 		helper.assertValueEqual(count(player.getInventory().getItem(BUNDLE_SLOT), Items.COBBLESTONE), 10, "cobblestone in the bundle");
 		helper.assertTrue(inventoryHoldsLoose(player, Items.COBBLESTONE), "the cobblestone went to the inventory");
