@@ -12,10 +12,15 @@ import net.minecraft.world.level.material.MapColor;
 
 /** Block and block entity registration. Vanilla registries only, so this ports unchanged. */
 public final class EchoBlocks {
-	public static final Block ECHO_CHEST = new EchoChestBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST));
+	/** 27 slots, a vanilla chest's (ADR-0005). */
+	public static final Block ECHO_CHEST = new EchoChestBlock(3, BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST));
 
+	/** An Echo Chest with twice the room, as a separate block rather than a setting (ADR-0005). */
+	public static final Block DEEP_ECHO_CHEST = new EchoChestBlock(6, BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST));
+
+	/** One type for every Echo Chest block: each chest takes its size from its block. */
 	public static final BlockEntityType<EchoChestBlockEntity> ECHO_CHEST_ENTITY =
-			BlockEntityType.Builder.of(EchoChestBlockEntity::new, ECHO_CHEST).build(null);
+			BlockEntityType.Builder.of(EchoChestBlockEntity::new, ECHO_CHEST, DEEP_ECHO_CHEST).build(null);
 
 	public static final Block ECHO_INTERFACE = new EchoInterfaceBlock(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_CYAN)
@@ -40,6 +45,7 @@ public final class EchoBlocks {
 
 	public static void register() {
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_chest"), ECHO_CHEST);
+		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("deep_echo_chest"), DEEP_ECHO_CHEST);
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_chest"), ECHO_CHEST_ENTITY);
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_interface"), ECHO_INTERFACE_ENTITY);

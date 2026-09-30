@@ -14,6 +14,7 @@ import dev.hefker.echostorage.link.Resolution;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
@@ -168,8 +169,8 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 
 	private static LinkedChests.Label labelOf(Level level, BlockPos pos) {
 		return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest
-				? new LinkedChests.Label(chest.name(), chest.category())
-				: new LinkedChests.Label("", Optional.empty());
+				? new LinkedChests.Label(BuiltInRegistries.ITEM.getKey(chest.item()), chest.name(), chest.category())
+				: new LinkedChests.Label(LinkedChests.ECHO_CHEST_ITEM, "", Optional.empty());
 	}
 
 	// --- persistence ----------------------------------------------------------------------

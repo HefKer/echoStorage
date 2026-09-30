@@ -1,11 +1,14 @@
 package dev.hefker.echostorage.gametest;
 
+import java.util.Collection;
 import java.util.List;
 
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoInterfaceBlockEntity;
 import dev.hefker.echostorage.block.EchoRelayBlockEntity;
+import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
+import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
 import dev.hefker.echostorage.link.LinkedChest;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -15,7 +18,9 @@ import dev.hefker.echostorage.network.OpenLinkedChestPayload;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
@@ -27,6 +32,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * replaced chest stops it.
  */
 public class EchoRelayGameTest implements FabricGameTest {
+	@GameTestGenerator
+	public Collection<TestFunction> everyChestKind() {
+		return EchoChestTests.forEveryKind(EchoRelayGameTest.class);
+	}
+
 	private static final BlockPos INTERFACE = new BlockPos(0, 1, 0);
 	/** At the end of two blocks of sculk from the interface. */
 	private static final BlockPos RELAY = new BlockPos(3, 1, 0);
@@ -35,9 +45,9 @@ public class EchoRelayGameTest implements FabricGameTest {
 	/** Halfway between the relay and the chest. */
 	private static final BlockPos BETWEEN = new BlockPos(3, 1, 4);
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void openingAChestNearARelayTheSculkReachesLinksIt(GameTestHelper helper) {
-		EchoInterfaceBlockEntity echoInterface = build(helper);
+	@EveryChestKind
+	public void openingAChestNearARelayTheSculkReachesLinksIt(GameTestHelper helper, ChestKind kind) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
 		EchoChestBlockEntity chest = helper.getBlockEntity(CHEST);
 		echoInterface.resolve();
 		helper.assertTrue(echoInterface.rows().isEmpty(), "the chest was linked before the relay heard it");
@@ -151,14 +161,18 @@ public class EchoRelayGameTest implements FabricGameTest {
 
 	// --- helpers --------------------------------------------------------------------------
 
-	/** An interface, two blocks of sculk, a relay, and a chest seven blocks from the relay. */
+	/** An interface, two blocks of sculk, a relay, and an Echo Chest seven blocks from the relay. */
 	private static EchoInterfaceBlockEntity build(GameTestHelper helper) {
+		return build(helper, ChestKind.ECHO);
+	}
+
+	private static EchoInterfaceBlockEntity build(GameTestHelper helper, ChestKind kind) {
 		helper.setBlock(INTERFACE, EchoBlocks.ECHO_INTERFACE);
 		for (int x = 1; x < RELAY.getX(); x++) {
 			helper.setBlock(new BlockPos(x, 1, 0), Blocks.SCULK);
 		}
 		helper.setBlock(RELAY, EchoBlocks.ECHO_RELAY);
-		helper.setBlock(CHEST, EchoBlocks.ECHO_CHEST);
+		helper.setBlock(CHEST, kind.block);
 		return helper.getBlockEntity(INTERFACE);
 	}
 

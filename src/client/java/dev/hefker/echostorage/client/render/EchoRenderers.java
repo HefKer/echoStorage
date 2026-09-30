@@ -9,6 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 /**
  * Block entity and item renderers, and block render layers. The block entity half is vanilla
@@ -26,9 +28,14 @@ public final class EchoRenderers {
 		// The sculk sensor's tendrils the relay's model borrows are cut out.
 		BlockRenderLayerMap.INSTANCE.putBlock(EchoBlocks.ECHO_RELAY, RenderType.cutout());
 
-		// The item is drawn by the block entity renderer, over a chest that is in no level.
-		EchoChestBlockEntity itemChest = new EchoChestBlockEntity(BlockPos.ZERO, EchoBlocks.ECHO_CHEST.defaultBlockState());
-		BuiltinItemRendererRegistry.INSTANCE.register(EchoItems.ECHO_CHEST, (stack, mode, pose, buffers, light, overlay) ->
+		registerChestItem(EchoItems.ECHO_CHEST, EchoBlocks.ECHO_CHEST);
+		registerChestItem(EchoItems.DEEP_ECHO_CHEST, EchoBlocks.DEEP_ECHO_CHEST);
+	}
+
+	/** The item is drawn by the block entity renderer, over a chest of its kind that is in no level. */
+	private static void registerChestItem(Item item, Block block) {
+		EchoChestBlockEntity itemChest = new EchoChestBlockEntity(BlockPos.ZERO, block.defaultBlockState());
+		BuiltinItemRendererRegistry.INSTANCE.register(item, (stack, mode, pose, buffers, light, overlay) ->
 				Minecraft.getInstance().getBlockEntityRenderDispatcher().renderItem(itemChest, pose, buffers, light, overlay));
 	}
 }

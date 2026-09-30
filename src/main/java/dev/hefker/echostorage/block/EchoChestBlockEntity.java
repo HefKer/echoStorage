@@ -25,6 +25,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,7 +36,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An Echo Chest: 27 vanilla slots (ADR-0005), an id, and a name the player typed.
+ * An Echo Chest: vanilla slots, as many rows of them as its block has (27 for an Echo Chest,
+ * ADR-0005, 54 for a Deep Echo Chest), an id, and a name the player typed.
  *
  * <p>The id is assigned when the block entity is made and again when a player places the
  * chest, and it is never written to the dropped item — so it dies with the block, and a
@@ -48,15 +50,13 @@ import org.jetbrains.annotations.Nullable;
  * and renaming in place is the point.
  */
 public class EchoChestBlockEntity extends BlockEntity implements Container, Nameable, LidBlockEntity {
-	public static final int SLOTS = 27;
-
 	private static final String ID_TAG = "EchoChestId";
 	private static final String NAME_TAG = "CustomName";
 	private static final String CATEGORY_TAG = "Category";
 	private static final String STRICT_TAG = "Strict";
 	private static final int EVENT_SET_OPEN_COUNT = 1;
 
-	private final NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
+	private final NonNullList<ItemStack> items;
 	private final ChestLidController lid = new ChestLidController();
 	private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
 		@Override
@@ -87,6 +87,20 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	public EchoChestBlockEntity(BlockPos pos, BlockState state) {
 		super(EchoBlocks.ECHO_CHEST_ENTITY, pos, state);
+		if (!(state.getBlock() instanceof EchoChestBlock block)) {
+			throw new IllegalArgumentException("An Echo Chest's block entity on " + state);
+		}
+		items = NonNullList.withSize(block.rows() * EchoChestBlock.SLOTS_PER_ROW, ItemStack.EMPTY);
+	}
+
+	/** How many rows of nine slots this chest has, as its block says. */
+	public int rows() {
+		return items.size() / EchoChestBlock.SLOTS_PER_ROW;
+	}
+
+	/** Which kind of chest this is: the item it drops as. */
+	public Item item() {
+		return getBlockState().getBlock().asItem();
 	}
 
 	/** This chest's identity: stable while it stands, never shared, never carried by the item. */
@@ -173,18 +187,21 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * What the chest is called on screen: its typed name, else its Category's name in italics,
-	 * else "Echo Chest". The Category fallback is display-only — never stored as the custom name,
-	 * so clearing the Category strands no name the player never typed.
+	 * else what kind of chest it is. The Category fallback is display-only — never stored as the
+	 * custom name, so clearing the Category strands no name the player never typed.
 	 */
 	@Override
 	public Component getName() {
-		return name != null ? name : unnamedTitle(category());
+		return name != null ? name : unnamedTitle(category(), item());
 	}
 
-	/** What an Echo Chest with no typed name is called: its Category in italics, else "Echo Chest". */
-	public static Component unnamedTitle(Optional<Category> category) {
+	/**
+	 * What a chest with no typed name is called: its Category in italics, else what {@code kind}
+	 * of chest it is, such as "Echo Chest" or "Deep Echo Chest".
+	 */
+	public static Component unnamedTitle(Optional<Category> category, Item kind) {
 		return category.<Component>map(assigned -> assigned.displayName().copy().withStyle(ChatFormatting.ITALIC))
-				.orElseGet(EchoBlocks.ECHO_CHEST::getName);
+				.orElseGet(kind::getDescription);
 	}
 
 	@Nullable
@@ -268,7 +285,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	@Override
 	public int getContainerSize() {
-		return SLOTS;
+		return items.size();
 	}
 
 	@Override

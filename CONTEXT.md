@@ -11,8 +11,8 @@ A placed container that knows which Category it holds and carries a player-given
 _Avoid_: filtered chest, smart chest, storage unit
 
 **Deep Echo Chest**:
-An Echo Chest with twice the room, made by upgrading an Echo Chest. Everything said of an
-Echo Chest holds for it.
+An Echo Chest with twice the room, crafted from a chest or by upgrading an Echo Chest, which
+keeps its name and Category. Everything said of an Echo Chest holds for it.
 _Avoid_: large echo chest, double echo chest, echo chest tier 2
 
 **Echo Bundle**:

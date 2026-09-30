@@ -13,8 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 /**
- * Item registration, and the only place that names the loader's creative-tab and server-tick
- * events. On NeoForge these become {@code BuildCreativeModeTabContentsEvent} and
+ * Item and recipe-serializer registration, and the only place that names the loader's
+ * creative-tab and server-tick events. On NeoForge these become {@code BuildCreativeModeTabContentsEvent} and
  * {@code ServerTickEvent.Post}; nothing else in the package changes.
  */
 public final class EchoItems {
@@ -23,6 +23,8 @@ public final class EchoItems {
 			.component(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY));
 
 	public static final Item ECHO_CHEST = new BlockItem(EchoBlocks.ECHO_CHEST, new Item.Properties());
+
+	public static final Item DEEP_ECHO_CHEST = new BlockItem(EchoBlocks.DEEP_ECHO_CHEST, new Item.Properties());
 
 	public static final Item ECHO_INTERFACE = new BlockItem(EchoBlocks.ECHO_INTERFACE, new Item.Properties());
 
@@ -37,13 +39,15 @@ public final class EchoItems {
 	public static void register() {
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_bundle"), ECHO_BUNDLE);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_chest"), ECHO_CHEST);
+		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("deep_echo_chest"), DEEP_ECHO_CHEST);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_relay"), ECHO_RELAY);
+		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, EchoStorage.id("echo_chest_upgrade"), EchoChestUpgradeRecipe.SERIALIZER);
 
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
 				.register(entries -> entries.addAfter(Items.BUNDLE, ECHO_BUNDLE));
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
-				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST, ECHO_INTERFACE, ECHO_RELAY));
+				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST, DEEP_ECHO_CHEST, ECHO_INTERFACE, ECHO_RELAY));
 		ServerTickEvents.END_SERVER_TICK.register(server -> SPILL.tick());
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> SPILL.flush());
 	}

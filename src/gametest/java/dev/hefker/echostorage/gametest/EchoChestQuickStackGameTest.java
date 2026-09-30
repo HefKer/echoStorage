@@ -2,7 +2,6 @@ package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
-import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_PLAYER_MENU_SLOT;
 import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.menu;
@@ -10,16 +9,22 @@ import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
 import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
+import java.util.Collection;
+
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
+import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -29,11 +34,16 @@ import net.minecraft.world.item.Items;
  * the only thing that writes into a bundle inside a chest (ADR-0007); shift-click never does.
  */
 public class EchoChestQuickStackGameTest implements FabricGameTest {
+	@GameTestGenerator
+	public Collection<TestFunction> everyChestKind() {
+		return EchoChestTests.forEveryKind(EchoChestQuickStackGameTest.class);
+	}
+
 	private static final int HOTBAR_SLOT = 0;
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void theButtonPutsAwayWhatTheChestHoldsFromTheMainInventoryNotTheHotbar(GameTestHelper helper) {
-		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+	@EveryChestKind
+	public void theButtonPutsAwayWhatTheChestHoldsFromTheMainInventoryNotTheHotbar(GameTestHelper helper, ChestKind kind) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
 		chest.setItem(0, new ItemStack(Items.COBBLESTONE, 10));
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.COBBLESTONE, 20));
@@ -50,14 +60,14 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void theButtonTopsUpABundleWhereAShiftClickFillsASlot(GameTestHelper helper) {
-		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+	@EveryChestKind
+	public void theButtonTopsUpABundleWhereAShiftClickFillsASlot(GameTestHelper helper, ChestKind kind) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
 		chest.setItem(0, bundleOf(new ItemStack(Items.IRON_ORE, 10)));
 		ServerPlayer player = openedBy(helper, chest);
 
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 20));
-		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
 		assertBundleHolds(helper, chest.getItem(0), 10, "after a shift-click");
 		assertStack(helper, new ItemStack(Items.IRON_ORE, 20), chest.getItem(1), "the shift-clicked slot");
 

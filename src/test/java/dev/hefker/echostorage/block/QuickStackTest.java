@@ -36,7 +36,7 @@ class QuickStackTest {
 		VanillaBootstrap.run();
 	}
 
-	private final SimpleContainer chest = new SimpleContainer(EchoChestBlockEntity.SLOTS);
+	private final SimpleContainer chest = new SimpleContainer(27);
 	private final SimpleContainer player = new SimpleContainer(36);
 
 	@Test

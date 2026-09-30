@@ -2,7 +2,6 @@ package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
-import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_PLAYER_MENU_SLOT;
 import static dev.hefker.echostorage.gametest.EchoChestTests.NEIGHBOUR;
 import static dev.hefker.echostorage.gametest.EchoChestTests.breakChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
@@ -14,16 +13,18 @@ import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.placeFromItem;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
+import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -33,7 +34,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
@@ -54,6 +57,11 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
  * put in by shift-click or hopper.
  */
 public class EchoChestCategoryGameTest implements FabricGameTest {
+	@GameTestGenerator
+	public Collection<TestFunction> everyChestKind() {
+		return EchoChestTests.forEveryKind(EchoChestCategoryGameTest.class);
+	}
+
 	// --- persistence ----------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -196,7 +204,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	public void aScreenOpenedBeforeItsFirstSyncShowsNoCategory(GameTestHelper helper) {
 		// The client's menu, as it stands between the open packet and the first data sync.
 		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-		EchoChestMenu unsynced = new EchoChestMenu(1, player.getInventory(), new EchoChestMenuData(""));
+		EchoChestMenu unsynced = new EchoChestMenu(1, player.getInventory(), new EchoChestMenuData("", 3, ChestKind.ECHO.id()));
 
 		helper.assertValueEqual(unsynced.category(), Optional.empty(), "category before sync");
 		helper.assertFalse(unsynced.isStray(new ItemStack(Items.BREAD)), "an unsynced screen marks strays");
@@ -257,7 +265,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
 
-		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT)),
 				"the stray stays with the player");
@@ -271,7 +279,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 5));
 
-		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 5), chest.getItem(0)), "the match went in");
 		helper.succeed();
@@ -284,7 +292,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
 
-		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(0)), "the stray went in");
 		helper.succeed();
@@ -310,7 +318,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		ItemStack bundle = bundleOf(new ItemStack(Items.IRON_ORE, 10));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, bundle.copy());
 
-		menu(player).quickMoveStack(player, FIRST_PLAYER_MENU_SLOT);
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(bundle, chest.getItem(0)), "the bundle went in, got " + chest.getItem(0));
 		helper.succeed();
@@ -318,9 +326,9 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 	// --- display fallback -----------------------------------------------------------------
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void anUnnamedChestIsShownByItsCategoryInItalics(GameTestHelper helper) {
-		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+	@EveryChestKind
+	public void anUnnamedChestIsShownByItsCategoryInItalics(GameTestHelper helper, ChestKind kind) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
 		chest.assign(Categories.ORES);
 
 		helper.assertValueEqual(chest.getName(), Component.translatable("category.echostorage.ores").withStyle(ChatFormatting.ITALIC),
@@ -340,13 +348,21 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	@GameTest(template = EMPTY_STRUCTURE)
-	public void clearingTheCategoryOfAnUnnamedChestStrandsNoName(GameTestHelper helper) {
-		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+	@EveryChestKind
+	public void anUnnamedChestWithNoCategoryIsCalledByItsKind(GameTestHelper helper, ChestKind kind) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
+
+		helper.assertValueEqual(chest.getName(), kind.block.getName(), "shown name");
+		helper.succeed();
+	}
+
+	@EveryChestKind
+	public void clearingTheCategoryOfAnUnnamedChestStrandsNoName(GameTestHelper helper, ChestKind kind) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
 		chest.assign(Categories.ORES);
 		chest.assign(null);
 
-		helper.assertValueEqual(chest.getName(), EchoBlocks.ECHO_CHEST.getName(), "shown name");
+		helper.assertValueEqual(chest.getName(), kind.block.getName(), "shown name");
 		helper.succeed();
 	}
 
