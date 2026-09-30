@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "conditions": [
+        { "condition": "minecraft:survives_explosion" }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "echostorage:echo_shulker_box",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "source": "block_entity",
+              "include": [
+                "minecraft:custom_name",
+                "minecraft:container",
+                "minecraft:base_color",
+                "echostorage:echo_chest_assignment"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "echostorage:blocks/echo_shulker_box"
+}

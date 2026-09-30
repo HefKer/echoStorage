@@ -55,7 +55,8 @@ import org.jetbrains.annotations.Nullable;
  * should never cost materials.
  *
  * <p>The Echo Chest and the Deep Echo Chest are this one class with a different number of rows;
- * everything else about them is the same.
+ * everything else about them is the same. The Echo Shulker Box is a block of its own, since it is
+ * shaped, opened and broken like a shulker box: see {@link EchoShulkerBoxBlock}.
  */
 public class EchoChestBlock extends BaseEntityBlock {
 	public static final MapCodec<EchoChestBlock> CODEC = RecordCodecBuilder.mapCodec(block -> block.group(
@@ -128,6 +129,11 @@ public class EchoChestBlock extends BaseEntityBlock {
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
 		super.appendHoverText(stack, context, lines, flag);
+		appendAssignment(stack, lines);
+	}
+
+	/** The Category and Strict lines of any kind of Echo Chest's item. */
+	static void appendAssignment(ItemStack stack, List<Component> lines) {
 		EchoChestAssignment assignment = stack.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
 		assignment.category().ifPresent(category -> lines.add(
 				Component.translatable("item.echostorage.echo_chest.category", category.displayName()).withStyle(ChatFormatting.GRAY)));

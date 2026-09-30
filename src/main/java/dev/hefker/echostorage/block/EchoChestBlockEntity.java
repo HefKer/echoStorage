@@ -29,6 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestLidController;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
@@ -54,19 +55,20 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	private static final String NAME_TAG = "CustomName";
 	private static final String CATEGORY_TAG = "Category";
 	private static final String STRICT_TAG = "Strict";
-	private static final int EVENT_SET_OPEN_COUNT = 1;
+	/** The block event that tells clients how many players have the chest open, which moves the lid. */
+	protected static final int EVENT_SET_OPEN_COUNT = 1;
 
 	private final NonNullList<ItemStack> items;
 	private final ChestLidController lid = new ChestLidController();
 	private final ContainerOpenersCounter openers = new ContainerOpenersCounter() {
 		@Override
 		protected void onOpen(Level level, BlockPos pos, BlockState state) {
-			playSound(level, pos, SoundEvents.CHEST_OPEN);
+			playSound(level, pos, openSound());
 		}
 
 		@Override
 		protected void onClose(Level level, BlockPos pos, BlockState state) {
-			playSound(level, pos, SoundEvents.CHEST_CLOSE);
+			playSound(level, pos, closeSound());
 		}
 
 		@Override
@@ -86,16 +88,30 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	private EchoChestAssignment assignment = EchoChestAssignment.DEFAULT;
 
 	public EchoChestBlockEntity(BlockPos pos, BlockState state) {
-		super(EchoBlocks.ECHO_CHEST_ENTITY, pos, state);
+		this(EchoBlocks.ECHO_CHEST_ENTITY, pos, state, rowsOf(state));
+	}
+
+	/** For another kind of Echo Chest, with a block of its own: {@code rows} rows of nine slots. */
+	protected EchoChestBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int rows) {
+		super(type, pos, state);
+		items = NonNullList.withSize(rows * EchoChestBlock.SLOTS_PER_ROW, ItemStack.EMPTY);
+	}
+
+	private static int rowsOf(BlockState state) {
 		if (!(state.getBlock() instanceof EchoChestBlock block)) {
 			throw new IllegalArgumentException("An Echo Chest's block entity on " + state);
 		}
-		items = NonNullList.withSize(block.rows() * EchoChestBlock.SLOTS_PER_ROW, ItemStack.EMPTY);
+		return block.rows();
 	}
 
 	/** How many rows of nine slots this chest has, as its block says. */
 	public int rows() {
 		return items.size() / EchoChestBlock.SLOTS_PER_ROW;
+	}
+
+	/** The slots themselves, for a kind of chest that carries them on its item. */
+	protected NonNullList<ItemStack> items() {
+		return items;
 	}
 
 	/** Which kind of chest this is: the item it drops as. */
@@ -161,7 +177,10 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		setChanged();
 	}
 
-	/** Whether {@code stack} is kept out: only by a strict chest, and only if it is not in the Category. */
+	/**
+	 * Whether {@code stack} is kept out: by a strict chest, only if it is not in the Category. What
+	 * every insert but the player's hand asks, so a kind of chest that keeps more out says so here.
+	 */
 	public boolean refuses(ItemStack stack) {
 		return refuses(assignment.category(), assignment.strict(), stack);
 	}
@@ -378,6 +397,14 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	@Override
 	public float getOpenNess(float partialTick) {
 		return lid.getOpenness(partialTick);
+	}
+
+	protected SoundEvent openSound() {
+		return SoundEvents.CHEST_OPEN;
+	}
+
+	protected SoundEvent closeSound() {
+		return SoundEvents.CHEST_CLOSE;
 	}
 
 	private static void playSound(Level level, BlockPos pos, SoundEvent sound) {

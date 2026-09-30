@@ -14,6 +14,7 @@ import static dev.hefker.echostorage.gametest.EchoChestTests.placeFromItem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
@@ -67,7 +69,7 @@ public class EchoChestGameTest implements FabricGameTest {
 
 	// --- break and drop -------------------------------------------------------------------
 
-	@EveryChestKind
+	@EveryChestKind(placedOnly = true)
 	public void breakingSpillsEveryItemAndDropsTheChest(GameTestHelper helper, ChestKind kind) {
 		EchoChestBlockEntity chest = placeChest(helper, CHEST, kind);
 		chest.setItem(0, new ItemStack(Items.COBBLESTONE, 64));
@@ -81,7 +83,7 @@ public class EchoChestGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	@EveryChestKind
+	@EveryChestKind(placedOnly = true)
 	public void aBlankChestDropsAsAPlainItemThatStacks(GameTestHelper helper, ChestKind kind) {
 		placeChest(helper, CHEST, kind);
 
@@ -163,8 +165,8 @@ public class EchoChestGameTest implements FabricGameTest {
 		chest.setItem(kind.slots - 1, new ItemStack(Items.DIAMOND, 3));
 
 		CompoundTag saved = chest.saveWithFullMetadata(helper.getLevel().registryAccess());
-		EchoChestBlockEntity loaded = new EchoChestBlockEntity(chest.getBlockPos(), chest.getBlockState());
-		loaded.loadWithComponents(saved, helper.getLevel().registryAccess());
+		EchoChestBlockEntity loaded = (EchoChestBlockEntity) BlockEntity.loadStatic(chest.getBlockPos(), chest.getBlockState(), saved,
+				helper.getLevel().registryAccess());
 
 		helper.assertValueEqual(loaded.id(), chest.id(), "id after load");
 		helper.assertValueEqual(loaded.name(), "Ores", "name after load");
@@ -196,13 +198,13 @@ public class EchoChestGameTest implements FabricGameTest {
 		placeFromItem(helper, new ItemStack(kind.item), CHEST);
 		// Sneak-placing against a chest's side is how vanilla asks for a double chest.
 		Map<BlockPos, ChestKind> placed = new LinkedHashMap<>(Map.of(CHEST, kind));
-		Direction side = Direction.EAST;
+		Iterator<Direction> sides = Direction.Plane.HORIZONTAL.iterator();
 		for (ChestKind neighbour : ChestKind.values()) {
+			Direction side = sides.next();
 			Player sneaking = holding(helper, new ItemStack(neighbour.item));
 			sneaking.setShiftKeyDown(true);
 			helper.placeAt(sneaking, sneaking.getMainHandItem(), CHEST, side);
 			placed.put(CHEST.relative(side), neighbour);
-			side = side.getOpposite();
 		}
 
 		placed.forEach((pos, placedKind) -> {

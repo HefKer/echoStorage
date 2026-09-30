@@ -24,7 +24,8 @@ import net.minecraft.core.Direction;
  * art of their own.
  */
 public class EchoChestRenderer implements BlockEntityRenderer<EchoChestBlockEntity> {
-	private static final int TINT = 0xFF9FC4C8;
+	/** The Echo Chest's teal, which an undyed Echo Shulker Box shares. */
+	static final int TINT = 0xFF9FC4C8;
 	private static final int DEEP_TINT = 0xFF4F7080;
 
 	private final ModelPart lid;

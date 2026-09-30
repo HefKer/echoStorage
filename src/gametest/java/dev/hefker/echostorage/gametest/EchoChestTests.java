@@ -59,17 +59,21 @@ final class EchoChestTests {
 
 	/** Each kind of Echo Chest, for the tests that {@link #forEveryKind} runs once per kind. */
 	enum ChestKind {
-		ECHO(EchoBlocks.ECHO_CHEST, EchoItems.ECHO_CHEST, 27),
-		DEEP(EchoBlocks.DEEP_ECHO_CHEST, EchoItems.DEEP_ECHO_CHEST, 54);
+		ECHO(EchoBlocks.ECHO_CHEST, EchoItems.ECHO_CHEST, 27, false),
+		DEEP(EchoBlocks.DEEP_ECHO_CHEST, EchoItems.DEEP_ECHO_CHEST, 54, false),
+		SHULKER(EchoBlocks.ECHO_SHULKER_BOX, EchoItems.ECHO_SHULKER_BOX, 27, true);
 
 		final Block block;
 		final Item item;
 		final int slots;
+		/** Whether it keeps its contents when broken, rather than spilling them. */
+		final boolean carried;
 
-		ChestKind(Block block, Item item, int slots) {
+		ChestKind(Block block, Item item, int slots, boolean carried) {
 			this.block = block;
 			this.item = item;
 			this.slots = slots;
+			this.carried = carried;
 		}
 
 		ResourceLocation id() {
@@ -84,6 +88,8 @@ final class EchoChestTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@interface EveryChestKind {
+		/** Leaves out the kinds that are carried, for what only a chest that spills when broken does. */
+		boolean placedOnly() default false;
 	}
 
 	/**
@@ -98,6 +104,9 @@ final class EchoChestTests {
 				.sorted(Comparator.comparing(Method::getName))
 				.forEach(method -> {
 					for (ChestKind kind : ChestKind.values()) {
+						if (kind.carried && method.getAnnotation(EveryChestKind.class).placedOnly()) {
+							continue;
+						}
 						String name = suite + "." + method.getName().toLowerCase(Locale.ROOT) + "_" + kind.name().toLowerCase(Locale.ROOT);
 						functions.add(new TestFunction(DEFAULT_BATCH, name, FabricGameTest.EMPTY_STRUCTURE, DEFAULT_TIMEOUT_TICKS, 0, true,
 								helper -> invoke(tests, method, helper, kind)));

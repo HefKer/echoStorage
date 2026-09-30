@@ -5,10 +5,13 @@ import java.util.function.Predicate;
 
 import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.block.EchoShulkerBoxBlock;
+import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.config.EchoConfig;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,8 +19,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.ShulkerBoxSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -28,6 +33,9 @@ import org.jetbrains.annotations.Nullable;
  * nested bundle is the quick-stack button's job alone (ADR-0007). A strict chest refuses a
  * stray from shift-click and quick-stack alike (ADR-0009), but a stack placed by hand always goes
  * in: that is the player choosing to.
+ *
+ * <p>An Echo Shulker Box's slots take no shulker box of any kind, even by hand, as vanilla's
+ * shulker box slots do; the open-data's kind says which chest this is, so the client predicts it.
  *
  * <p>The chest's Category and strictness ride along as vanilla data slots, so an open screen
  * follows every change, and the screen changes them with vanilla menu-button clicks — which the
@@ -50,6 +58,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private final Container container;
 	private final ContainerData assignment;
 	private final EchoChestMenuData data;
+	/** Whether the chest is an Echo Shulker Box, which holds no shulker boxes. */
+	private final boolean carried;
 	/** Who may go on using the menu when it was opened from an Echo Interface; null when opened in person. */
 	@Nullable
 	private final Predicate<Player> remoteReach;
@@ -79,6 +89,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		this.assignment = assignment;
 		this.data = data;
 		this.remoteReach = remoteReach;
+		this.carried = Block.byItem(BuiltInRegistries.ITEM.get(data.kind())) instanceof EchoShulkerBoxBlock;
 		if (remoteReach == null) {
 			container.startOpen(playerInventory.player);
 		}
@@ -88,7 +99,10 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 		for (int row = 0; row < data.rows(); row++) {
 			for (int column = 0; column < EchoChestBlock.SLOTS_PER_ROW; column++) {
-				addSlot(new Slot(container, column + row * EchoChestBlock.SLOTS_PER_ROW, 8 + column * 18, 18 + row * 18));
+				int slot = column + row * EchoChestBlock.SLOTS_PER_ROW;
+				int x = 8 + column * 18;
+				int y = 18 + row * 18;
+				addSlot(carried ? new ShulkerBoxSlot(container, slot, x, y) : new Slot(container, slot, x, y));
 			}
 		}
 
@@ -138,7 +152,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The chest's own rule, read from the synced data so the client predicts what the server does. */
 	private boolean refuses(ItemStack stack) {
-		return EchoChestBlockEntity.refuses(category(), isStrict(), stack);
+		return (carried && !EchoShulkerBoxBlockEntity.fits(stack)) || EchoChestBlockEntity.refuses(category(), isStrict(), stack);
 	}
 
 	@Override
