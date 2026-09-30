@@ -67,13 +67,13 @@ final class EchoChestTests {
 		final Item item;
 		final int slots;
 		/** Whether it keeps its contents when broken, rather than spilling them. */
-		final boolean carried;
+		final boolean keepsContents;
 
-		ChestKind(Block block, Item item, int slots, boolean carried) {
+		ChestKind(Block block, Item item, int slots, boolean keepsContents) {
 			this.block = block;
 			this.item = item;
 			this.slots = slots;
-			this.carried = carried;
+			this.keepsContents = keepsContents;
 		}
 
 		ResourceLocation id() {
@@ -88,7 +88,7 @@ final class EchoChestTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@interface EveryChestKind {
-		/** Leaves out the kinds that are carried, for what only a chest that spills when broken does. */
+		/** Leaves out the kinds that keep their contents when broken, for what only a chest that spills does. */
 		boolean placedOnly() default false;
 	}
 
@@ -104,7 +104,7 @@ final class EchoChestTests {
 				.sorted(Comparator.comparing(Method::getName))
 				.forEach(method -> {
 					for (ChestKind kind : ChestKind.values()) {
-						if (kind.carried && method.getAnnotation(EveryChestKind.class).placedOnly()) {
+						if (kind.keepsContents && method.getAnnotation(EveryChestKind.class).placedOnly()) {
 							continue;
 						}
 						String name = suite + "." + method.getName().toLowerCase(Locale.ROOT) + "_" + kind.name().toLowerCase(Locale.ROOT);

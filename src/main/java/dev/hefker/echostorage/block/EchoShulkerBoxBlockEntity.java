@@ -19,7 +19,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,13 +34,14 @@ import org.jetbrains.annotations.Nullable;
  * the block (ADR-0008), so placing it again makes a new chest.
  *
  * <p>No shulker box of any kind goes in, from any source: hoppers and quick-stack ask
- * {@link #refuses}, and the menu's slots refuse them as vanilla's shulker box slots do.
+ * {@link #refuses}, and the menu's slots refuse them as vanilla's shulker box slots do, both
+ * because its block {@link EchoShulkerBoxBlock#refusesShulkerBoxes refuses shulker boxes}.
  *
  * <p>The lid is vanilla's shulker lid: it rises and turns over ten ticks on both sides, pushing
  * whatever is in the way, and while it is open the block's shape follows it.
  */
 public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
-	public static final int ROWS = 3;
+	private static final int ROWS = 3;
 	private static final String COLOR_TAG = "Color";
 	/** How far the lid moves each tick: open in ten. */
 	private static final float LID_STEP = 0.1F;
@@ -58,20 +58,10 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		super(EchoBlocks.ECHO_SHULKER_BOX_ENTITY, pos, state, ROWS);
 	}
 
-	/** Whether {@code stack} may go inside any carried container: never a shulker box, of any kind. */
-	public static boolean fits(ItemStack stack) {
-		return stack.getItem().canFitInsideContainerItems();
-	}
-
 	/** The dye this box was coloured with; empty when it is undyed. */
+	@Override
 	public Optional<DyeColor> color() {
 		return Optional.ofNullable(color);
-	}
-
-	/** A shulker box is kept out even from a permissive box, as vanilla keeps it out of its own. */
-	@Override
-	public boolean refuses(ItemStack stack) {
-		return !fits(stack) || super.refuses(stack);
 	}
 
 	// --- the item side --------------------------------------------------------------------
@@ -94,10 +84,10 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		}
 	}
 
-	/** Clients draw the box in its colour, and nothing else of it: only the colour is sent. */
+	/** Clients draw the box in its colour, so it is sent along with whatever an Echo Chest sends. */
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-		CompoundTag tag = new CompoundTag();
+		CompoundTag tag = super.getUpdateTag(registries);
 		saveColor(tag);
 		return tag;
 	}

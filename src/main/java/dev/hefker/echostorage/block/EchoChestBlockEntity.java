@@ -25,6 +25,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -119,6 +120,11 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		return getBlockState().getBlock().asItem();
 	}
 
+	/** The dye this chest was coloured with: empty but for a dyed Echo Shulker Box. */
+	public Optional<DyeColor> color() {
+		return Optional.empty();
+	}
+
 	/** This chest's identity: stable while it stands, never shared, never carried by the item. */
 	public UUID id() {
 		return id;
@@ -178,16 +184,22 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	}
 
 	/**
-	 * Whether {@code stack} is kept out: by a strict chest, only if it is not in the Category. What
-	 * every insert but the player's hand asks, so a kind of chest that keeps more out says so here.
+	 * Whether {@code stack} is kept out: by a strict chest, only if it is not in the Category, and by
+	 * a chest that {@link #refusesShulkerBoxes refuses shulker boxes}, any shulker box. What every insert but the player's
+	 * hand asks.
 	 */
 	public boolean refuses(ItemStack stack) {
-		return refuses(assignment.category(), assignment.strict(), stack);
+		return refuses(refusesShulkerBoxes(), assignment.category(), assignment.strict(), stack);
+	}
+
+	/** Whether this kind of chest keeps out every shulker box, as its block says. */
+	public boolean refusesShulkerBoxes() {
+		return getBlockState().getBlock() instanceof AbstractEchoChestBlock block && block.refusesShulkerBoxes();
 	}
 
 	/** The rule itself, shared with the menu so a client screen can predict it. */
-	public static boolean refuses(Optional<Category> category, boolean strict, ItemStack stack) {
-		return strict && isStray(category, stack);
+	public static boolean refuses(boolean refusesShulkerBoxes, Optional<Category> category, boolean strict, ItemStack stack) {
+		return (refusesShulkerBoxes && !stack.getItem().canFitInsideContainerItems()) || (strict && isStray(category, stack));
 	}
 
 	/**

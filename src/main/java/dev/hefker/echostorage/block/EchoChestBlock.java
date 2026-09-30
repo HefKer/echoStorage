@@ -5,33 +5,22 @@ import java.util.List;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.menu.EchoChestMenuData;
-import dev.hefker.echostorage.menu.EchoChestMenuProvider;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -58,7 +47,7 @@ import org.jetbrains.annotations.Nullable;
  * everything else about them is the same. The Echo Shulker Box is a block of its own, since it is
  * shaped, opened and broken like a shulker box: see {@link EchoShulkerBoxBlock}.
  */
-public class EchoChestBlock extends BaseEntityBlock {
+public class EchoChestBlock extends AbstractEchoChestBlock {
 	public static final MapCodec<EchoChestBlock> CODEC = RecordCodecBuilder.mapCodec(block -> block.group(
 			Codec.intRange(1, EchoChestMenuData.MAX_ROWS).fieldOf("rows").forGetter(EchoChestBlock::rows),
 			propertiesCodec()
@@ -89,6 +78,11 @@ public class EchoChestBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected DirectionProperty facing() {
+		return FACING;
+	}
+
+	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING);
 	}
@@ -96,14 +90,6 @@ public class EchoChestBlock extends BaseEntityBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-		super.setPlacedBy(level, pos, state, placer, stack);
-		if (level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest) {
-			chest.assignNewId();
-		}
 	}
 
 	@Override
@@ -119,12 +105,6 @@ public class EchoChestBlock extends BaseEntityBlock {
 		return InteractionResult.CONSUME;
 	}
 
-	@Nullable
-	@Override
-	protected MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
-		return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest ? new EchoChestMenuProvider(chest) : null;
-	}
-
 	/** Why an Echo Chest item does not stack with a blank one: what it will be set to when placed. */
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
@@ -132,27 +112,10 @@ public class EchoChestBlock extends BaseEntityBlock {
 		appendAssignment(stack, lines);
 	}
 
-	/** The Category and Strict lines of any kind of Echo Chest's item. */
-	static void appendAssignment(ItemStack stack, List<Component> lines) {
-		EchoChestAssignment assignment = stack.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
-		assignment.category().ifPresent(category -> lines.add(
-				Component.translatable("item.echostorage.echo_chest.category", category.displayName()).withStyle(ChatFormatting.GRAY)));
-		if (assignment.strict()) {
-			lines.add(Component.translatable("item.echostorage.echo_chest.strict").withStyle(ChatFormatting.GRAY));
-		}
-	}
-
 	@Override
 	protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
 		Containers.dropContentsOnDestroy(state, newState, level, pos);
 		super.onRemove(state, level, pos, newState, movedByPiston);
-	}
-
-	@Override
-	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		if (level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest) {
-			chest.recheckOpen();
-		}
 	}
 
 	@Nullable
@@ -170,33 +133,8 @@ public class EchoChestBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected RenderShape getRenderShape(BlockState state) {
-		return RenderShape.ENTITYBLOCK_ANIMATED;
-	}
-
-	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPE;
-	}
-
-	@Override
-	protected boolean hasAnalogOutputSignal(BlockState state) {
-		return true;
-	}
-
-	@Override
-	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
-	}
-
-	@Override
-	protected BlockState rotate(BlockState state, Rotation rotation) {
-		return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-	}
-
-	@Override
-	protected BlockState mirror(BlockState state, Mirror mirror) {
-		return state.rotate(mirror.getRotation(state.getValue(FACING)));
 	}
 
 	@Override
