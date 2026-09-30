@@ -42,6 +42,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 	private static final int ROWS = 3;
+	/** How many slots a box has, placed or carried. */
+	public static final int SLOTS = ROWS * EchoChestBlock.SLOTS_PER_ROW;
 	private static final String COLOR_TAG = "Color";
 	/** How far the lid moves each tick: open in ten. */
 	private static final float LID_STEP = 0.1F;
