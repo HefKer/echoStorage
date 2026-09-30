@@ -88,8 +88,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		this.assignment = assignment;
 		this.data = data;
 		this.remoteReach = remoteReach;
-		this.refusesShulkerBoxes = Block.byItem(BuiltInRegistries.ITEM.get(data.kind())) instanceof AbstractEchoChestBlock block
-				&& block.refusesShulkerBoxes();
+		this.refusesShulkerBoxes = AbstractEchoChestBlock.refusesShulkerBoxes(Block.byItem(BuiltInRegistries.ITEM.get(data.kind())));
 		if (remoteReach == null) {
 			container.startOpen(playerInventory.player);
 		}

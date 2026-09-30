@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
@@ -44,6 +45,11 @@ public abstract class AbstractEchoChestBlock extends BaseEntityBlock {
 	 */
 	public boolean refusesShulkerBoxes() {
 		return false;
+	}
+
+	/** Whether {@code block} is a kind of Echo Chest that {@link #refusesShulkerBoxes() refuses shulker boxes}. */
+	public static boolean refusesShulkerBoxes(Block block) {
+		return block instanceof AbstractEchoChestBlock chest && chest.refusesShulkerBoxes();
 	}
 
 	/** Placed by a player: a new id, so data copied from another chest cannot clone its id. */

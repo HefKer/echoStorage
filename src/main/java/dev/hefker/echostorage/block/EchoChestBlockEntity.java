@@ -185,8 +185,8 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * Whether {@code stack} is kept out: by a strict chest, only if it is not in the Category, and by
-	 * a chest that {@link #refusesShulkerBoxes refuses shulker boxes}, any shulker box. What every insert but the player's
-	 * hand asks.
+	 * a chest that {@link #refusesShulkerBoxes refuses shulker boxes}, any shulker box. What every
+	 * insert but the player's hand asks.
 	 */
 	public boolean refuses(ItemStack stack) {
 		return refuses(refusesShulkerBoxes(), assignment.category(), assignment.strict(), stack);
@@ -194,7 +194,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/** Whether this kind of chest keeps out every shulker box, as its block says. */
 	public boolean refusesShulkerBoxes() {
-		return getBlockState().getBlock() instanceof AbstractEchoChestBlock block && block.refusesShulkerBoxes();
+		return AbstractEchoChestBlock.refusesShulkerBoxes(getBlockState().getBlock());
 	}
 
 	/** The rule itself, shared with the menu so a client screen can predict it. */
