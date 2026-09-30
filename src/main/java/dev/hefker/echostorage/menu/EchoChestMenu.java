@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import dev.hefker.echostorage.block.AbstractEchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlock;
+import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlock;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
@@ -176,7 +177,8 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The chest's own rule, read from the synced data so the client predicts what the server does. */
 	private boolean refuses(ItemStack stack) {
-		return EchoChestBlockEntity.refuses(refusesShulkerBoxes(), category(), isStrict(), stack);
+		return EchoChestBlockEntity.refuses(
+				refusesShulkerBoxes(), new EchoChestAssignment(category(), isStrict()), stack);
 	}
 
 	@Override

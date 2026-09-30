@@ -189,7 +189,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 * insert but the player's hand asks.
 	 */
 	public boolean refuses(ItemStack stack) {
-		return refuses(refusesShulkerBoxes(), assignment.category(), assignment.strict(), stack);
+		return refuses(refusesShulkerBoxes(), assignment, stack);
 	}
 
 	/** Whether this kind of chest keeps out every shulker box, as its block says. */
@@ -197,9 +197,13 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		return AbstractEchoChestBlock.refusesShulkerBoxes(getBlockState().getBlock());
 	}
 
-	/** The rule itself, shared with the menu so a client screen can predict it. */
-	public static boolean refuses(boolean refusesShulkerBoxes, Optional<Category> category, boolean strict, ItemStack stack) {
-		return (refusesShulkerBoxes && !stack.getItem().canFitInsideContainerItems()) || (strict && isStray(category, stack));
+	/**
+	 * The rule itself, for a chest with {@code assignment}: shared with the menu so a client screen
+	 * can predict it, and with a carried Echo Shulker Box, which has no block entity to ask.
+	 */
+	public static boolean refuses(boolean refusesShulkerBoxes, EchoChestAssignment assignment, ItemStack stack) {
+		return (refusesShulkerBoxes && !stack.getItem().canFitInsideContainerItems())
+				|| (assignment.strict() && isStray(assignment.category(), stack));
 	}
 
 	/**

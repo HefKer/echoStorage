@@ -157,7 +157,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		EchoChestAssignment assignment = box.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
 		int before = moving.getCount();
 		QuickStack.put(slots, QuickStack.wanted(slots, assignment.category()), stack -> refuses(
-				EchoShulkerBoxBlock.REFUSES_SHULKER_BOXES, assignment.category(), assignment.strict(), stack), moving);
+				EchoShulkerBoxBlock.REFUSES_SHULKER_BOXES, assignment, stack), moving);
 		if (moving.getCount() == before) {
 			return null;
 		}
