@@ -36,7 +36,7 @@ import net.minecraft.world.item.Item;
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
  *
- * <p>An Echo Shulker Box has a vacuum button under them, which sets whether the box picks up
+ * <p>An Echo Shulker Box has a Vacuum button under them, which sets whether the box picks up
  * what the player picks up once they carry it. No other kind of chest has one.
  *
  * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would

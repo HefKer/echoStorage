@@ -2,7 +2,7 @@ package dev.hefker.echostorage.config;
 
 /**
  * World-preference switches: what a pack author may turn off for everyone. Per-object intent —
- * a chest's strictness, a bundle's or box's vacuum toggle — is never here; it lives on the object. Nor
+ * a chest's strictness, a bundle's or box's Vacuum toggle — is never here; it lives on the object. Nor
  * is the Echo Chest's slot count: container size is world data, and shrinking it would strand
  * whatever sat in the removed slots.
  *
@@ -12,7 +12,7 @@ package dev.hefker.echostorage.config;
  *
  * @param searchInOpenContainer whether an open container's screen offers a search box
  * @param searchByChestName     whether an Echo Interface can search its chests by name
- * @param vacuum                whether any carried Echo Bundle or Echo Shulker Box may vacuum on pickup;
+ * @param vacuumEnabled         whether any carried Echo Bundle or Echo Shulker Box may Vacuum on pickup;
  *                              each one still starts with its own toggle off
  * @param bundleRefill          whether placing the last block in hand pulls the next from a bundle
  * @param bundlePlace           whether using an Echo Bundle on a block places a block out of it
@@ -23,7 +23,7 @@ package dev.hefker.echostorage.config;
 public record EchoConfig(
 		boolean searchInOpenContainer,
 		boolean searchByChestName,
-		boolean vacuum,
+		boolean vacuumEnabled,
 		boolean bundleRefill,
 		boolean bundlePlace,
 		boolean chestQuickStack,
@@ -40,28 +40,28 @@ public record EchoConfig(
 		current = config;
 	}
 
-	public EchoConfig withVacuum(boolean vacuum) {
-		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuum, bundleRefill, bundlePlace,
+	public EchoConfig withVacuumEnabled(boolean vacuumEnabled) {
+		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuumEnabled, bundleRefill, bundlePlace,
 				chestQuickStack, interfaceQuickStack);
 	}
 
 	public EchoConfig withBundleRefill(boolean bundleRefill) {
-		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuum, bundleRefill, bundlePlace,
+		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuumEnabled, bundleRefill, bundlePlace,
 				chestQuickStack, interfaceQuickStack);
 	}
 
 	public EchoConfig withBundlePlace(boolean bundlePlace) {
-		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuum, bundleRefill, bundlePlace,
+		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuumEnabled, bundleRefill, bundlePlace,
 				chestQuickStack, interfaceQuickStack);
 	}
 
 	public EchoConfig withChestQuickStack(boolean chestQuickStack) {
-		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuum, bundleRefill, bundlePlace,
+		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuumEnabled, bundleRefill, bundlePlace,
 				chestQuickStack, interfaceQuickStack);
 	}
 
 	public EchoConfig withInterfaceQuickStack(boolean interfaceQuickStack) {
-		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuum, bundleRefill, bundlePlace,
+		return new EchoConfig(searchInOpenContainer, searchByChestName, vacuumEnabled, bundleRefill, bundlePlace,
 				chestQuickStack, interfaceQuickStack);
 	}
 }

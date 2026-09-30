@@ -266,7 +266,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 			EchoChestMenu menu = menu(player);
 
 			helper.assertFalse(menu.isShulkerBox(), kind + "'s menu says it is a shulker box");
-			helper.assertFalse(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), kind + "'s menu took the vacuum button");
+			helper.assertFalse(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), kind + "'s menu took the Vacuum button");
 			helper.assertFalse(menu.vacuums(), kind + "'s menu shows vacuum on");
 			player.closeContainer();
 		}
@@ -302,7 +302,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		box.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
 		player.getInventory().setItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT, box.copy());
 
-		withConfig(EchoConfig.DEFAULTS.withVacuum(false), () -> drop(helper, player, new ItemStack(Items.BREAD, 3)));
+		withConfig(EchoConfig.DEFAULTS.withVacuumEnabled(false), () -> drop(helper, player, new ItemStack(Items.BREAD, 3)));
 
 		assertStack(helper, box, player.getInventory().getItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT), "the box");
 		helper.assertValueEqual(player.getInventory().countItem(Items.BREAD), 3, "bread loose in the inventory");

@@ -15,7 +15,7 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * An Echo Bundle's own screen: its Category and its vacuum toggle, for the bundle in the hand
+ * An Echo Bundle's own screen: its Category and its Vacuum toggle, for the bundle in the hand
  * that opened it. No slots, so nothing can move the bundle while it is open.
  *
  * <p>Built the way {@link EchoChestMenu} is: the settings ride along as data slots read from and

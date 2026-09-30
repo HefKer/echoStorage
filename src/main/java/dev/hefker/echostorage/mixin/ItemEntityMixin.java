@@ -36,7 +36,7 @@ abstract class ItemEntityMixin {
 		ItemEntity self = (ItemEntity) (Object) this;
 		// The same conditions vanilla checks before it will let the player take the item at all.
 		if (self.level().isClientSide() || pickupDelay != 0 || (target != null && !target.equals(player.getUUID()))
-				|| !EchoConfig.get().vacuum()) {
+				|| !EchoConfig.get().vacuumEnabled()) {
 			return;
 		}
 		ItemStack stack = self.getItem();

@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The Echo Bundle's three conveniences against a real player and world, each with its config
- * switch off as well as on, and the bundle's own screen that sets its Category and vacuum toggle.
+ * switch off as well as on, and the bundle's own screen that sets its Category and Vacuum toggle.
  *
  * <p>Tests that change the config restore it before returning; they run on the server thread
  * start to finish, so no other test sees the change.
@@ -105,7 +105,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		ServerPlayer player = player(helper);
 		player.getInventory().setItem(BUNDLE_SLOT, bundle(vacuuming(Optional.empty()), new ItemStack(Items.COBBLESTONE, 10)));
 
-		withConfig(EchoConfig.DEFAULTS.withVacuum(false), () -> drop(helper, player, new ItemStack(Items.COBBLESTONE, 20)));
+		withConfig(EchoConfig.DEFAULTS.withVacuumEnabled(false), () -> drop(helper, player, new ItemStack(Items.COBBLESTONE, 20)));
 
 		helper.assertValueEqual(count(player.getInventory().getItem(BUNDLE_SLOT), Items.COBBLESTONE), 10, "cobblestone in the bundle");
 		helper.assertTrue(inventoryHoldsLoose(player, Items.COBBLESTONE), "the cobblestone went to the inventory");
