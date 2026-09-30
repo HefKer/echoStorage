@@ -86,27 +86,6 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		setChanged();
 	}
 
-	/**
-	 * Puts as much of {@code moving} into a carried {@code box} as Quick-stacking it into the box,
-	 * placed, would take, strictness and the bundles inside included, shrinking {@code moving} by
-	 * what went in. Returns the box as written, or null if it took nothing.
-	 */
-	@Nullable
-	public static ItemStack putIntoItem(ItemStack box, ItemStack moving) {
-		SimpleContainer slots = new SimpleContainer(SLOTS);
-		box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(slots.getItems());
-		EchoChestAssignment assignment = box.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
-		int before = moving.getCount();
-		QuickStack.put(slots, QuickStack.wanted(slots, assignment.category()),
-				stack -> refuses(EchoShulkerBoxBlock.REFUSES_SHULKER_BOXES, assignment.category(), assignment.strict(), stack), moving);
-		if (moving.getCount() == before) {
-			return null;
-		}
-		ItemStack written = box.copy();
-		written.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(slots.getItems()));
-		return written;
-	}
-
 	// --- the item side --------------------------------------------------------------------
 
 	@Override
@@ -164,6 +143,27 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		if (vacuum) {
 			components.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
 		}
+	}
+
+	/**
+	 * Puts as much of {@code moving} into a carried {@code box} as Quick-stacking it into the box,
+	 * placed, would take, strictness and the bundles inside included, shrinking {@code moving} by
+	 * what went in. Returns the box as written, or null if it took nothing.
+	 */
+	@Nullable
+	public static ItemStack putIntoItem(ItemStack box, ItemStack moving) {
+		SimpleContainer slots = new SimpleContainer(SLOTS);
+		box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(slots.getItems());
+		EchoChestAssignment assignment = box.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
+		int before = moving.getCount();
+		QuickStack.put(slots, QuickStack.wanted(slots, assignment.category()), stack -> refuses(
+				EchoShulkerBoxBlock.REFUSES_SHULKER_BOXES, assignment.category(), assignment.strict(), stack), moving);
+		if (moving.getCount() == before) {
+			return null;
+		}
+		ItemStack written = box.copy();
+		written.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(slots.getItems()));
+		return written;
 	}
 
 	@SuppressWarnings("deprecation")

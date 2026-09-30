@@ -63,7 +63,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	private final Container container;
 	private final ContainerData settings;
 	private final EchoChestMenuData data;
-	/** The chest's kind, from the open-data, which both sides ask whether it refuses shulker boxes and has a Vacuum toggle. */
+	/** The chest's kind, from the open-data, so the client knows it as well as the server. */
 	private final Block block;
 	/** Who may go on using the menu when it was opened from an Echo Interface; null when opened in person. */
 	@Nullable
@@ -150,7 +150,11 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		return settings.get(STRICT_DATA) != 0;
 	}
 
-	/** Whether this is an Echo Shulker Box's menu, whose screen shows the Vacuum button. */
+	/**
+	 * Whether this is an Echo Shulker Box's menu, whose screen shows the Vacuum button. Asked of
+	 * the kind rather than of {@link #refusesShulkerBoxes}: having a Vacuum toggle and refusing
+	 * shulker boxes are separate rules that today pick out the same kind.
+	 */
 	public boolean isShulkerBox() {
 		return block instanceof EchoShulkerBoxBlock;
 	}

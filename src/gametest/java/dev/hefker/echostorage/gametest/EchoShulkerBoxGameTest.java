@@ -267,7 +267,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 
 			helper.assertFalse(menu.isShulkerBox(), kind + "'s menu says it is a shulker box");
 			helper.assertFalse(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), kind + "'s menu took the Vacuum button");
-			helper.assertFalse(menu.vacuums(), kind + "'s menu shows vacuum on");
+			helper.assertFalse(menu.vacuums(), kind + "'s menu shows Vacuum on");
 			player.closeContainer();
 		}
 		helper.succeed();
