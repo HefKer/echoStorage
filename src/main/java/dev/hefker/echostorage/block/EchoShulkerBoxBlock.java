@@ -52,6 +52,11 @@ import org.jetbrains.annotations.Nullable;
 public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 	public static final MapCodec<EchoShulkerBoxBlock> CODEC = simpleCodec(EchoShulkerBoxBlock::new);
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
+	/**
+	 * Its slots take no shulker box, even by hand, as vanilla's do (ADR-0009): placed, and carried
+	 * too, where there is no block to ask.
+	 */
+	public static final boolean REFUSES_SHULKER_BOXES = true;
 	/** How many stacks the tooltip names before it says how many more there are, as vanilla's does. */
 	private static final int TOOLTIP_STACKS = 5;
 	/** What an open box still supports on the side opposite its lid: a sliver of its base. */
@@ -83,10 +88,9 @@ public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 		return FACING;
 	}
 
-	/** Its slots take no shulker box, even by hand, as vanilla's do (ADR-0009). */
 	@Override
 	public boolean refusesShulkerBoxes() {
-		return true;
+		return REFUSES_SHULKER_BOXES;
 	}
 
 	@Override

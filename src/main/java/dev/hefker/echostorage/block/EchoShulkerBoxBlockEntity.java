@@ -17,10 +17,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,8 +41,9 @@ import org.jetbrains.annotations.Nullable;
  * while it is carried: see {@link dev.hefker.echostorage.item.Vacuum}.
  *
  * <p>No shulker box of any kind goes in, from any source: hoppers and quick-stack ask
- * {@link #refuses}, and the menu's slots refuse them as vanilla's shulker box slots do, both
- * because its block {@link EchoShulkerBoxBlock#refusesShulkerBoxes refuses shulker boxes}.
+ * {@link #refuses}, Vacuum asks {@link #putIntoItem}, and the menu's slots refuse them as vanilla's
+ * shulker box slots do, all because an Echo Shulker Box
+ * {@link EchoShulkerBoxBlock#REFUSES_SHULKER_BOXES refuses shulker boxes}.
  *
  * <p>The lid is vanilla's shulker lid: it rises and turns over ten ticks on both sides, pushing
  * whatever is in the way, and while it is open the block's shape follows it.
@@ -81,6 +84,27 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 	public void setVacuum(boolean vacuum) {
 		this.vacuum = vacuum;
 		setChanged();
+	}
+
+	/**
+	 * Puts as much of {@code moving} into a carried {@code box} as Quick-stacking it into the box,
+	 * placed, would take, strictness and the bundles inside included, shrinking {@code moving} by
+	 * what went in. Returns the box as written, or null if it took nothing.
+	 */
+	@Nullable
+	public static ItemStack putIntoItem(ItemStack box, ItemStack moving) {
+		SimpleContainer slots = new SimpleContainer(SLOTS);
+		box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(slots.getItems());
+		EchoChestAssignment assignment = box.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
+		int before = moving.getCount();
+		QuickStack.put(slots, QuickStack.wanted(slots, assignment.category()),
+				stack -> refuses(EchoShulkerBoxBlock.REFUSES_SHULKER_BOXES, assignment.category(), assignment.strict(), stack), moving);
+		if (moving.getCount() == before) {
+			return null;
+		}
+		ItemStack written = box.copy();
+		written.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(slots.getItems()));
+		return written;
 	}
 
 	// --- the item side --------------------------------------------------------------------

@@ -45,7 +45,8 @@ public final class QuickStack {
 	 * Box vacuums a picked-up stack, the one other nested write (ADR-0007).
 	 */
 	public static void put(Container chest, Predicate<ItemStack> wants, Predicate<ItemStack> refuses, ItemStack moving) {
-		// A bundle is the player's carried storage, never something to put away.
+		// A bundle is the player's carried storage, never something to put away: Vacuum relies on
+		// this too, so a carried box never takes a picked-up bundle.
 		if (EchoBundleContents.isBundle(moving) || !wants.test(moving) || refuses.test(moving)) {
 			return;
 		}

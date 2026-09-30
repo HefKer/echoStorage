@@ -1,14 +1,8 @@
 package dev.hefker.echostorage.item;
 
-import dev.hefker.echostorage.block.EchoChestAssignment;
-import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
-import dev.hefker.echostorage.block.QuickStack;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -65,22 +59,7 @@ public final class Vacuum {
 	 */
 	@Nullable
 	private static ItemStack intoBox(ItemStack box, ItemStack pickedUp) {
-		if (!box.has(EchoComponents.ECHO_SHULKER_BOX_VACUUM)) {
-			return null;
-		}
-		SimpleContainer slots = new SimpleContainer(EchoShulkerBoxBlockEntity.SLOTS);
-		box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(slots.getItems());
-		EchoChestAssignment assignment = box.getOrDefault(EchoComponents.ECHO_CHEST_ASSIGNMENT, EchoChestAssignment.DEFAULT);
-		int before = pickedUp.getCount();
-		// A box refuses every shulker box, and a Strict one its strays, as it does when placed.
-		QuickStack.put(slots, QuickStack.wanted(slots, assignment.category()),
-				stack -> EchoChestBlockEntity.refuses(true, assignment.category(), assignment.strict(), stack), pickedUp);
-		if (pickedUp.getCount() == before) {
-			return null;
-		}
-		ItemStack written = box.copy();
-		written.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(slots.getItems()));
-		return written;
+		return box.has(EchoComponents.ECHO_SHULKER_BOX_VACUUM) ? EchoShulkerBoxBlockEntity.putIntoItem(box, pickedUp) : null;
 	}
 
 	/**
