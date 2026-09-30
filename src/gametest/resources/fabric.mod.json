@@ -15,7 +15,8 @@
 			"dev.hefker.echostorage.gametest.EchoChestQuickStackGameTest",
 			"dev.hefker.echostorage.gametest.EchoBundleConveniencesGameTest",
 			"dev.hefker.echostorage.gametest.EchoInterfaceGameTest",
-			"dev.hefker.echostorage.gametest.EchoRelayGameTest"
+			"dev.hefker.echostorage.gametest.EchoRelayGameTest",
+			"dev.hefker.echostorage.gametest.EchoShulkerBoxGameTest"
 		]
 	},
 	"depends": {

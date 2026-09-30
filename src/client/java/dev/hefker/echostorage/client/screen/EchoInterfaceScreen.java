@@ -20,6 +20,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -151,13 +152,14 @@ public class EchoInterfaceScreen extends AbstractContainerScreen<EchoInterfaceMe
 		return BuiltInRegistries.ITEM.getOptional(row.item()).orElse(EchoItems.ECHO_CHEST);
 	}
 
-	/** A row's button: its chest's icon at the left, greyed or not, and the label in the room beside it. */
+	/** A row's button: its chest's icon at the left, in the chest's colour, greyed or not, and the label in the room beside it. */
 	private static final class ChestRowButton extends Button {
 		private final ItemStack icon;
 
 		ChestRowButton(int x, int y, int width, Row row, OnPress onPress) {
 			super(x, y, width, ROW_HEIGHT, label(row), onPress, DEFAULT_NARRATION);
 			this.icon = new ItemStack(kind(row));
+			row.color().ifPresent(color -> icon.set(DataComponents.BASE_COLOR, color));
 		}
 
 		@Override

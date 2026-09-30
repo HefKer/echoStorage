@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
+import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -13,7 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 /**
- * Item and recipe-serializer registration, and the only place that names the loader's
+ * Item, recipe-serializer and cauldron-interaction registration, and the only place that names the loader's
  * creative-tab and server-tick events. On NeoForge these become {@code BuildCreativeModeTabContentsEvent} and
  * {@code ServerTickEvent.Post}; nothing else in the package changes.
  */
@@ -25,6 +26,9 @@ public final class EchoItems {
 	public static final Item ECHO_CHEST = new BlockItem(EchoBlocks.ECHO_CHEST, new Item.Properties());
 
 	public static final Item DEEP_ECHO_CHEST = new BlockItem(EchoBlocks.DEEP_ECHO_CHEST, new Item.Properties());
+
+	/** Stacks to one even when empty, as a vanilla shulker box does. */
+	public static final Item ECHO_SHULKER_BOX = new EchoShulkerBoxItem(EchoBlocks.ECHO_SHULKER_BOX, new Item.Properties().stacksTo(1));
 
 	public static final Item ECHO_INTERFACE = new BlockItem(EchoBlocks.ECHO_INTERFACE, new Item.Properties());
 
@@ -40,14 +44,18 @@ public final class EchoItems {
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_bundle"), ECHO_BUNDLE);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_chest"), ECHO_CHEST);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("deep_echo_chest"), DEEP_ECHO_CHEST);
+		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_shulker_box"), ECHO_SHULKER_BOX);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 		Registry.register(BuiltInRegistries.ITEM, EchoStorage.id("echo_relay"), ECHO_RELAY);
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, EchoStorage.id("echo_chest_upgrade"), EchoChestUpgradeRecipe.SERIALIZER);
+		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, EchoStorage.id("echo_shulker_box"), EchoShulkerBoxRecipe.SERIALIZER);
+		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, EchoStorage.id("echo_shulker_box_coloring"), EchoShulkerBoxColoring.SERIALIZER);
+		CauldronInteraction.WATER.map().put(ECHO_SHULKER_BOX, EchoShulkerBoxItem::wash);
 
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
 				.register(entries -> entries.addAfter(Items.BUNDLE, ECHO_BUNDLE));
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
-				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST, DEEP_ECHO_CHEST, ECHO_INTERFACE, ECHO_RELAY));
+				.register(entries -> entries.addAfter(Items.CHEST, ECHO_CHEST, DEEP_ECHO_CHEST, ECHO_SHULKER_BOX, ECHO_INTERFACE, ECHO_RELAY));
 		ServerTickEvents.END_SERVER_TICK.register(server -> SPILL.tick());
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> SPILL.flush());
 	}

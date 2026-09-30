@@ -5,6 +5,7 @@ import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import dev.hefker.echostorage.block.EchoBlocks;
@@ -14,6 +15,7 @@ import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.gametest.EchoChestTests.ChestKind;
 import dev.hefker.echostorage.gametest.EchoChestTests.EveryChestKind;
+import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.link.LinkedChests.Row;
 import dev.hefker.echostorage.link.LinkedChests.State;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -24,12 +26,14 @@ import dev.hefker.echostorage.network.EchoInterfaces;
 import dev.hefker.echostorage.network.OpenLinkedChestPayload;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -63,7 +67,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 
 		echoInterface.resolve();
 
-		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), kind.id(), "Ores",
+		assertRows(helper, echoInterface, List.of(new Row(chest.id(), helper.absolutePos(FAR_CHEST), kind.id(), Optional.empty(), "Ores",
 				chest.category(), State.LINKED)));
 		helper.succeed();
 	}
@@ -78,6 +82,35 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.assertValueEqual(row.item(), kind.id(), "the row's item");
 		helper.assertValueEqual(EchoChestBlockEntity.unnamedTitle(row.category(), BuiltInRegistries.ITEM.get(row.item())),
 				kind.block.getName(), "the row's label");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aDyedEchoShulkerBoxsRowCarriesItsColour(GameTestHelper helper) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, ChestKind.SHULKER);
+		helper.setBlock(FAR_CHEST, Blocks.AIR);
+		ItemStack dyed = new ItemStack(EchoItems.ECHO_SHULKER_BOX);
+		dyed.set(DataComponents.BASE_COLOR, DyeColor.LIME);
+		EchoChestTests.placeFromItem(helper, dyed, FAR_CHEST);
+
+		echoInterface.resolve();
+
+		helper.assertValueEqual(echoInterface.rows().getFirst().color(), Optional.of(DyeColor.LIME), "the row's colour");
+		helper.succeed();
+	}
+
+	/** Nothing lifts a lid the player opens from afar, so nothing on it can stop it. */
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void anEchoShulkerBoxWithItsLidBlockedStillOpensFromTheInterface(GameTestHelper helper) {
+		EchoInterfaceBlockEntity echoInterface = build(helper, ChestKind.SHULKER);
+		helper.setBlock(FAR_CHEST.above(), Blocks.STONE);
+		EchoChestBlockEntity box = helper.getBlockEntity(FAR_CHEST);
+		ServerPlayer player = openedBy(helper, echoInterface);
+
+		EchoInterfaces.onOpen(player, new OpenLinkedChestPayload(player.containerMenu.containerId, box.id()));
+
+		helper.assertTrue(player.containerMenu instanceof EchoChestMenu menu && menu.container() == box,
+				"the blocked box did not open, got " + player.containerMenu);
 		helper.succeed();
 	}
 

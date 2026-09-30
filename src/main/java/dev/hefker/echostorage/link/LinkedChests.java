@@ -24,6 +24,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.DyeColor;
 
 /** The Echo Chests an Echo Interface lists, one row each, kept between resolutions. */
 public final class LinkedChests {
@@ -90,52 +91,72 @@ public final class LinkedChests {
 
 	private static Row linked(LinkedChest chest, Function<LinkedChest, Label> labels) {
 		Label label = labels.apply(chest);
-		return new Row(chest.id(), chest.pos(), label.item(), label.name(), label.category(), State.LINKED);
+		return new Row(chest.id(), chest.pos(), label.item(), label.color(), label.name(), label.category(), State.LINKED);
 	}
 
 	/**
-	 * What a chest is, as the chest holds it: its item, the typed name, empty if none, and the
-	 * Category. The label shown for an unnamed chest is worked out from these where it is drawn,
+	 * What a chest is, as the chest holds it: its item and colour, the typed name, empty if none,
+	 * and the Category. The label shown for an unnamed chest is worked out from these where it is drawn,
 	 * never stored, so clearing a Category leaves no name behind.
 	 *
 	 * @param item the registry id of the chest's item, which the row draws as its icon and which
 	 *             names an unnamed chest with no Category
+	 * @param color what the icon is dyed, for a chest that can be; empty for one that is not
 	 */
-	public record Label(ResourceLocation item, String name, Optional<Category> category) {
+	public record Label(ResourceLocation item, Optional<DyeColor> color, String name, Optional<Category> category) {
 	}
 
 	/**
 	 * One listed chest, as it was when last reached.
 	 *
-	 * @param item a registry id rather than a flag for one kind, so every kind of chest can be listed
+	 * @param item  a registry id rather than a flag for one kind, so every kind of chest can be listed
+	 * @param color the colour the chest's icon is drawn in, as an Echo Shulker Box is dyed
 	 */
-	public record Row(UUID id, BlockPos pos, ResourceLocation item, String name, Optional<Category> category, State state) {
+	public record Row(UUID id, BlockPos pos, ResourceLocation item, Optional<DyeColor> color, String name, Optional<Category> category,
+			State state) {
 		/**
 		 * Saved with the interface. A Category that no longer ships, or one of the wrong type, loads
-		 * as none, a name of the wrong type as no name, and a missing or malformed item as an Echo
-		 * Chest's, so the row keeps its place rather than dropping off the list.
+		 * as none, a name of the wrong type as no name, a missing or malformed item as an Echo
+		 * Chest's, and a missing or unknown colour as undyed, so the row keeps its place rather than
+		 * dropping off the list.
 		 */
 		public static final Codec<Row> CODEC = RecordCodecBuilder.create(row -> row.group(
 				UUIDUtil.CODEC.fieldOf("id").forGetter(Row::id),
 				BlockPos.CODEC.fieldOf("pos").forGetter(Row::pos),
 				ResourceLocation.CODEC.lenientOptionalFieldOf("item", ECHO_CHEST_ITEM).forGetter(Row::item),
+				DyeColor.CODEC.lenientOptionalFieldOf("color").forGetter(Row::color),
 				Codec.STRING.lenientOptionalFieldOf("name", "").forGetter(Row::name),
 				Categories.OPTIONAL_FIELD.forGetter(Row::category),
 				State.CODEC.fieldOf("state").forGetter(Row::state)
 		).apply(row, Row::new));
 
-		/** Sent to an open interface screen, which works out each row's label from it. */
+		/**
+		 * Sent to an open interface screen, which works out each row's label from it. Seven fields
+		 * are one more than {@code StreamCodec.composite} takes, so the kind of chest travels as a pair.
+		 */
 		public static final StreamCodec<ByteBuf, Row> STREAM_CODEC = StreamCodec.composite(
 				UUIDUtil.STREAM_CODEC, Row::id,
 				BlockPos.STREAM_CODEC, Row::pos,
-				ResourceLocation.STREAM_CODEC, Row::item,
+				Kind.STREAM_CODEC, Row::kind,
 				ByteBufCodecs.stringUtf8(EchoChestName.MAX_LENGTH), Row::name,
 				ByteBufCodecs.optional(Categories.STREAM_CODEC), Row::category,
 				State.STREAM_CODEC, Row::state,
-				Row::new);
+				(id, pos, kind, name, category, state) -> new Row(id, pos, kind.item(), kind.color(), name, category, state));
 
 		Row withState(State state) {
-			return new Row(id, pos, item, name, category, state);
+			return new Row(id, pos, item, color, name, category, state);
+		}
+
+		private Kind kind() {
+			return new Kind(item, color);
+		}
+
+		/** The part of a row that says what the icon is: which chest, in which colour. */
+		private record Kind(ResourceLocation item, Optional<DyeColor> color) {
+			static final StreamCodec<ByteBuf, Kind> STREAM_CODEC = StreamCodec.composite(
+					ResourceLocation.STREAM_CODEC, Kind::item,
+					ByteBufCodecs.optional(DyeColor.STREAM_CODEC), Kind::color,
+					Kind::new);
 		}
 	}
 

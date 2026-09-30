@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -168,9 +169,11 @@ public class EchoInterfaceBlockEntity extends BlockEntity {
 	}
 
 	private static LinkedChests.Label labelOf(Level level, BlockPos pos) {
-		return level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest
-				? new LinkedChests.Label(BuiltInRegistries.ITEM.getKey(chest.item()), chest.name(), chest.category())
-				: new LinkedChests.Label(LinkedChests.ECHO_CHEST_ITEM, "", Optional.empty());
+		if (!(level.getBlockEntity(pos) instanceof EchoChestBlockEntity chest)) {
+			return new LinkedChests.Label(LinkedChests.ECHO_CHEST_ITEM, Optional.empty(), "", Optional.empty());
+		}
+		Optional<DyeColor> color = chest instanceof EchoShulkerBoxBlockEntity box ? box.color() : Optional.empty();
+		return new LinkedChests.Label(BuiltInRegistries.ITEM.getKey(chest.item()), color, chest.name(), chest.category());
 	}
 
 	// --- persistence ----------------------------------------------------------------------

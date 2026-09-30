@@ -22,6 +22,19 @@ public final class EchoBlocks {
 	public static final BlockEntityType<EchoChestBlockEntity> ECHO_CHEST_ENTITY =
 			BlockEntityType.Builder.of(EchoChestBlockEntity::new, ECHO_CHEST, DEEP_ECHO_CHEST).build(null);
 
+	/**
+	 * An Echo Chest the player can carry. Vanilla's shulker box properties, pistons destroying it and
+	 * all, but suffocating and blocking sight only while its own lid is shut.
+	 */
+	public static final Block ECHO_SHULKER_BOX = new EchoShulkerBoxBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.SHULKER_BOX)
+			.mapColor(MapColor.COLOR_CYAN)
+			.isSuffocating(EchoShulkerBoxBlock::isClosed)
+			.isViewBlocking(EchoShulkerBoxBlock::isClosed));
+
+	/** A type of its own, since the box carries its contents and colour on its item and animates its own lid. */
+	public static final BlockEntityType<EchoShulkerBoxBlockEntity> ECHO_SHULKER_BOX_ENTITY =
+			BlockEntityType.Builder.of(EchoShulkerBoxBlockEntity::new, ECHO_SHULKER_BOX).build(null);
+
 	public static final Block ECHO_INTERFACE = new EchoInterfaceBlock(BlockBehaviour.Properties.of()
 			.mapColor(MapColor.COLOR_CYAN)
 			.strength(3.0F, 6.0F)
@@ -47,6 +60,8 @@ public final class EchoBlocks {
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_chest"), ECHO_CHEST);
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("deep_echo_chest"), DEEP_ECHO_CHEST);
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_chest"), ECHO_CHEST_ENTITY);
+		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_shulker_box"), ECHO_SHULKER_BOX);
+		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_shulker_box"), ECHO_SHULKER_BOX_ENTITY);
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_interface"), ECHO_INTERFACE);
 		Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, EchoStorage.id("echo_interface"), ECHO_INTERFACE_ENTITY);
 		Registry.register(BuiltInRegistries.BLOCK, EchoStorage.id("echo_relay"), ECHO_RELAY);
