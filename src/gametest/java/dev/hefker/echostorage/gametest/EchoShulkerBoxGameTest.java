@@ -136,6 +136,19 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aBoxBreaksAsFastAsAVanillaOne(GameTestHelper helper) {
+		helper.setBlock(CHEST, EchoBlocks.ECHO_SHULKER_BOX);
+		helper.setBlock(CHEST.east(), Blocks.SHULKER_BOX);
+		ItemStack pickaxe = new ItemStack(Items.IRON_PICKAXE);
+
+		helper.assertValueEqual(helper.getBlockState(CHEST).getDestroySpeed(helper.getLevel(), helper.absolutePos(CHEST)),
+				helper.getBlockState(CHEST.east()).getDestroySpeed(helper.getLevel(), helper.absolutePos(CHEST.east())), "hardness");
+		helper.assertValueEqual(pickaxe.getDestroySpeed(helper.getBlockState(CHEST)), pickaxe.getDestroySpeed(helper.getBlockState(CHEST.east())),
+				"a pickaxe's speed on it");
+		helper.succeed();
+	}
+
 	// --- opening --------------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)

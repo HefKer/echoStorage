@@ -1,4 +1,4 @@
 {
   "replace": false,
-  "values": ["echostorage:echo_interface"]
+  "values": ["echostorage:echo_interface", "echostorage:echo_shulker_box"]
 }
