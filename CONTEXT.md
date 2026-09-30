@@ -33,6 +33,8 @@ _Avoid_: echo shulker, portable chest, backpack
 **Vacuum**:
 A carried Echo Bundle or Echo Shulker Box taking an item the player picks up, when the item is
 in its Category or it already holds that item. Off on each item until the player turns it on.
+A picked-up bundle is never vacuumed: like Quick-stack, Vacuum treats a bundle as carried
+storage, not something to put away.
 _Avoid_: auto-pickup, magnet, absorb, siphon
 
 **Echo Interface**:
