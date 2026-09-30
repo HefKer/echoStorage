@@ -10,10 +10,30 @@ never the player's knowledge of where things are.
 A placed container that knows which Category it holds and carries a player-given name.
 _Avoid_: filtered chest, smart chest, storage unit
 
+**Deep Echo Chest**:
+An Echo Chest with twice the room, made by upgrading an Echo Chest. Everything said of an
+Echo Chest holds for it.
+_Avoid_: large echo chest, double echo chest, echo chest tier 2
+
 **Echo Bundle**:
 A carried container holding four bundles' worth of mixed items, optionally assigned a
 Category, for keeping an inventory manageable while away from base.
 _Avoid_: big bundle, sack, pouch
+
+**Selected item**:
+The one item an Echo Bundle acts with when used from the hand: the block it places or the food
+it eats. The player moves it through the distinct items inside; it passes to the next when used up.
+_Avoid_: active item, current slot, most recent
+
+**Echo Shulker Box**:
+An Echo Chest the player can carry: placed, it is an Echo Chest in every respect; broken, it
+keeps its contents, and while carried it can Vacuum.
+_Avoid_: echo shulker, portable chest, backpack
+
+**Vacuum**:
+A carried Echo Bundle or Echo Shulker Box taking an item the player picks up, when the item is
+in its Category or it already holds that item. Off on each item until the player turns it on.
+_Avoid_: auto-pickup, magnet, absorb, siphon
 
 **Echo Interface**:
 A placed block that lists the Echo Chests Linked to it and opens a chosen one

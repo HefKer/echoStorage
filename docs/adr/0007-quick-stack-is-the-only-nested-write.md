@@ -23,3 +23,19 @@ only the button recurses.
 The button and a shift-click produce materially different results in the same chest. That is
 intended — the button is the bulk action, the click is the precise one — but it must be visible
 in the UI rather than left as a hidden rule.
+
+## Amendment (2026-09-29): one level, through bundles and shulker boxes, for bulk actions
+
+Two things change; the read-versus-write split and its reasoning stand.
+
+**Shulker boxes are see-through too.** A shulker box item (vanilla or Echo) inside an Echo Chest
+is read and written exactly as a bundle there is: matching sees into it, Quick-stack tops up
+what it already holds, ignoring its own Category (ADR-0010). Recursion is still exactly one
+level, whatever the containers: Quick-stack into a chest holding a shulker box that holds a
+bundle fills the shulker box, never the bundle inside it.
+
+**Vacuum is the second nested write.** A carried Echo Shulker Box that vacuums an item tops up
+the bundles inside it before its own slots. The risk this ADR manages lives in interactive menu
+clicks, and vacuum on pickup is, like the button, one server-authoritative operation. So the
+rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the only nested
+writes; a menu click never is.
