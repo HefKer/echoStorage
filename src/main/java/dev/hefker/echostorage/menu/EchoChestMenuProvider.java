@@ -15,8 +15,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Opens an {@link EchoChestMenu} on a chest, sending its typed name, size and kind as open-data. The loader
- * adapter for this menu, as {@link ProbeMenuProvider} is for the probe.
+ * Opens an {@link EchoChestMenu} on a chest, sending its typed name, size and kind as open-data.
+ * The loader adapter for this menu, as {@link ProbeMenuProvider} is for the probe.
  *
  * @param remoteReach set when the chest is opened from an Echo Interface; see {@link EchoChestMenu}
  */

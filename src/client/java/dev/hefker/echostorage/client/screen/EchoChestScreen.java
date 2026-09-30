@@ -6,6 +6,7 @@ import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoChestName;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.config.EchoConfig;
+import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
 import dev.hefker.echostorage.network.NetClient;
 import dev.hefker.echostorage.network.RenameEchoChestPayload;
@@ -73,7 +74,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	public EchoChestScreen(EchoChestMenu menu, Inventory playerInventory, Component title) {
 		super(menu, playerInventory, title);
 		this.chestHeight = menu.data().rows() * 18 + 17;
-		this.kind = BuiltInRegistries.ITEM.get(menu.data().kind());
+		this.kind = BuiltInRegistries.ITEM.getOptional(menu.data().kind()).orElse(EchoItems.ECHO_CHEST);
 		this.imageHeight = 114 + menu.data().rows() * 18;
 		this.inventoryLabelY = imageHeight - 94;
 		this.sentName = menu.data().name();

@@ -13,8 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 /**
- * Item and recipe-serializer registration, and the only place that names the loader's creative-tab and server-tick
- * events. On NeoForge these become {@code BuildCreativeModeTabContentsEvent} and
+ * Item and recipe-serializer registration, and the only place that names the loader's
+ * creative-tab and server-tick events. On NeoForge these become {@code BuildCreativeModeTabContentsEvent} and
  * {@code ServerTickEvent.Post}; nothing else in the package changes.
  */
 public final class EchoItems {

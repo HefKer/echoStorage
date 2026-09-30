@@ -187,8 +187,8 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * What the chest is called on screen: its typed name, else its Category's name in italics,
-	 * else what kind of chest it is. The Category fallback is display-only — never stored as the custom name,
-	 * so clearing the Category strands no name the player never typed.
+	 * else what kind of chest it is. The Category fallback is display-only — never stored as the
+	 * custom name, so clearing the Category strands no name the player never typed.
 	 */
 	@Override
 	public Component getName() {

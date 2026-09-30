@@ -16,8 +16,7 @@ public final class EchoBlocks {
 	public static final Block ECHO_CHEST = new EchoChestBlock(3, BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST));
 
 	/** An Echo Chest with twice the room, as a separate block rather than a setting (ADR-0005). */
-	public static final Block DEEP_ECHO_CHEST = new EchoChestBlock(6, BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST)
-			.mapColor(MapColor.COLOR_CYAN));
+	public static final Block DEEP_ECHO_CHEST = new EchoChestBlock(6, BlockBehaviour.Properties.ofFullCopy(Blocks.CHEST));
 
 	/** One type for every Echo Chest block: each chest takes its size from its block. */
 	public static final BlockEntityType<EchoChestBlockEntity> ECHO_CHEST_ENTITY =

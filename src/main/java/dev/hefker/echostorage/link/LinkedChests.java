@@ -29,7 +29,10 @@ import net.minecraft.util.StringRepresentable;
 public final class LinkedChests {
 	/** One screen's worth (ADR-0004). Greyed rows count, so a new chest waits for one to be dismissed. */
 	public static final int MAX_ROWS = 27;
-	/** The item a row names when it was saved before rows named one: every chest was an Echo Chest then. */
+	/**
+	 * The item a row names when nothing better is known: a row saved before rows named one, when
+	 * every chest was an Echo Chest, or a chest no longer there to ask.
+	 */
 	public static final ResourceLocation ECHO_CHEST_ITEM = EchoStorage.id("echo_chest");
 
 	private final List<Row> rows = new ArrayList<>();

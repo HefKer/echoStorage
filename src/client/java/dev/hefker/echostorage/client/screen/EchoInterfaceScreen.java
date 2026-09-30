@@ -35,8 +35,9 @@ import net.minecraft.world.item.ItemStack;
  * tooltip says why it is greyed: in an unloaded chunk, or lost.
  *
  * <p>A row is labelled as its chest is — the typed name, else the Category in italics, else the
- * kind of chest, such as "Echo Chest" — beside that kind's icon, and the search box, unless the config turns it off, dims rows whose label does
- * not match. Those labels are names the player typed or chose, so searching them is allowed.
+ * kind of chest, such as "Echo Chest" — beside that kind's icon. The search box, unless the
+ * config turns it off, dims rows whose label does not match. Those labels are names the player
+ * typed or chose, so searching them is allowed.
  *
  * <p>Global quick-stack sits beside the search box only when the config turns it on; it is off
  * by default (ADR-0010).
