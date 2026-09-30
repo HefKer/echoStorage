@@ -51,8 +51,8 @@ public abstract class KeepingShapedRecipe extends ShapedRecipe {
 		return result;
 	}
 
-	/** Copies onto {@code result} what it keeps from the inputs. */
-	protected abstract void keep(CraftingInput input, ItemStack result);
+	/** Copies onto {@code made}, the stack just assembled, what it keeps from the inputs. */
+	protected abstract void keep(CraftingInput input, ItemStack made);
 
 	/** Sets {@code type} on {@code to} as it is on {@code from}, if it is there at all. */
 	protected static <T> void copy(DataComponentType<T> type, ItemStack from, ItemStack to) {
