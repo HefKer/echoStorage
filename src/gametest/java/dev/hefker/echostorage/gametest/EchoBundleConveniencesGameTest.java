@@ -2,6 +2,7 @@ package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
+import static dev.hefker.echostorage.gametest.EchoChestTests.drop;
 import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import java.util.Optional;
@@ -265,14 +266,6 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		player.moveTo(helper.absoluteVec(ABOVE_FLOOR.getCenter()).add(1, 0, 0));
 		player.getInventory().selected = 0;
 		return player;
-	}
-
-	/** An item entity at the player's feet, touched by them as a tick would. */
-	private static ItemEntity drop(GameTestHelper helper, ServerPlayer player, ItemStack stack) {
-		ItemEntity entity = new ItemEntity(helper.getLevel(), player.getX(), player.getY(), player.getZ(), stack);
-		helper.getLevel().addFreshEntity(entity);
-		entity.playerTouch(player);
-		return entity;
 	}
 
 	/** Uses the main hand on the top of the floor block, down the same path as a player's click. */

@@ -36,6 +36,9 @@ import net.minecraft.world.item.Item;
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
  *
+ * <p>An Echo Shulker Box has a vacuum button under them, which sets whether the box picks up
+ * what the player picks up once they carry it. No other kind of chest has one.
+ *
  * <p>Below them is quick-stack, which tops up bundles inside the chest where a shift-click would
  * only fill a slot, unless the config turns it off. Its tooltip says so, since the two otherwise
  * look like the same action.
@@ -64,6 +67,8 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	private EditBox nameField;
 	private CycleButton<Optional<Category>> categoryButton;
 	private CycleButton<Boolean> strictButton;
+	/** Null but for an Echo Shulker Box. */
+	private CycleButton<Boolean> vacuumButton;
 	/** Null when the config turns search off. */
 	private EditBox searchField;
 	private SearchQuery query = SearchQuery.of("");
@@ -118,6 +123,15 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 
 		// Switched-off widgets leave no gap: each takes the next free place in the column.
 		int nextButton = 2;
+		if (menu.isShulkerBox()) {
+			vacuumButton = CycleButton.onOffBuilder(menu.vacuums())
+					.withTooltip(vacuum -> Tooltip.create(Component.translatable("container.echostorage.echo_shulker_box.vacuum.tooltip")))
+					.create(buttonX, topPos + nextButton * (BUTTON_HEIGHT + BUTTON_GAP), BUTTON_WIDTH, BUTTON_HEIGHT,
+							Component.translatable("container.echostorage.echo_shulker_box.vacuum"),
+							(button, vacuum) -> clickButton(vacuum ? EchoChestMenu.VACUUM_ON_BUTTON : EchoChestMenu.VACUUM_OFF_BUTTON));
+			addRenderableWidget(vacuumButton);
+			nextButton++;
+		}
 		if (EchoConfig.get().chestQuickStack()) {
 			// The menu does nothing with this on the client; the slots sync back from the server.
 			addRenderableWidget(Button.builder(Component.translatable("container.echostorage.echo_chest.quick_stack"),
@@ -152,6 +166,9 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 		nameField.setHint(EchoChestBlockEntity.unnamedTitle(category, kind));
 		if (strictButton.getValue() != menu.isStrict()) {
 			strictButton.setValue(menu.isStrict());
+		}
+		if (vacuumButton != null && vacuumButton.getValue() != menu.vacuums()) {
+			vacuumButton.setValue(menu.vacuums());
 		}
 	}
 

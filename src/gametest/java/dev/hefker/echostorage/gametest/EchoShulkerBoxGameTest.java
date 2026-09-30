@@ -1,15 +1,18 @@
 package dev.hefker.echostorage.gametest;
 
 import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
+import static dev.hefker.echostorage.gametest.EchoChestTests.NEIGHBOUR;
 import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
 import static dev.hefker.echostorage.gametest.EchoChestTests.breakChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.chestAt;
+import static dev.hefker.echostorage.gametest.EchoChestTests.drop;
 import static dev.hefker.echostorage.gametest.EchoChestTests.holding;
 import static dev.hefker.echostorage.gametest.EchoChestTests.menu;
 import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
 import static dev.hefker.echostorage.gametest.EchoChestTests.placeChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.placeFromItem;
+import static dev.hefker.echostorage.gametest.EchoChestTests.withConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +22,9 @@ import java.util.Optional;
 import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
@@ -34,6 +39,7 @@ import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -55,8 +61,8 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 /**
- * The Echo Shulker Box's own behaviour: what it keeps when broken, how it is crafted and dyed, and
- * the vanilla shulker box rules it follows. What it does as an Echo Chest is tested with the
+ * The Echo Shulker Box's own behaviour: what it keeps when broken, how it is crafted and dyed,
+ * how it vacuums while carried, and the vanilla shulker box rules it follows. What it does as an Echo Chest is tested with the
  * other kinds, through {@link EchoChestTests.ChestKind#SHULKER}.
  */
 public class EchoShulkerBoxGameTest implements FabricGameTest {
@@ -213,6 +219,93 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		menu.quickMoveStack(player, menu.chestSlots());
 
 		helper.assertTrue(menu.container().isEmpty(), "the box took a shulker box from a shift-click");
+		helper.succeed();
+	}
+
+	// --- vacuum ---------------------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theVacuumButtonSetsTheToggleWhichSurvivesBreakingAndPlacingTheBox(GameTestHelper helper) {
+		EchoShulkerBoxBlockEntity box = (EchoShulkerBoxBlockEntity) placeChest(helper, CHEST, EchoChestTests.ChestKind.SHULKER);
+		ServerPlayer player = openedBy(helper, box);
+		EchoChestMenu menu = menu(player);
+		helper.assertFalse(menu.vacuums(), "a new box vacuums");
+
+		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), "vacuum on handled");
+		helper.assertTrue(box.vacuums(), "the box vacuums after the on button");
+		helper.assertTrue(menu.vacuums(), "the screen sees vacuum on");
+		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_OFF_BUTTON), "vacuum off handled");
+		helper.assertFalse(box.vacuums(), "the box vacuums after the off button");
+		menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON);
+		player.closeContainer();
+
+		breakChest(helper, CHEST);
+		ItemStack dropped = EchoChestTests.droppedChest(helper, EchoChestTests.ChestKind.SHULKER);
+		helper.assertTrue(dropped.has(EchoComponents.ECHO_SHULKER_BOX_VACUUM), "the dropped box lost its toggle");
+
+		placeFromItem(helper, dropped.copy(), NEIGHBOUR);
+		helper.assertTrue(((EchoShulkerBoxBlockEntity) chestAt(helper, NEIGHBOUR)).vacuums(), "the box placed again lost its toggle");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aBoxWithItsToggleOffDropsWithoutOne(GameTestHelper helper) {
+		placeChest(helper, CHEST, EchoChestTests.ChestKind.SHULKER).setItem(0, new ItemStack(Items.DIAMOND));
+
+		breakChest(helper, CHEST);
+
+		helper.assertFalse(EchoChestTests.droppedChest(helper, EchoChestTests.ChestKind.SHULKER).has(EchoComponents.ECHO_SHULKER_BOX_VACUUM),
+				"a box never turned on dropped vacuuming");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aPlainOrDeepEchoChestsMenuRefusesTheVacuumButton(GameTestHelper helper) {
+		for (EchoChestTests.ChestKind kind : List.of(EchoChestTests.ChestKind.ECHO, EchoChestTests.ChestKind.DEEP)) {
+			ServerPlayer player = openedBy(helper, placeChest(helper, CHEST, kind));
+			EchoChestMenu menu = menu(player);
+
+			helper.assertFalse(menu.isShulkerBox(), kind + "'s menu says it is a shulker box");
+			helper.assertFalse(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), kind + "'s menu took the vacuum button");
+			helper.assertFalse(menu.vacuums(), kind + "'s menu shows vacuum on");
+			player.closeContainer();
+		}
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aCarriedBoxVacuumsWhatItsCategoryMatchesAndWhatItHoldsBeforeTheInventoryDoes(GameTestHelper helper) {
+		ServerPlayer player = playerBeside(helper);
+		ItemStack box = boxHolding(new ItemStack(Items.BREAD, 1));
+		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(Categories.ORES), false));
+		box.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
+		player.getInventory().setItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT, box);
+
+		ItemEntity ore = drop(helper, player, new ItemStack(Items.IRON_ORE, 5));
+		drop(helper, player, new ItemStack(Items.BREAD, 3));
+		drop(helper, player, new ItemStack(Items.FLINT, 2));
+
+		List<ItemStack> contents = contents(player.getInventory().getItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT));
+		assertStack(helper, new ItemStack(Items.BREAD, 4), contents.get(0), "the box's slot 0");
+		assertStack(helper, new ItemStack(Items.IRON_ORE, 5), contents.get(1), "the box's slot 1");
+		helper.assertTrue(ore.isRemoved(), "the ore's item entity was picked up");
+		helper.assertValueEqual(player.getInventory().countItem(Items.IRON_ORE) + player.getInventory().countItem(Items.BREAD), 0,
+				"ore and bread loose in the inventory");
+		helper.assertValueEqual(player.getInventory().countItem(Items.FLINT), 2, "flint loose in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void noBoxVacuumsWithTheConfigSwitchOff(GameTestHelper helper) {
+		ServerPlayer player = playerBeside(helper);
+		ItemStack box = boxHolding(new ItemStack(Items.BREAD, 1));
+		box.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
+		player.getInventory().setItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT, box.copy());
+
+		withConfig(EchoConfig.DEFAULTS.withVacuum(false), () -> drop(helper, player, new ItemStack(Items.BREAD, 3)));
+
+		assertStack(helper, box, player.getInventory().getItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT), "the box");
+		helper.assertValueEqual(player.getInventory().countItem(Items.BREAD), 3, "bread loose in the inventory");
 		helper.succeed();
 	}
 

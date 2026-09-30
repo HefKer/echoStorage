@@ -186,6 +186,14 @@ final class EchoChestTests {
 		return (EchoChestMenu) player.containerMenu;
 	}
 
+	/** An item entity at the player's feet, touched by them as a tick would. */
+	static ItemEntity drop(GameTestHelper helper, Player player, ItemStack stack) {
+		ItemEntity entity = new ItemEntity(helper.getLevel(), player.getX(), player.getY(), player.getZ(), stack);
+		helper.getLevel().addFreshEntity(entity);
+		entity.playerTouch(player);
+		return entity;
+	}
+
 	static ItemStack bundleOf(ItemStack... contents) {
 		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(EchoBundleContents.EMPTY);
 		for (ItemStack stack : contents) {

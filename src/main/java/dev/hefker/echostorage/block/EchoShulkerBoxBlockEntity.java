@@ -3,6 +3,7 @@ package dev.hefker.echostorage.block;
 import java.util.List;
 import java.util.Optional;
 
+import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -15,6 +16,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.monster.Shulker;
@@ -33,6 +35,9 @@ import org.jetbrains.annotations.Nullable;
  * its colour on the item it drops as, the way a vanilla shulker box does. Its id still dies with
  * the block (ADR-0008), so placing it again makes a new chest.
  *
+ * <p>It also keeps its Vacuum toggle, set from its screen while it is placed and acted on only
+ * while it is carried: see {@link dev.hefker.echostorage.item.Vacuum}.
+ *
  * <p>No shulker box of any kind goes in, from any source: hoppers and quick-stack ask
  * {@link #refuses}, and the menu's slots refuse them as vanilla's shulker box slots do, both
  * because its block {@link EchoShulkerBoxBlock#refusesShulkerBoxes refuses shulker boxes}.
@@ -45,6 +50,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 	/** How many slots a box has, placed or carried. */
 	public static final int SLOTS = ROWS * EchoChestBlock.SLOTS_PER_ROW;
 	private static final String COLOR_TAG = "Color";
+	private static final String VACUUM_TAG = "Vacuum";
 	/** How far the lid moves each tick: open in ten. */
 	private static final float LID_STEP = 0.1F;
 	/** How far the lid rises when fully open, in blocks. */
@@ -52,6 +58,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 
 	@Nullable
 	private DyeColor color;
+	private boolean vacuum;
 	private AnimationStatus animationStatus = AnimationStatus.CLOSED;
 	private float progress;
 	private float progressOld;
@@ -66,18 +73,32 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		return Optional.ofNullable(color);
 	}
 
+	/** Whether the box vacuums what the player picks up while they carry it; off until they turn it on. */
+	public boolean vacuums() {
+		return vacuum;
+	}
+
+	public void setVacuum(boolean vacuum) {
+		this.vacuum = vacuum;
+		setChanged();
+	}
+
 	// --- the item side --------------------------------------------------------------------
 
 	@Override
 	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
 		super.loadAdditional(tag, registries);
 		color = tag.contains(COLOR_TAG, CompoundTag.TAG_STRING) ? DyeColor.byName(tag.getString(COLOR_TAG), null) : null;
+		vacuum = tag.getBoolean(VACUUM_TAG);
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
 		super.saveAdditional(tag, registries);
 		saveColor(tag);
+		if (vacuum) {
+			tag.putBoolean(VACUUM_TAG, true);
+		}
 	}
 
 	private void saveColor(CompoundTag tag) {
@@ -99,12 +120,13 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	/** The contents and colour travel with the item as well as the name and assignment. */
+	/** The contents, colour and Vacuum toggle travel with the item as well as the name and assignment. */
 	@Override
 	protected void applyImplicitComponents(BlockEntity.DataComponentInput components) {
 		super.applyImplicitComponents(components);
 		components.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(items());
 		color = components.get(DataComponents.BASE_COLOR);
+		vacuum = components.get(EchoComponents.ECHO_SHULKER_BOX_VACUUM) != null;
 	}
 
 	/** Always writes the contents, as vanilla's shulker box does; the item stacks to one anyway. */
@@ -115,6 +137,9 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		if (color != null) {
 			components.set(DataComponents.BASE_COLOR, color);
 		}
+		if (vacuum) {
+			components.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -123,6 +148,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		super.removeComponentsFromTag(tag);
 		tag.remove("Items");
 		tag.remove(COLOR_TAG);
+		tag.remove(VACUUM_TAG);
 	}
 
 	// --- the lid --------------------------------------------------------------------------

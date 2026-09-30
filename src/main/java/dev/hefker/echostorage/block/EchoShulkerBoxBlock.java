@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mojang.serialization.MapCodec;
+import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -164,7 +165,7 @@ public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 		}
 	}
 
-	/** Vanilla's contents preview, then the Echo Chest's Category and Strict lines. */
+	/** Vanilla's contents preview, then the Echo Chest's Category and Strict lines, then whether it vacuums. */
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
 		super.appendHoverText(stack, context, lines, flag);
@@ -181,6 +182,9 @@ public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 			lines.add(Component.translatable("container.shulkerBox.more", stacks - shown).withStyle(ChatFormatting.ITALIC));
 		}
 		appendAssignment(stack, lines);
+		if (stack.has(EchoComponents.ECHO_SHULKER_BOX_VACUUM)) {
+			lines.add(Component.translatable("item.echostorage.echo_shulker_box.vacuums").withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	@Nullable

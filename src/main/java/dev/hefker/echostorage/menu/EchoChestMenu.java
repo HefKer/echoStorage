@@ -6,6 +6,8 @@ import java.util.function.Predicate;
 import dev.hefker.echostorage.block.AbstractEchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlock;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
+import dev.hefker.echostorage.block.EchoShulkerBoxBlock;
+import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
 import dev.hefker.echostorage.block.QuickStack;
 import dev.hefker.echostorage.category.Categories;
 import dev.hefker.echostorage.category.Category;
@@ -36,9 +38,10 @@ import org.jetbrains.annotations.Nullable;
  * <p>An Echo Shulker Box's slots take no shulker box of any kind, even by hand, as vanilla's
  * shulker box slots do; the open-data's kind says which chest this is, so the client predicts it.
  *
- * <p>The chest's Category and strictness ride along as vanilla data slots, so an open screen
- * follows every change, and the screen changes them with vanilla menu-button clicks — which the
- * server already ignores for a menu the player no longer has open or could not still use.
+ * <p>The chest's Category and strictness, and an Echo Shulker Box's Vacuum toggle, ride along as
+ * vanilla data slots, so an open screen follows every change, and the screen changes them with
+ * vanilla menu-button clicks — which the server already ignores for a menu the player no longer has
+ * open or could not still use. Only an Echo Shulker Box's menu takes the vacuum buttons.
  */
 public class EchoChestMenu extends AbstractContainerMenu {
 	// Buttons say what the chest should become, never "flip it", so a click from a screen that
@@ -47,18 +50,23 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	public static final int STRICT_BUTTON = 1;
 	/** An action, not a state: runs quick-stack once on the server, however often it arrives. */
 	public static final int QUICK_STACK_BUTTON = 2;
+	public static final int VACUUM_OFF_BUTTON = 3;
+	public static final int VACUUM_ON_BUTTON = 4;
 	/** Followed by one button per preset, in {@link Categories#ALL} order. */
-	public static final int CLEAR_CATEGORY_BUTTON = 3;
+	public static final int CLEAR_CATEGORY_BUTTON = 5;
 
 	private static final int CATEGORY_DATA = 0;
 	private static final int STRICT_DATA = 1;
-	private static final int DATA_COUNT = 2;
+	private static final int VACUUM_DATA = 2;
+	private static final int DATA_COUNT = 3;
 
 	private final Container container;
-	private final ContainerData assignment;
+	private final ContainerData settings;
 	private final EchoChestMenuData data;
 	/** Whether the chest holds no shulker boxes, even placed by hand: an Echo Shulker Box. */
 	private final boolean refusesShulkerBoxes;
+	/** Whether the chest is an Echo Shulker Box, the one kind with a Vacuum toggle. */
+	private final boolean isShulkerBox;
 	/** Who may go on using the menu when it was opened from an Echo Interface; null when opened in person. */
 	@Nullable
 	private final Predicate<Player> remoteReach;
@@ -76,23 +84,25 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	 */
 	public EchoChestMenu(int containerId, Inventory playerInventory, EchoChestBlockEntity chest, EchoChestMenuData data,
 			@Nullable Predicate<Player> remoteReach) {
-		this(containerId, playerInventory, chest, assignmentOf(chest), data, remoteReach);
+		this(containerId, playerInventory, chest, settingsOf(chest), data, remoteReach);
 	}
 
-	private EchoChestMenu(int containerId, Inventory playerInventory, Container container, ContainerData assignment,
+	private EchoChestMenu(int containerId, Inventory playerInventory, Container container, ContainerData settings,
 			EchoChestMenuData data, @Nullable Predicate<Player> remoteReach) {
 		super(EchoMenus.ECHO_CHEST, containerId);
 		checkContainerSize(container, data.rows() * EchoChestBlock.SLOTS_PER_ROW);
-		checkContainerDataCount(assignment, DATA_COUNT);
+		checkContainerDataCount(settings, DATA_COUNT);
 		this.container = container;
-		this.assignment = assignment;
+		this.settings = settings;
 		this.data = data;
 		this.remoteReach = remoteReach;
-		this.refusesShulkerBoxes = AbstractEchoChestBlock.refusesShulkerBoxes(Block.byItem(BuiltInRegistries.ITEM.get(data.kind())));
+		Block block = Block.byItem(BuiltInRegistries.ITEM.get(data.kind()));
+		this.refusesShulkerBoxes = AbstractEchoChestBlock.refusesShulkerBoxes(block);
+		this.isShulkerBox = block instanceof EchoShulkerBoxBlock;
 		if (remoteReach == null) {
 			container.startOpen(playerInventory.player);
 		}
-		addDataSlots(assignment);
+		addDataSlots(settings);
 
 		int playerInventoryTop = 103 + (data.rows() - 4) * 18;
 
@@ -137,11 +147,21 @@ public class EchoChestMenu extends AbstractContainerMenu {
 
 	/** The chest's Category as last synced: on the server the chest's own, on the client a copy. */
 	public Optional<Category> category() {
-		return CategoryData.decode(assignment.get(CATEGORY_DATA));
+		return CategoryData.decode(settings.get(CATEGORY_DATA));
 	}
 
 	public boolean isStrict() {
-		return assignment.get(STRICT_DATA) != 0;
+		return settings.get(STRICT_DATA) != 0;
+	}
+
+	/** Whether this is an Echo Shulker Box's menu, whose screen shows the vacuum button. */
+	public boolean isShulkerBox() {
+		return isShulkerBox;
+	}
+
+	/** An Echo Shulker Box's Vacuum toggle as last synced; always off for any other chest. */
+	public boolean vacuums() {
+		return settings.get(VACUUM_DATA) != 0;
 	}
 
 	/** Whether {@code stack} falls outside the chest's Category. An unassigned chest has no strays. */
@@ -165,12 +185,20 @@ public class EchoChestMenu extends AbstractContainerMenu {
 			return true;
 		}
 		if (button == PERMISSIVE_BUTTON || button == STRICT_BUTTON) {
-			assignment.set(STRICT_DATA, button == STRICT_BUTTON ? 1 : 0);
+			settings.set(STRICT_DATA, button == STRICT_BUTTON ? 1 : 0);
+			return true;
+		}
+		if (button == VACUUM_OFF_BUTTON || button == VACUUM_ON_BUTTON) {
+			// No other kind of chest has the toggle, so no client can set one there.
+			if (!isShulkerBox) {
+				return false;
+			}
+			settings.set(VACUUM_DATA, button == VACUUM_ON_BUTTON ? 1 : 0);
 			return true;
 		}
 		int category = button - CLEAR_CATEGORY_BUTTON;
 		if (CategoryData.isValid(category)) {
-			assignment.set(CATEGORY_DATA, category);
+			settings.set(CATEGORY_DATA, category);
 			return true;
 		}
 		return false;
@@ -231,13 +259,14 @@ public class EchoChestMenu extends AbstractContainerMenu {
 	}
 
 	/** The server's data slots: read from the chest, and written straight back to it. */
-	private static ContainerData assignmentOf(EchoChestBlockEntity chest) {
+	private static ContainerData settingsOf(EchoChestBlockEntity chest) {
 		return new ContainerData() {
 			@Override
 			public int get(int index) {
 				return switch (index) {
 					case CATEGORY_DATA -> CategoryData.encode(chest.category());
 					case STRICT_DATA -> chest.isStrict() ? 1 : 0;
+					case VACUUM_DATA -> chest instanceof EchoShulkerBoxBlockEntity box && box.vacuums() ? 1 : 0;
 					default -> 0;
 				};
 			}
@@ -247,6 +276,11 @@ public class EchoChestMenu extends AbstractContainerMenu {
 				switch (index) {
 					case CATEGORY_DATA -> chest.assign(CategoryData.decode(value).orElse(null));
 					case STRICT_DATA -> chest.setStrict(value != 0);
+					case VACUUM_DATA -> {
+						if (chest instanceof EchoShulkerBoxBlockEntity box) {
+							box.setVacuum(value != 0);
+						}
+					}
 					default -> {
 					}
 				}

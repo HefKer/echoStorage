@@ -19,7 +19,8 @@
                 "minecraft:custom_name",
                 "minecraft:container",
                 "minecraft:base_color",
-                "echostorage:echo_chest_assignment"
+                "echostorage:echo_chest_assignment",
+                "echostorage:echo_shulker_box_vacuum"
               ]
             }
           ]
