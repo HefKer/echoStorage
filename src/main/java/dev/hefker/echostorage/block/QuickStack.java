@@ -27,17 +27,30 @@ public final class QuickStack {
 	public static void run(Container chest, Predicate<ItemStack> wants, Predicate<ItemStack> refuses, Container source, int from, int to) {
 		for (int slot = from; slot < to; slot++) {
 			ItemStack stack = source.getItem(slot);
-			// A bundle on the player is their carried storage, never something to put away.
-			if (stack.isEmpty() || EchoBundleContents.isBundle(stack) || !wants.test(stack) || refuses.test(stack)) {
+			if (stack.isEmpty()) {
 				continue;
 			}
 			ItemStack moving = stack.copy();
-			intoBundles(chest, moving);
-			intoSlots(chest, moving);
+			put(chest, wants, refuses, moving);
 			if (moving.getCount() != stack.getCount()) {
 				source.setItem(slot, moving);
 			}
 		}
+	}
+
+	/**
+	 * Moves as much of {@code moving} into {@code chest} as fits, if {@code wants} matches it and
+	 * {@code refuses} does not keep it out, shrinking {@code moving} by what went in: first topping
+	 * up the bundles inside that already hold it, then into slots. Also how a carried Echo Shulker
+	 * Box vacuums a picked-up stack, the one other nested write (ADR-0007).
+	 */
+	public static void put(Container chest, Predicate<ItemStack> wants, Predicate<ItemStack> refuses, ItemStack moving) {
+		// A bundle is the player's carried storage, never something to put away.
+		if (EchoBundleContents.isBundle(moving) || !wants.test(moving) || refuses.test(moving)) {
+			return;
+		}
+		intoBundles(chest, moving);
+		intoSlots(chest, moving);
 	}
 
 	/** What a chest with {@code category} wants: anything in the Category or that it already holds. */
