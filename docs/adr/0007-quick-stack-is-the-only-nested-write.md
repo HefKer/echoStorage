@@ -40,10 +40,10 @@ clicks, and Vacuum on pickup is, like the button, one server-authoritative opera
 rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the only nested
 writes; a menu click never is.
 
-**What a shulker box is.** Anything in the `c:shulker_boxes` item tag that keeps its items in
-the vanilla `container` component, so another mod's shulker boxes are see-through as well. One
-that is not see-through (its loot has not been rolled yet, or it has no `container` component)
-is neither read nor written, and is still carried storage that Quick-stack and Vacuum never move.
+**What a shulker box is.** Anything in the `c:shulker_boxes` item tag, so another mod's shulker
+boxes count as well. One is see-through when it keeps its items in the vanilla `container`
+component and its loot has been rolled. One that is not see-through is neither read nor written,
+and is still carried storage that Quick-stack and Vacuum never move.
 
 **How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
 boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
