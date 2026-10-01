@@ -1,7 +1,7 @@
 # A broken Echo Chest keeps its name, Category and strictness; it stacks only while blank
 
 Breaking an Echo Chest drops an item that carries everything the player set on it: the typed
-name, the Category and the strict flag. The chest's id and contents do not travel (the id dies
+name, the Category and the Strict flag. The chest's id and contents do not travel (the id dies
 with the block, per its lifecycle; the contents spill). A chest with nothing set drops as a plain
 item that stacks with a freshly crafted one.
 
@@ -16,7 +16,7 @@ Category is set, and carrying one without the other would keep half of the playe
 
 ## Consequences
 
-- A chest with a Category, or set to strict, stops stacking with blank chests, just as a named
+- A chest with a Category, or set to Strict, stops stacking with blank chests, just as a named
   chest already does. The item's tooltip shows the Category and strictness so the reason is
   visible.
 - The Category is saved on the item by name and read leniently: a name no preset has any more

@@ -1,6 +1,6 @@
 # Categories are resolved in layers, not from item tags alone
 
-The design assumed Minecraft's item tags could supply preset storage categories
+The design assumed Minecraft's item tags could supply preset storage Categories
 (`wood`, `stone`, `nature`, `soil`, ores, food). Checked against the 1.21.1 server jar
 (147 vanilla item tags) and `fabric-convention-tags-v2` 2.12.0 (272 `c:` item tags),
 that assumption is mostly false: there is no `wood`, `nature` or `soil` tag in either

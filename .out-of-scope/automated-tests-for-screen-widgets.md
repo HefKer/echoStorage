@@ -1,6 +1,6 @@
 # Automated tests for which widgets a screen shows
 
-No automated test checks which buttons or boxes a screen builds, such as whether the quick-stack button on `EchoChestScreen` or `EchoInterfaceScreen` is hidden when its world switch is off. Reading the code is how that gets checked.
+No automated test checks which buttons or boxes a screen builds, such as whether the Quick-stack button on `EchoChestScreen` or `EchoInterfaceScreen` is hidden when its world switch is off. Reading the code is how that gets checked.
 
 ## Why this is out of scope
 
@@ -14,7 +14,7 @@ if (EchoConfig.get().chestQuickStack()) {
 }
 ```
 
-The behaviour that matters is already tested on the server. A quick-stack press while the switch is off is refused, and the chest and interface game tests cover that. A button that shows by mistake would do nothing when pressed.
+The behaviour that matters is already tested on the server. A Quick-stack press while the switch is off is refused, and the chest and interface game tests cover that. A button that shows by mistake would do nothing when pressed.
 
 Moving the "which widgets show" decision into a class a unit test can reach would add a layer just to test one condition per widget.
 

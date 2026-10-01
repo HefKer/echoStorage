@@ -1,7 +1,7 @@
 # The mod never presents a merged inventory, and never moves items between containers on its own
 
 Every tech storage mod's central feature is a single searchable view of everything you own.
-Echo Storage deliberately refuses it. The Echo Interface lists linked Echo Chests by name and
+Echo Storage deliberately refuses it. The Echo Interface lists Linked Echo Chests by name and
 opens one of them; it does not pool their contents. Search exists only over what is already on
 screen (the open container) or over names the player typed themselves — never over the contents
 of chests that aren't open.
@@ -26,7 +26,7 @@ sorting for you, and a merged searchable pool is the point where that stops bein
 
 Auto-refill is removed. Once an Echo Bundle had a Selected item, refill was the weaker version
 of the same idea: pick-block now puts a bundle holding the block in the player's hand with that
-block selected, and the bundle places it from there. The bundle's conveniences are now vacuum,
+block selected, and the bundle places it from there. The bundle's conveniences are now Vacuum,
 placing the Selected item, pick-block from a bundle, and eating the Selected item from a Food
 bundle. All of them move items only between a container and the player, and each keeps its own
 world switch.
