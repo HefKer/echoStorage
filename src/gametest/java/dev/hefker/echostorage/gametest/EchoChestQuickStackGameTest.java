@@ -3,6 +3,7 @@ package dev.hefker.echostorage.gametest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
 import static dev.hefker.echostorage.gametest.EchoChestTests.assertStack;
+import static dev.hefker.echostorage.gametest.EchoChestTests.boxOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.menu;
 import static dev.hefker.echostorage.gametest.EchoChestTests.openedBy;
@@ -31,7 +32,8 @@ import net.minecraft.world.item.Items;
 
 /**
  * The Quick-stack button on an open Echo Chest, against a real chest and player. The button is
- * the only thing that writes into a bundle inside a chest (ADR-0007); shift-click never does.
+ * the only thing that writes into a bundle or shulker box inside a chest (ADR-0007); shift-click
+ * never does.
  */
 public class EchoChestQuickStackGameTest implements FabricGameTest {
 	@GameTestGenerator
@@ -158,6 +160,27 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 				"what the chest holds");
 		assertStack(helper, new ItemStack(Items.IRON_ORE, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1),
 				"what is in its Category");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theButtonTopsUpShulkerBoxesInTheChestAndLeavesThePlayersOwn(GameTestHelper helper) {
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.assign(Categories.ORES);
+		chest.setItem(4, boxOf(Items.SHULKER_BOX, new ItemStack(Items.BREAD, 10)));
+		chest.setItem(5, boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.COBBLESTONE, 10)));
+		ServerPlayer player = openedBy(helper, chest);
+		ItemStack carried = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COBBLESTONE, 20));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 2, carried.copy());
+
+		quickStack(player);
+
+		assertStack(helper, boxOf(Items.SHULKER_BOX, new ItemStack(Items.BREAD, 30)), chest.getItem(4), "the vanilla box");
+		assertStack(helper, boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.COBBLESTONE, 30)), chest.getItem(5), "the Echo Shulker Box");
+		assertStack(helper, carried, player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 2), "the player's own box of ore");
+		helper.assertTrue(chest.getItem(0).isEmpty(), "a chest slot took " + chest.getItem(0));
 		helper.succeed();
 	}
 
