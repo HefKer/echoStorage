@@ -5,9 +5,9 @@ chest already holds it, unless the chest refuses it (ADR-0009). #7 matched on he
 an empty chest with a Category never received anything until the player seeded it by hand; the
 Category is the player's statement of what belongs there, and Quick-stack should honour it.
 
-The nested write into a bundle inside the chest (ADR-0007) ignores the bundle's own Category and
-tops up only what the bundle already holds, so Quick-stack never starts a new kind of item inside
-a bundle.
+The nested write into a bundle or shulker box inside the chest (ADR-0007) ignores that bundle's
+or shulker box's own Category and tops up only what it already holds, so Quick-stack never starts
+a new kind of item inside a bundle or shulker box.
 
 Global Quick-stack from an Echo Interface makes two passes over every Linked chest: first the
 chests that already hold the item, then those whose Category matches it. Like items join each
