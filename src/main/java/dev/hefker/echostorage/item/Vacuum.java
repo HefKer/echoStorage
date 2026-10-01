@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * decides exactly as Quick-stack into it would, strictness included (ADR-0009), and so tops up the
  * bundles inside it before its own slots (ADR-0007).
  *
- * <p>A picked-up bundle or shulker box is carried storage, and no carried item takes it.
+ * <p>A picked-up bundle or shulker box is carried storage, and no carried item takes it (ADR-0007).
  */
 public final class Vacuum {
 	private Vacuum() {
@@ -22,8 +22,7 @@ public final class Vacuum {
 
 	/**
 	 * Moves as much of {@code pickedUp} as fits into each bundle or box in {@code inventory} that
-	 * wants it, in slot order, shrinking {@code pickedUp} by what went in. Carried storage is left
-	 * whole, whatever would have wanted it.
+	 * wants it, in slot order, shrinking {@code pickedUp} by what went in.
 	 */
 	public static void run(Container inventory, ItemStack pickedUp) {
 		if (CarriedStorage.isCarriedStorage(pickedUp)) {
