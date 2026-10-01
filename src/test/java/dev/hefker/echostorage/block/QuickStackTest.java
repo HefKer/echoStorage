@@ -2,6 +2,7 @@ package dev.hefker.echostorage.block;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -41,11 +42,17 @@ class QuickStackTest {
 	/**
 	 * The Echo Shulker Box is not registered outside a game, so here it is an ender chest: what
 	 * makes a stack a shulker box is the tag and the component, which {@link #bootstrap} and
-	 * {@link #boxOf} give it.
+	 * {@link #boxOf} give it. That does not make it one known to have 27 slots: a game test fills
+	 * the real one's empty slots.
 	 */
 	private static Item echoShulkerBox() {
 		// Not a constant: Items cannot be touched until bootstrap has run.
 		return Items.ENDER_CHEST;
+	}
+
+	/** Stands in for another mod's shulker box: in the tag, with nothing to say how many slots it has. */
+	private static Item otherModsShulkerBox() {
+		return Items.BARREL;
 	}
 
 	@BeforeAll
@@ -53,7 +60,8 @@ class QuickStackTest {
 		VanillaBootstrap.run();
 		// No datapack binds tags here, so the one the code under test reads is bound by hand.
 		BuiltInRegistries.ITEM.bindTags(Map.of(CarriedStorage.SHULKER_BOXES,
-				List.of(Items.SHULKER_BOX.builtInRegistryHolder(), echoShulkerBox().builtInRegistryHolder())));
+				List.of(Items.SHULKER_BOX.builtInRegistryHolder(), echoShulkerBox().builtInRegistryHolder(),
+						otherModsShulkerBox().builtInRegistryHolder())));
 	}
 
 	private final SimpleContainer chest = new SimpleContainer(27);
@@ -351,19 +359,92 @@ class QuickStackTest {
 	}
 
 	@Test
-	void aShulkerBoxWithMoreSlotsThanCanBeReadBackIsNotWritten() {
-		// Another mod's bigger box: writing 27 slots back would throw away the rest.
-		ItemStack[] big = new ItemStack[28];
+	void aShulkerBoxListingMoreSlotsThanItHasIsToppedUpButGainsNoSlot() {
+		ItemStack[] big = new ItemStack[29];
 		Arrays.fill(big, new ItemStack(Items.BREAD, 1));
-		big[0] = new ItemStack(Items.IRON_ORE, 10);
-		ItemStack box = boxOf(Items.SHULKER_BOX, big);
+		big[0] = new ItemStack(Items.IRON_ORE, 60);
+		big[1] = ItemStack.EMPTY;
+		chest.setItem(5, boxOf(Items.SHULKER_BOX, big));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		big[0] = new ItemStack(Items.IRON_ORE, 64);
+		assertBoxHolds(chest.getItem(5), big);
+		assertStack(new ItemStack(Items.IRON_ORE, 6), chest.getItem(0));
+	}
+
+	// --- through shulker boxes of unknown size ---------------------------------------------
+
+	@Test
+	void aShulkerBoxOfUnknownSizeHasItsStackToppedUpAndTheRestGoesToChestSlots() {
+		chest.setItem(5, boxOf(otherModsShulkerBox(), new ItemStack(Items.IRON_ORE, 60)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 64));
+		assertStack(new ItemStack(Items.IRON_ORE, 6), chest.getItem(0));
+		assertTrue(player.getItem(HOTBAR).isEmpty(), "the ore stayed with the player");
+	}
+
+	@Test
+	void aShulkerBoxOfUnknownSizeKeepsItsSlotCountAndEveryStackWhereItWas() {
+		// Slots 0 and 2 are empty and stay so; nothing is written past slot 3.
+		ItemStack box = boxOf(otherModsShulkerBox(), ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 60),
+				ItemStack.EMPTY, new ItemStack(Items.BREAD, 1));
+		chest.setItem(5, box);
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 64),
+				ItemStack.EMPTY, new ItemStack(Items.BREAD, 1));
+		assertStack(new ItemStack(Items.IRON_ORE, 6), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxOfUnknownSizeOnlyTopsUpAStackWithTheSameComponents() {
+		ItemStack named = new ItemStack(Items.PAPER, 3);
+		named.set(DataComponents.CUSTOM_NAME, Component.literal("Deed"));
+		ItemStack box = boxOf(otherModsShulkerBox(), named);
 		chest.setItem(5, box.copy());
-		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+		player.setItem(HOTBAR, new ItemStack(Items.PAPER, 5));
 
 		quickStack();
 
 		assertStack(box, chest.getItem(5));
-		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+		assertStack(new ItemStack(Items.PAPER, 5), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxOfUnknownSizeHoldingOnlyFullStacksIsNotRewritten() {
+		ItemStack box = boxOf(otherModsShulkerBox(), new ItemStack(Items.IRON_ORE, 64), new ItemStack(Items.IRON_ORE, 64));
+		// Told apart from a box written back with the same contents by being the very same stack.
+		chest.setItem(5, box);
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		assertSame(box, chest.getItem(5));
+		assertBoxHolds(box, new ItemStack(Items.IRON_ORE, 64), new ItemStack(Items.IRON_ORE, 64));
+		assertStack(new ItemStack(Items.IRON_ORE, 10), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxOfUnknownSizeIsToppedUpPastSlot27WithNothingLostOrMoved() {
+		ItemStack[] big = new ItemStack[30];
+		Arrays.fill(big, new ItemStack(Items.BREAD, 1));
+		big[27] = ItemStack.EMPTY;
+		big[28] = new ItemStack(Items.IRON_ORE, 60);
+		chest.setItem(5, boxOf(otherModsShulkerBox(), big));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		big[28] = new ItemStack(Items.IRON_ORE, 64);
+		assertBoxHolds(chest.getItem(5), big);
+		assertStack(new ItemStack(Items.IRON_ORE, 6), chest.getItem(0));
 	}
 
 	// --- what is taken -------------------------------------------------------------------

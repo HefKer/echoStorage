@@ -187,6 +187,29 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void theButtonFillsEmptySlotsOnlyInAShulkerBoxKnownToHaveThem(GameTestHelper helper) {
+		// The game test data pack tags a heart of the sea into c:shulker_boxes, as another mod's box.
+		EchoChestBlockEntity chest = placeChest(helper, CHEST);
+		chest.setItem(3, boxOf(Items.RED_SHULKER_BOX, new ItemStack(Items.BREAD, 60)));
+		chest.setItem(4, boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.COBBLESTONE, 60)));
+		chest.setItem(5, boxOf(Items.HEART_OF_THE_SEA, new ItemStack(Items.IRON_ORE, 60)));
+		ServerPlayer player = openedBy(helper, chest);
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 10));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COBBLESTONE, 10));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 2, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack(player);
+
+		assertStack(helper, boxOf(Items.RED_SHULKER_BOX, new ItemStack(Items.BREAD, 64), new ItemStack(Items.BREAD, 6)),
+				chest.getItem(3), "the vanilla box");
+		assertStack(helper, boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 6)),
+				chest.getItem(4), "the Echo Shulker Box");
+		assertStack(helper, boxOf(Items.HEART_OF_THE_SEA, new ItemStack(Items.IRON_ORE, 64)), chest.getItem(5), "another mod's box");
+		assertStack(helper, new ItemStack(Items.IRON_ORE, 6), chest.getItem(0), "what another mod's box had no stack for");
+		helper.succeed();
+	}
+
 	// --- helpers --------------------------------------------------------------------------
 
 	private static boolean quickStack(ServerPlayer player) {

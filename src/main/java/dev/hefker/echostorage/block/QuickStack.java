@@ -3,6 +3,7 @@ package dev.hefker.echostorage.block;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -22,9 +23,6 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * in its Category or what it already holds (ADR-0010) — unless the chest refuses it (ADR-0009).
  */
 public final class QuickStack {
-	/** How many slots a shulker box item is taken to have, as vanilla's and the Echo Shulker Box do. */
-	private static final int SHULKER_BOX_SLOTS = 27;
-
 	private QuickStack() {
 	}
 
@@ -116,21 +114,33 @@ public final class QuickStack {
 		}
 	}
 
-	/** Puts as much of {@code moving} as fits into the shulker box item {@code box}, as into a chest's slots. */
+	/**
+	 * Puts as much of {@code moving} as fits into the shulker box item {@code box}. One known to
+	 * have room past what its component lists is filled as a chest's slots are; any other only has
+	 * the stacks it already holds topped up, so no slot it may not have is ever written (ADR-0007).
+	 */
 	private static void intoShulkerBox(ItemStack box, ItemStack moving) {
 		ItemContainerContents contents = box.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-		// Another mod's bigger box: slots that would not be read back must not be written away.
-		if (contents.stream().count() > SHULKER_BOX_SLOTS) {
-			return;
-		}
-		SimpleContainer slots = new SimpleContainer(SHULKER_BOX_SLOTS);
+		int listed = (int) contents.stream().count();
+		OptionalInt known = CarriedStorage.shulkerBoxSlots(box);
+		boolean fills = known.isPresent() && listed <= known.getAsInt();
+		SimpleContainer slots = new SimpleContainer(fills ? known.getAsInt() : listed);
 		contents.copyInto(slots.getItems());
-		intoSlots(slots, moving);
+		topUp(slots, moving);
+		if (fills) {
+			fillEmpty(slots, moving);
+		}
 		box.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(slots.getItems()));
 	}
 
 	/** Merges into matching stacks first, then fills empty slots, as a shift-click would. */
 	private static void intoSlots(Container chest, ItemStack moving) {
+		topUp(chest, moving);
+		fillEmpty(chest, moving);
+	}
+
+	/** Adds to each stack of the same item and components, up to its limit. Writes no empty slot. */
+	private static void topUp(Container chest, ItemStack moving) {
 		for (int slot = 0; slot < chest.getContainerSize() && !moving.isEmpty(); slot++) {
 			ItemStack there = chest.getItem(slot);
 			if (!there.isEmpty() && ItemStack.isSameItemSameComponents(there, moving)) {
@@ -142,6 +152,10 @@ public final class QuickStack {
 				}
 			}
 		}
+	}
+
+	/** Puts what is left into empty slots, a full stack to each. */
+	private static void fillEmpty(Container chest, ItemStack moving) {
 		for (int slot = 0; slot < chest.getContainerSize() && !moving.isEmpty(); slot++) {
 			if (chest.getItem(slot).isEmpty()) {
 				chest.setItem(slot, moving.split(Math.min(chest.getMaxStackSize(moving), moving.getMaxStackSize())));
