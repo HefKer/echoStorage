@@ -1,0 +1,66 @@
+package dev.hefker.echostorage.item;
+
+import java.util.Optional;
+
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
+
+/**
+ * Bundles and shulker boxes: the storage a player carries. Quick-stack and Vacuum never move one,
+ * and inside an Echo Chest an Echo Bundle or a shulker box is see-through, exactly one level deep
+ * (ADR-0007): the one place that says which stacks those are and what is in them.
+ */
+public final class CarriedStorage {
+	/** Every shulker box, vanilla's, ours and other mods'. */
+	public static final TagKey<Item> SHULKER_BOXES =
+			TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "shulker_boxes"));
+
+	private CarriedStorage() {
+	}
+
+	/** Whether {@code stack} is a bundle or a shulker box of any kind, full or empty. */
+	public static boolean is(ItemStack stack) {
+		return EchoBundleContents.isBundle(stack) || stack.is(SHULKER_BOXES);
+	}
+
+	/**
+	 * Whether {@code stack} is a shulker box that keeps its items where they can be read and
+	 * written. One whose loot has not been rolled yet is a plain item.
+	 */
+	public static boolean isShulkerBox(ItemStack stack) {
+		return stack.is(SHULKER_BOXES) && stack.has(DataComponents.CONTAINER) && !stack.has(DataComponents.CONTAINER_LOOT);
+	}
+
+	/**
+	 * What is inside {@code stack}, if it is see-through: an Echo Bundle's or a shulker box's items.
+	 * Empty for any other stack, which is then judged as the item it is. The items are not looked
+	 * into in turn, so a bundle inside a shulker box is one of them and what it holds is not.
+	 */
+	public static Optional<Iterable<ItemStack>> contents(ItemStack stack) {
+		EchoBundleContents bundled = stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
+		if (bundled != null) {
+			return Optional.of(bundled.items());
+		}
+		if (isShulkerBox(stack)) {
+			return Optional.of(stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems());
+		}
+		return Optional.empty();
+	}
+
+	/** Whether {@code stack} is see-through and holds {@code item}, whatever its components. */
+	public static boolean holds(ItemStack stack, Item item) {
+		return contents(stack).filter(inside -> {
+			for (ItemStack held : inside) {
+				if (held.is(item)) {
+					return true;
+				}
+			}
+			return false;
+		}).isPresent();
+	}
+}
