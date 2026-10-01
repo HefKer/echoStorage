@@ -10,7 +10,7 @@ Category changes. And because a configured chest carries its name and Category a
 (ADR-0008), a pair would carry two names.
 
 Implementing it would mean a merge/split state machine and a concept of half-a-chest threaded
-through link resolution, the interface list and the stacking rule — the same class of machinery
+through Link resolution, the interface list and the stacking rule — the same class of machinery
 that produces Create's toolbox item-loss and duplication bugs. The mod is built on a chest being
 an addressable, named, categorised thing; two chests named *Ores 1* and *Ores 2* is a perfectly
 good storage wall.

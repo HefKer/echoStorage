@@ -5,13 +5,13 @@ see through them — an ore chest whose ore is in bundles would otherwise be inv
 matcher. Recursion is one level deep, which Q18's refusal of bundle-in-bundle makes exhaustive.
 
 The split is read versus write. Category matching, contents-matching for display and the
-interface's view are all **read-only** through nested bundles. The explicit quick-stack action is
+interface's view are all **read-only** through nested bundles. The explicit Quick-stack action is
 the **only** path that writes into one: it prefers topping up bundles already in the chest until
 they are full, then falls through to chest slots.
 
 The risk being managed is writing to a data component on a stack that lives inside a container.
 That is genuinely dangerous through interactive menu clicks, where the client cursor, the slot
-stack and the component can drift apart. A quick-stack button is not that — it is one
+stack and the component can drift apart. A Quick-stack button is not that — it is one
 server-authoritative operation computing a whole transfer and writing it atomically, with the
 client receiving the result. Confined there it is about as safe as any container write in the mod.
 
@@ -36,7 +36,7 @@ bundle fills the shulker box, never the bundle inside it.
 
 **Vacuum is the second nested write.** A carried Echo Shulker Box that vacuums an item tops up
 the bundles inside it before its own slots. The risk this ADR manages lives in interactive menu
-clicks, and vacuum on pickup is, like the button, one server-authoritative operation. So the
+clicks, and Vacuum on pickup is, like the button, one server-authoritative operation. So the
 rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the only nested
 writes; a menu click never is.
 
