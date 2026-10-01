@@ -33,8 +33,8 @@ _Avoid_: echo shulker, portable chest, backpack
 **Vacuum**:
 A carried Echo Bundle or Echo Shulker Box taking an item the player picks up, when the item is
 in its Category or it already holds that item. Off on each item until the player turns it on.
-A picked-up bundle is never vacuumed: like Quick-stack, Vacuum treats a bundle as carried
-storage, not something to put away.
+A picked-up bundle or shulker box is never vacuumed: like Quick-stack, Vacuum treats both as
+carried storage, not something to put away.
 _Avoid_: auto-pickup, magnet, absorb, siphon
 
 **Echo Interface**:
@@ -49,7 +49,8 @@ _Avoid_: filter, group, class
 
 **Stray**:
 An item outside the Category of the Echo Chest it is in or being put into. A chest with no
-Category has no strays.
+Category has no strays. A bundle or shulker box is judged by what it holds, one level deep: a
+stray if anything inside is, and never one while empty.
 _Avoid_: misfit, foreign item, unsorted item
 
 **Strict**:
@@ -80,5 +81,6 @@ _Avoid_: receiver, listener, antenna, node
 **Quick-stack**:
 A player-initiated action that moves items from the player's inventory into one or more
 Echo Chests, each item going to a chest whose Category it falls in or that already holds it.
-Never happens on its own.
+Never happens on its own, and never moves a bundle or shulker box: those are carried storage,
+not something to put away.
 _Avoid_: auto-sort, deposit, dump

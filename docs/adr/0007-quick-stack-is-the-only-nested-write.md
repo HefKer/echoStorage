@@ -39,3 +39,15 @@ the bundles inside it before its own slots. The risk this ADR manages lives in i
 clicks, and vacuum on pickup is, like the button, one server-authoritative operation. So the
 rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the only nested
 writes; a menu click never is.
+
+**What a shulker box is.** Anything in the `c:shulker_boxes` item tag that keeps its items in
+the vanilla `container` component, so another mod's shulker boxes are see-through as well. One
+whose loot has not been rolled yet is a plain item: neither read nor written.
+
+**Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
+item it is, not by what it holds, so that shulker box is a stray unless the Category covers
+bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
+
+**A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
+whatever it holds. Seeing through them would otherwise put a player's box of ore in an ore
+chest's Category, and a bulk action would take the whole box.
