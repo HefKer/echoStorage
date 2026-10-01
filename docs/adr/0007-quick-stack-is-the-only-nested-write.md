@@ -44,6 +44,14 @@ writes; a menu click never is.
 the vanilla `container` component, so another mod's shulker boxes are see-through as well. One
 whose loot has not been rolled yet is a plain item: neither read nor written.
 
+**How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
+boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
+and then fills their empty slots. Any other shulker box only has the stacks it already holds
+topped up: same item, same components, up to the stack's limit. No empty slot in it is written
+and no slot is added past those its component lists, so a smaller box loses nothing and a bigger
+one is topped up wherever its stacks are. A box listing more than 27 slots is treated this way
+whatever its kind. Reads are the same for every kind.
+
 **Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
 item it is, not by what it holds, so that shulker box is a stray unless the Category covers
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
