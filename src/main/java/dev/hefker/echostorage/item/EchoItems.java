@@ -7,11 +7,13 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
  * Item, recipe-serializer and cauldron-interaction registration, and the only place that names the loader's
@@ -27,8 +29,13 @@ public final class EchoItems {
 
 	public static final Item DEEP_ECHO_CHEST = new BlockItem(EchoBlocks.DEEP_ECHO_CHEST, new Item.Properties());
 
-	/** Stacks to one even when empty, as a vanilla shulker box does. */
-	public static final Item ECHO_SHULKER_BOX = new EchoShulkerBoxItem(EchoBlocks.ECHO_SHULKER_BOX, new Item.Properties().stacksTo(1));
+	/**
+	 * Stacks to one even when empty, and carries empty contents before it is ever placed, as a
+	 * vanilla shulker box does: that component is what makes a shulker box see-through (ADR-0007).
+	 */
+	public static final Item ECHO_SHULKER_BOX = new EchoShulkerBoxItem(EchoBlocks.ECHO_SHULKER_BOX, new Item.Properties()
+			.stacksTo(1)
+			.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 
 	public static final Item ECHO_INTERFACE = new BlockItem(EchoBlocks.ECHO_INTERFACE, new Item.Properties());
 
