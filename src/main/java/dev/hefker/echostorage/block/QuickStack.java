@@ -139,6 +139,7 @@ public final class QuickStack {
 		fillEmpty(chest, moving);
 	}
 
+	/** Adds to each stack of the same item and components, up to its limit. Writes no empty slot. */
 	private static void topUp(Container chest, ItemStack moving) {
 		for (int slot = 0; slot < chest.getContainerSize() && !moving.isEmpty(); slot++) {
 			ItemStack there = chest.getItem(slot);
@@ -153,6 +154,7 @@ public final class QuickStack {
 		}
 	}
 
+	/** Puts what is left into empty slots, a full stack to each. */
 	private static void fillEmpty(Container chest, ItemStack moving) {
 		for (int slot = 0; slot < chest.getContainerSize() && !moving.isEmpty(); slot++) {
 			if (chest.getItem(slot).isEmpty()) {
