@@ -216,16 +216,9 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	}
 
 	private static boolean belongs(Category category, ItemStack stack) {
-		Optional<Iterable<ItemStack>> contents = CarriedStorage.contents(stack);
-		if (contents.isEmpty()) {
-			return category.matches(stack);
-		}
-		for (ItemStack inside : contents.get()) {
-			if (!category.matches(inside)) {
-				return false;
-			}
-		}
-		return true;
+		return CarriedStorage.contents(stack)
+				.map(inside -> inside.stream().allMatch(category::matches))
+				.orElseGet(() -> category.matches(stack));
 	}
 
 	/**

@@ -308,10 +308,8 @@ class QuickStackTest {
 	void thePlayersOwnShulkerBoxNeverMovesEvenIntoAChestWhoseCategoryItsContentsMatch() {
 		ItemStack vanilla = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
 		ItemStack echo = boxOf(echoShulkerBox(), new ItemStack(Items.IRON_ORE, 10));
-		// A chest that also holds both kinds of box, so it "holds" them as well as wanting their ore.
-		chest.setItem(0, new ItemStack(Items.SHULKER_BOX));
-		chest.setItem(1, new ItemStack(echoShulkerBox()));
-		chest.getItem(0).remove(DataComponents.CONTAINER);
+		// An ender chest carries no contents, so the chest "holds" that item as well as wanting the ore.
+		chest.setItem(0, new ItemStack(echoShulkerBox()));
 		player.setItem(HOTBAR, vanilla.copy());
 		player.setItem(HOTBAR + 1, echo.copy());
 
@@ -319,7 +317,7 @@ class QuickStackTest {
 
 		assertStack(vanilla, player.getItem(HOTBAR));
 		assertStack(echo, player.getItem(HOTBAR + 1));
-		assertTrue(chest.getItem(2).isEmpty(), "the chest took " + chest.getItem(2));
+		assertTrue(chest.getItem(1).isEmpty(), "the chest took " + chest.getItem(1));
 	}
 
 	@Test

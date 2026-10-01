@@ -1,5 +1,6 @@
 package dev.hefker.echostorage.item;
 
+import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.component.DataComponents;
@@ -24,7 +25,7 @@ public final class CarriedStorage {
 	}
 
 	/** Whether {@code stack} is a bundle or a shulker box of any kind, full or empty. */
-	public static boolean is(ItemStack stack) {
+	public static boolean isCarriedStorage(ItemStack stack) {
 		return EchoBundleContents.isBundle(stack) || stack.is(SHULKER_BOXES);
 	}
 
@@ -32,7 +33,7 @@ public final class CarriedStorage {
 	 * Whether {@code stack} is a shulker box that keeps its items where they can be read and
 	 * written. One whose loot has not been rolled yet is a plain item.
 	 */
-	public static boolean isShulkerBox(ItemStack stack) {
+	private static boolean isSeeThroughShulkerBox(ItemStack stack) {
 		return stack.is(SHULKER_BOXES) && stack.has(DataComponents.CONTAINER) && !stack.has(DataComponents.CONTAINER_LOOT);
 	}
 
@@ -41,26 +42,19 @@ public final class CarriedStorage {
 	 * Empty for any other stack, which is then judged as the item it is. The items are not looked
 	 * into in turn, so a bundle inside a shulker box is one of them and what it holds is not.
 	 */
-	public static Optional<Iterable<ItemStack>> contents(ItemStack stack) {
+	public static Optional<List<ItemStack>> contents(ItemStack stack) {
 		EchoBundleContents bundled = stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS);
 		if (bundled != null) {
-			return Optional.of(bundled.items());
+			return Optional.of(bundled.items);
 		}
-		if (isShulkerBox(stack)) {
-			return Optional.of(stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems());
+		if (isSeeThroughShulkerBox(stack)) {
+			return Optional.of(stack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyStream().toList());
 		}
 		return Optional.empty();
 	}
 
 	/** Whether {@code stack} is see-through and holds {@code item}, whatever its components. */
 	public static boolean holds(ItemStack stack, Item item) {
-		return contents(stack).filter(inside -> {
-			for (ItemStack held : inside) {
-				if (held.is(item)) {
-					return true;
-				}
-			}
-			return false;
-		}).isPresent();
+		return contents(stack).filter(inside -> inside.stream().anyMatch(held -> held.is(item))).isPresent();
 	}
 }

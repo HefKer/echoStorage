@@ -174,12 +174,15 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 20));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COBBLESTONE, 20));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 2, carried.copy());
+		ItemStack carriedEcho = boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 3, carriedEcho.copy());
 
 		quickStack(player);
 
 		assertStack(helper, boxOf(Items.SHULKER_BOX, new ItemStack(Items.BREAD, 30)), chest.getItem(4), "the vanilla box");
 		assertStack(helper, boxOf(EchoItems.ECHO_SHULKER_BOX, new ItemStack(Items.COBBLESTONE, 30)), chest.getItem(5), "the Echo Shulker Box");
 		assertStack(helper, carried, player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 2), "the player's own box of ore");
+		assertStack(helper, carriedEcho, player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 3), "the player's own Echo Shulker Box of ore");
 		helper.assertTrue(chest.getItem(0).isEmpty(), "a chest slot took " + chest.getItem(0));
 		helper.succeed();
 	}
