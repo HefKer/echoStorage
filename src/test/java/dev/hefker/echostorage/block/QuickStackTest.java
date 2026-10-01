@@ -4,21 +4,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import dev.hefker.echostorage.VanillaBootstrap;
 import dev.hefker.echostorage.category.Category;
+import dev.hefker.echostorage.item.CarriedStorage;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.component.SeededContainerLoot;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,9 +38,22 @@ class QuickStackTest {
 	/** Tag layers are empty without datapacks, so tests give their Category a later layer. */
 	private static final Category ORES = Category.of("ores", stack -> stack.is(Items.IRON_ORE) || stack.is(Items.COAL_ORE));
 
+	/**
+	 * The Echo Shulker Box is not registered outside a game, so here it is an ender chest: what
+	 * makes a stack a shulker box is the tag and the component, which {@link #bootstrap} and
+	 * {@link #boxOf} give it.
+	 */
+	private static Item echoShulkerBox() {
+		// Not a constant: Items cannot be touched until bootstrap has run.
+		return Items.ENDER_CHEST;
+	}
+
 	@BeforeAll
 	static void bootstrap() {
 		VanillaBootstrap.run();
+		// No datapack binds tags here, so the one the code under test reads is bound by hand.
+		BuiltInRegistries.ITEM.bindTags(Map.of(CarriedStorage.SHULKER_BOXES,
+				List.of(Items.SHULKER_BOX.builtInRegistryHolder(), echoShulkerBox().builtInRegistryHolder())));
 	}
 
 	private final SimpleContainer chest = new SimpleContainer(27);
@@ -157,6 +177,192 @@ class QuickStackTest {
 
 		assertEquals(2, chest.getItem(5).getCount());
 		assertBundleHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 10));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+	}
+
+	// --- through shulker boxes -----------------------------------------------------------
+
+	@Test
+	void anItemHeldOnlyInsideAShulkerBoxIsMatchedAndTopsThatBoxUp() {
+		chest.setItem(5, boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 30));
+		assertTrue(player.getItem(HOTBAR).isEmpty(), "the ore stayed with the player");
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void anEchoShulkerBoxIsReadAndToppedUpAsAVanillaOneIs() {
+		chest.setItem(5, boxOf(echoShulkerBox(), new ItemStack(Items.IRON_ORE, 10)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 30));
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void aShulkerBoxThatDoesNotHoldTheItemIsLeftAloneWhateverItsOwnCategory() {
+		ItemStack box = boxOf(echoShulkerBox(), new ItemStack(Items.COAL_ORE, 10));
+		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(ORES), false));
+		chest.setItem(5, box);
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack(Optional.of(ORES));
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.COAL_ORE, 10));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxIsToppedUpWithAStrayItHoldsWhateverItsOwnStrictness() {
+		ItemStack box = boxOf(echoShulkerBox(), new ItemStack(Items.BREAD, 10));
+		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(ORES), true));
+		chest.setItem(5, box);
+		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 20));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.BREAD, 30));
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void aShulkerBoxFillsItsMatchingStacksThenItsEmptySlots() {
+		chest.setItem(5, boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 60), new ItemStack(Items.BREAD, 1)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 64), new ItemStack(Items.BREAD, 1), new ItemStack(Items.IRON_ORE, 6));
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void aFullShulkerBoxLetsTheRestFallThroughToChestSlots() {
+		ItemStack[] full = new ItemStack[27];
+		Arrays.fill(full, new ItemStack(Items.IRON_ORE, 64));
+		full[26] = new ItemStack(Items.IRON_ORE, 60);
+		chest.setItem(5, boxOf(Items.SHULKER_BOX, full));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		full[26] = new ItemStack(Items.IRON_ORE, 64);
+		assertBoxHolds(chest.getItem(5), full);
+		assertStack(new ItemStack(Items.IRON_ORE, 6), chest.getItem(0));
+		assertTrue(player.getItem(HOTBAR).isEmpty(), "the ore stayed with the player");
+	}
+
+	@Test
+	void aBundleAndAShulkerBoxThatBothHoldTheItemAreToppedUpInSlotOrder() {
+		// Each has room for 4 more; the chest's own slot 0 comes after both.
+		ItemStack[] nearlyFull = new ItemStack[27];
+		Arrays.fill(nearlyFull, new ItemStack(Items.IRON_ORE, 64));
+		nearlyFull[26] = new ItemStack(Items.IRON_ORE, 60);
+		chest.setItem(3, boxOf(Items.SHULKER_BOX, nearlyFull));
+		chest.setItem(5, bundleOf(new ItemStack(Items.IRON_ORE, 64), new ItemStack(Items.IRON_ORE, 64),
+				new ItemStack(Items.IRON_ORE, 64), new ItemStack(Items.IRON_ORE, 60)));
+		chest.setItem(7, boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 1)));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 10));
+
+		quickStack();
+
+		nearlyFull[26] = new ItemStack(Items.IRON_ORE, 64);
+		assertBoxHolds(chest.getItem(3), nearlyFull);
+		assertBundleHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 256));
+		assertBoxHolds(chest.getItem(7), new ItemStack(Items.IRON_ORE, 3));
+		assertTrue(chest.getItem(0).isEmpty(), "a chest slot took " + chest.getItem(0));
+	}
+
+	@Test
+	void aBundleInsideAShulkerBoxIsNeverWrittenInto() {
+		ItemStack inner = bundleOf(new ItemStack(Items.IRON_ORE, 10));
+		chest.setItem(5, boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 1), inner));
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 21), inner);
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void anItemHeldOnlyInABundleInsideAShulkerBoxIsNotMatched() {
+		ItemStack box = boxOf(Items.SHULKER_BOX, bundleOf(new ItemStack(Items.IRON_ORE, 10)));
+		chest.setItem(5, box.copy());
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertStack(new ItemStack(Items.IRON_ORE, 20), player.getItem(HOTBAR));
+		assertStack(box, chest.getItem(5));
+		assertOnlySlotFilled(5);
+	}
+
+	@Test
+	void thePlayersOwnShulkerBoxNeverMovesEvenIntoAChestWhoseCategoryItsContentsMatch() {
+		ItemStack vanilla = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		ItemStack echo = boxOf(echoShulkerBox(), new ItemStack(Items.IRON_ORE, 10));
+		// An ender chest carries no contents, so the chest "holds" that item as well as wanting the ore.
+		chest.setItem(0, new ItemStack(echoShulkerBox()));
+		player.setItem(HOTBAR, vanilla.copy());
+		player.setItem(HOTBAR + 1, echo.copy());
+
+		quickStack(Optional.of(ORES));
+
+		assertStack(vanilla, player.getItem(HOTBAR));
+		assertStack(echo, player.getItem(HOTBAR + 1));
+		assertTrue(chest.getItem(1).isEmpty(), "the chest took " + chest.getItem(1));
+	}
+
+	@Test
+	void aStackOfSeveralShulkerBoxesIsNeverWrittenInto() {
+		ItemStack pair = boxOf(echoShulkerBox(), new ItemStack(Items.IRON_ORE, 10));
+		pair.setCount(2);
+		chest.setItem(5, pair.copy());
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertStack(pair, chest.getItem(5));
+		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxWhoseLootIsUnrolledIsNeitherReadNorWritten() {
+		ItemStack unrolled = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		unrolled.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
+		chest.setItem(5, unrolled.copy());
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+		assertStack(new ItemStack(Items.IRON_ORE, 20), player.getItem(HOTBAR));
+
+		chest.setItem(0, new ItemStack(Items.IRON_ORE, 1));
+		quickStack();
+
+		assertStack(unrolled, chest.getItem(5));
+		assertStack(new ItemStack(Items.IRON_ORE, 21), chest.getItem(0));
+	}
+
+	@Test
+	void aShulkerBoxWithMoreSlotsThanCanBeReadBackIsNotWritten() {
+		// Another mod's bigger box: writing 27 slots back would throw away the rest.
+		ItemStack[] big = new ItemStack[28];
+		Arrays.fill(big, new ItemStack(Items.BREAD, 1));
+		big[0] = new ItemStack(Items.IRON_ORE, 10);
+		ItemStack box = boxOf(Items.SHULKER_BOX, big);
+		chest.setItem(5, box.copy());
+		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
+
+		quickStack();
+
+		assertStack(box, chest.getItem(5));
 		assertStack(new ItemStack(Items.IRON_ORE, 20), chest.getItem(0));
 	}
 
@@ -296,6 +502,20 @@ class QuickStackTest {
 		ItemStack bundle = new ItemStack(Items.STICK);
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
 		return bundle;
+	}
+
+	/** A shulker box item of the given kind, its slots filled in order from the first. */
+	private static ItemStack boxOf(Item kind, ItemStack... contents) {
+		ItemStack box = new ItemStack(kind);
+		box.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(contents)));
+		return box;
+	}
+
+	/** The box's slots, exactly: stack by stack from the first, with nothing after them. */
+	private static void assertBoxHolds(ItemStack box, ItemStack... expected) {
+		ItemContainerContents contents = box.get(DataComponents.CONTAINER);
+		assertNotNull(contents, box + " carries no contents");
+		assertEquals(ItemContainerContents.fromItems(List.of(expected)), contents);
 	}
 
 	/** Totals per item, so the assertion does not care how the bundle split its entries. */

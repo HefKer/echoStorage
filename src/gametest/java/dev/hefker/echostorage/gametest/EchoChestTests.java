@@ -25,6 +25,7 @@ import dev.hefker.echostorage.menu.EchoChestMenuProvider;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestFunction;
@@ -37,6 +38,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 
@@ -202,6 +204,13 @@ final class EchoChestTests {
 		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
 		return bundle;
+	}
+
+	/** A shulker box item of the given kind, its slots filled in order from the first. */
+	static ItemStack boxOf(Item kind, ItemStack... contents) {
+		ItemStack box = new ItemStack(kind);
+		box.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(contents)));
+		return box;
 	}
 
 	/**

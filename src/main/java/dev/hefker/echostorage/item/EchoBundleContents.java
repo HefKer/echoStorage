@@ -117,11 +117,6 @@ public final class EchoBundleContents {
 		return items.stream().filter(test).findFirst();
 	}
 
-	/** Whether every entry passes {@code test}; true of an empty bundle. */
-	public boolean allMatch(Predicate<ItemStack> test) {
-		return items.stream().allMatch(test);
-	}
-
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof EchoBundleContents contents

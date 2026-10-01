@@ -3,6 +3,7 @@ package dev.hefker.echostorage.gametest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.CHEST;
 import static dev.hefker.echostorage.gametest.EchoChestTests.FIRST_MAIN_INVENTORY_SLOT;
 import static dev.hefker.echostorage.gametest.EchoChestTests.NEIGHBOUR;
+import static dev.hefker.echostorage.gametest.EchoChestTests.boxOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.breakChest;
 import static dev.hefker.echostorage.gametest.EchoChestTests.bundleOf;
 import static dev.hefker.echostorage.gametest.EchoChestTests.chestAt;
@@ -48,8 +49,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.SeededContainerLoot;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 /**
  * An Echo Chest's Category and strictness: how they are saved, assigned, enforced and shown.
@@ -321,6 +324,53 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(bundle, chest.getItem(0)), "the bundle went in, got " + chest.getItem(0));
+		helper.succeed();
+	}
+
+	// --- through shulker boxes (ADR-0007, read-only) --------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxIsJudgedByWhatItHolds(GameTestHelper helper) {
+		Optional<Category> ores = Optional.of(Categories.ORES);
+
+		for (Item kind : List.of(Items.SHULKER_BOX, Items.RED_SHULKER_BOX, EchoItems.ECHO_SHULKER_BOX)) {
+			helper.assertFalse(EchoChestBlockEntity.isStray(ores, boxOf(kind, new ItemStack(Items.IRON_ORE, 10))),
+					"a " + kind + " of ore is a stray");
+			helper.assertTrue(EchoChestBlockEntity.isStray(ores, boxOf(kind, new ItemStack(Items.IRON_ORE, 10), new ItemStack(Items.BREAD, 1))),
+					"a " + kind + " with bread in it is not a stray");
+			helper.assertFalse(EchoChestBlockEntity.isStray(ores, boxOf(kind)), "an empty " + kind + " is a stray");
+			helper.assertFalse(EchoChestBlockEntity.isStray(ores, new ItemStack(kind)), "a new " + kind + " is a stray");
+			helper.assertTrue(EchoChestBlockEntity.isStray(ores, boxOf(kind, bundleOf(new ItemStack(Items.IRON_ORE, 10)))),
+					"a " + kind + " holding a bundle of ore is not a stray: reads stop one level deep");
+		}
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxWhoseLootIsUnrolledIsJudgedAsTheItemItIs(GameTestHelper helper) {
+		ItemStack unrolled = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		unrolled.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
+
+		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), unrolled), "an unrolled box of ore is not a stray");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStrictChestTakesAShiftClickedShulkerBoxOfItsCategoryAndRefusesOneWithAStray(GameTestHelper helper) {
+		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
+		ServerPlayer player = openedBy(helper, chest);
+		ItemStack ore = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
+		ItemStack mixed = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10), new ItemStack(Items.BREAD, 1));
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, ore.copy());
+		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, mixed.copy());
+
+		menu(player).quickMoveStack(player, menu(player).chestSlots());
+		menu(player).quickMoveStack(player, menu(player).chestSlots() + 1);
+
+		helper.assertTrue(ItemStack.matches(ore, chest.getItem(0)), "the box of ore went in, got " + chest.getItem(0));
+		helper.assertTrue(chest.getItem(1).isEmpty(), "the chest took " + chest.getItem(1));
+		helper.assertTrue(ItemStack.matches(mixed, player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1)),
+				"the box with bread in it stayed with the player");
 		helper.succeed();
 	}
 
