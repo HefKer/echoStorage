@@ -112,6 +112,34 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxThatFitsInsideContainersIsNotVacuumedByABundleWhoseCategoryMatchesIt(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		Category hearts = Category.of("hearts", stack -> stack.is(Items.HEART_OF_THE_SEA));
+		ItemStack bundle = bundle(vacuuming(Optional.of(hearts)));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle.copy());
+
+		// Stands in for another mod's shulker box: in c:shulker_boxes, yet it fits inside container items.
+		drop(helper, player, new ItemStack(Items.HEART_OF_THE_SEA, 2));
+
+		helper.assertTrue(ItemStack.matches(bundle, player.getInventory().getItem(BUNDLE_SLOT)), "the bundle changed");
+		helper.assertValueEqual(player.getInventory().countItem(Items.HEART_OF_THE_SEA), 2, "shulker boxes loose in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxThatFitsInsideContainersIsNotVacuumedByABundleThatHoldsOne(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack bundle = bundle(vacuuming(Optional.empty()), new ItemStack(Items.HEART_OF_THE_SEA, 1));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle.copy());
+
+		drop(helper, player, new ItemStack(Items.HEART_OF_THE_SEA, 2));
+
+		helper.assertTrue(ItemStack.matches(bundle, player.getInventory().getItem(BUNDLE_SLOT)), "the bundle changed");
+		helper.assertValueEqual(player.getInventory().countItem(Items.HEART_OF_THE_SEA), 2, "shulker boxes loose in the inventory");
+		helper.succeed();
+	}
+
 	// --- refill ----------------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
