@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
  * <p>Each carried item wants what is in its Category or what it already holds (ADR-0010). A box
  * decides exactly as Quick-stack into it would, strictness included (ADR-0009), and so tops up the
  * bundles inside it before its own slots (ADR-0007).
+ *
+ * <p>A picked-up bundle or shulker box is carried storage, and no carried item takes it (ADR-0007).
  */
 public final class Vacuum {
 	private Vacuum() {
@@ -23,6 +25,9 @@ public final class Vacuum {
 	 * wants it, in slot order, shrinking {@code pickedUp} by what went in.
 	 */
 	public static void run(Container inventory, ItemStack pickedUp) {
+		if (CarriedStorage.isCarriedStorage(pickedUp)) {
+			return;
+		}
 		for (int slot = 0; slot < inventory.getContainerSize() && !pickedUp.isEmpty(); slot++) {
 			ItemStack carried = inventory.getItem(slot);
 			if (carried.getCount() != 1) {

@@ -44,6 +44,11 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	private static final BlockPos FLOOR = new BlockPos(1, 1, 1);
 	private static final BlockPos ABOVE_FLOOR = FLOOR.above();
 	private static final int BUNDLE_SLOT = 9;
+	/**
+	 * Stands in for another mod's shulker box: the game test data pack tags it into
+	 * c:shulker_boxes, yet it fits inside container items.
+	 */
+	private static final Item OTHER_MODS_SHULKER_BOX = Items.HEART_OF_THE_SEA;
 
 	// --- vacuum ----------------------------------------------------------------------------
 
@@ -109,6 +114,48 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 
 		helper.assertValueEqual(count(player.getInventory().getItem(BUNDLE_SLOT), Items.COBBLESTONE), 10, "cobblestone in the bundle");
 		helper.assertTrue(inventoryHoldsLoose(player, Items.COBBLESTONE), "the cobblestone went to the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxThatFitsInsideContainersIsNotVacuumedByABundleWhoseCategoryMatchesIt(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		Category hearts = Category.of("hearts", stack -> stack.is(OTHER_MODS_SHULKER_BOX));
+		ItemStack bundle = bundle(vacuuming(Optional.of(hearts)));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle.copy());
+
+		drop(helper, player, new ItemStack(OTHER_MODS_SHULKER_BOX, 2));
+
+		helper.assertTrue(ItemStack.matches(bundle, player.getInventory().getItem(BUNDLE_SLOT)), "the bundle changed");
+		helper.assertValueEqual(player.getInventory().countItem(OTHER_MODS_SHULKER_BOX), 2, "shulker boxes loose in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxThatFitsInsideContainersIsNotVacuumedByABundleThatHoldsOne(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack bundle = bundle(vacuuming(Optional.empty()), new ItemStack(OTHER_MODS_SHULKER_BOX, 1));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle.copy());
+
+		drop(helper, player, new ItemStack(OTHER_MODS_SHULKER_BOX, 2));
+
+		helper.assertTrue(ItemStack.matches(bundle, player.getInventory().getItem(BUNDLE_SLOT)), "the bundle changed");
+		helper.assertValueEqual(player.getInventory().countItem(OTHER_MODS_SHULKER_BOX), 2, "shulker boxes loose in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void noBundleOrShulkerBoxIsVacuumedByABundleWhoseCategoryMatchesIt(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack bundle = bundle(vacuuming(Optional.of(Category.of("anything", stack -> true))));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle.copy());
+
+		for (Item carriedStorage : new Item[] {Items.SHULKER_BOX, EchoItems.ECHO_SHULKER_BOX, Items.BUNDLE, EchoItems.ECHO_BUNDLE}) {
+			ItemEntity dropped = drop(helper, player, new ItemStack(carriedStorage));
+
+			helper.assertTrue(ItemStack.matches(bundle, player.getInventory().getItem(BUNDLE_SLOT)), "the bundle took " + carriedStorage);
+			helper.assertTrue(dropped.isRemoved(), carriedStorage + " did not reach the inventory");
+		}
 		helper.succeed();
 	}
 

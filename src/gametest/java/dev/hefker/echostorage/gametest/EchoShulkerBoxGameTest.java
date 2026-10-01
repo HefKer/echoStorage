@@ -24,6 +24,7 @@ import dev.hefker.echostorage.block.EchoChestAssignment;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.block.EchoShulkerBoxBlockEntity;
 import dev.hefker.echostorage.category.Categories;
+import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoComponents;
@@ -45,6 +46,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -306,6 +308,25 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 
 		assertStack(helper, box, player.getInventory().getItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT), "the box");
 		helper.assertValueEqual(player.getInventory().countItem(Items.BREAD), 3, "bread loose in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void noBundleOrShulkerBoxIsVacuumedByABoxWhoseCategoryMatchesIt(GameTestHelper helper) {
+		ServerPlayer player = playerBeside(helper);
+		ItemStack box = boxHolding();
+		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(Category.of("anything", stack -> true)), false));
+		box.set(EchoComponents.ECHO_SHULKER_BOX_VACUUM, Unit.INSTANCE);
+		player.getInventory().setItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT, box.copy());
+
+		// The heart of the sea stands in for another mod's shulker box: the game test data pack tags it into c:shulker_boxes.
+		for (Item carriedStorage : new Item[] {Items.SHULKER_BOX, EchoItems.ECHO_SHULKER_BOX, Items.BUNDLE, EchoItems.ECHO_BUNDLE,
+				Items.HEART_OF_THE_SEA}) {
+			ItemEntity dropped = drop(helper, player, new ItemStack(carriedStorage));
+
+			assertStack(helper, box, player.getInventory().getItem(EchoChestTests.FIRST_MAIN_INVENTORY_SLOT), "the box after " + carriedStorage);
+			helper.assertTrue(dropped.isRemoved(), carriedStorage + " did not reach the inventory");
+		}
 		helper.succeed();
 	}
 
