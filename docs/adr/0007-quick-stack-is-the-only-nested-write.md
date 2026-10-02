@@ -54,7 +54,7 @@ one is topped up wherever its stacks are. A box listing more than 27 slots is tr
 whatever its kind. Reads are the same for every kind.
 
 **Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
-item it is, not by what it holds, so that shulker box is a stray unless the Category covers
+item it is, not by what it holds, so that shulker box is a Stray unless the Category covers
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
 
 **A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
