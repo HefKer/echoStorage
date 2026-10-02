@@ -1,5 +1,7 @@
 package dev.hefker.echostorage.block;
 
+import static dev.hefker.echostorage.VanillaBootstrap.echoShulkerBox;
+import static dev.hefker.echostorage.VanillaBootstrap.otherModsShulkerBox;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -13,12 +15,10 @@ import java.util.Optional;
 
 import dev.hefker.echostorage.VanillaBootstrap;
 import dev.hefker.echostorage.category.Category;
-import dev.hefker.echostorage.item.CarriedStorage;
 import dev.hefker.echostorage.item.EchoBundleContents;
 import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
@@ -39,29 +39,9 @@ class QuickStackTest {
 	/** Tag layers are empty without datapacks, so tests give their Category a later layer. */
 	private static final Category ORES = Category.of("ores", stack -> stack.is(Items.IRON_ORE) || stack.is(Items.COAL_ORE));
 
-	/**
-	 * The Echo Shulker Box is not registered outside a game, so here it is an ender chest: what
-	 * makes a stack a shulker box is the tag and the component, which {@link #bootstrap} and
-	 * {@link #boxOf} give it. That does not make it one known to have 27 slots: a game test fills
-	 * the real one's empty slots.
-	 */
-	private static Item echoShulkerBox() {
-		// Not a constant: Items cannot be touched until bootstrap has run.
-		return Items.ENDER_CHEST;
-	}
-
-	/** Stands in for another mod's shulker box: in the tag, with nothing to say how many slots it has. */
-	private static Item otherModsShulkerBox() {
-		return Items.BARREL;
-	}
-
 	@BeforeAll
 	static void bootstrap() {
 		VanillaBootstrap.run();
-		// No datapack binds tags here, so the one the code under test reads is bound by hand.
-		BuiltInRegistries.ITEM.bindTags(Map.of(CarriedStorage.SHULKER_BOXES,
-				List.of(Items.SHULKER_BOX.builtInRegistryHolder(), echoShulkerBox().builtInRegistryHolder(),
-						otherModsShulkerBox().builtInRegistryHolder())));
 	}
 
 	private final SimpleContainer chest = new SimpleContainer(27);

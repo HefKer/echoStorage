@@ -281,6 +281,29 @@ class VacuumTest {
 	}
 
 	@Test
+	void aShulkerBoxIsCarriedStorage() {
+		assertTrue(CarriedStorage.isCarriedStorage(new ItemStack(Items.SHULKER_BOX)), "c:shulker_boxes is not bound");
+	}
+
+	@Test
+	void anotherModsShulkerBoxIsNeverVacuumedEvenByABundleOrABoxWhoseCategoryMatchesIt() {
+		// It fits inside container items, so the bundle would hold it: only Vacuum's own check keeps
+		// it out. The box is asked as Quick-stack would ask it, which refuses carried storage again.
+		Category boxes = Category.of("boxes", stack -> stack.is(VanillaBootstrap.otherModsShulkerBox()));
+		player.setItem(3, TestBundles.of(vacuuming(Optional.of(boxes))));
+		player.setItem(4, box(permissive(boxes), true));
+		ItemStack bundleBefore = player.getItem(3).copy();
+		ItemStack boxBefore = player.getItem(4).copy();
+		ItemStack pickedUp = new ItemStack(VanillaBootstrap.otherModsShulkerBox());
+
+		Vacuum.run(player, pickedUp);
+
+		assertEquals(1, pickedUp.getCount(), "the shulker box was Vacuumed");
+		assertTrue(ItemStack.matches(bundleBefore, player.getItem(3)), "the bundle changed: " + player.getItem(3));
+		assertTrue(ItemStack.matches(boxBefore, player.getItem(4)), "the box changed: " + player.getItem(4));
+	}
+
+	@Test
 	void aBundleOfEitherKindIsNeverVacuumedIntoABoxWhoseCategoryMatchesBundles() {
 		Category bundles = Category.of("bundles", EchoBundleContents::isBundle);
 		player.setItem(3, box(permissive(bundles), true));
@@ -320,11 +343,11 @@ class VacuumTest {
 	}
 
 	/**
-	 * An Echo Shulker Box as a unit test can make one: like {@link TestBundles}, a stick carrying
-	 * the box's components, since the item is not registered outside a game.
+	 * An Echo Shulker Box as a unit test can make one: the item standing in for it, carrying the
+	 * box's components, since the real one is not registered outside a game.
 	 */
 	private static ItemStack box(EchoChestAssignment assignment, boolean vacuum, ItemStack... slots) {
-		ItemStack box = new ItemStack(Items.STICK);
+		ItemStack box = new ItemStack(VanillaBootstrap.echoShulkerBox());
 		box.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(Arrays.asList(slots)));
 		if (!assignment.isBlank()) {
 			box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, assignment);
