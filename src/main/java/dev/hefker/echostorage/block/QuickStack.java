@@ -48,7 +48,7 @@ public final class QuickStack {
 	 * Moves as much of {@code moving} into {@code chest} as fits, if {@code wants} matches it and
 	 * {@code refuses} does not keep it out, shrinking {@code moving} by what went in: first topping
 	 * up the bundles and shulker boxes inside that already hold it, then into slots. Also how a
-	 * carried Echo Shulker Box vacuums a picked-up stack, the one other nested write (ADR-0007).
+	 * carried Echo Shulker Box Vacuums a picked-up stack, the one other nested write (ADR-0007).
 	 */
 	public static void put(Container chest, Predicate<ItemStack> wants, Predicate<ItemStack> refuses, ItemStack moving) {
 		// A bundle or shulker box is the player's carried storage, never something to put away: Vacuum

@@ -12,15 +12,15 @@ import net.minecraft.network.codec.StreamCodec;
 
 /**
  * What the player has set on one Echo Bundle from its own screen: a Category, and whether it
- * vacuums up matching items on pickup. Per-bundle intent, so it lives on the item, never in the
- * config file — which can only switch vacuuming off for every bundle.
+ * Vacuums up matching items on pickup. Per-bundle intent, so it lives on the item, never in the
+ * config file — which can only switch Vacuuming off for every bundle.
  *
  * <p>Both fields are read leniently: a Category name no preset has any more loads as none, and a
  * value of the wrong type loads as the default, because a failing component would lose the whole
  * bundle, contents and all.
  *
- * @param category what the bundle vacuums, if assigned, besides what it already holds
- * @param vacuum   whether the bundle vacuums at all; off until the player turns it on
+ * @param category what the bundle Vacuums, if assigned, besides what it already holds
+ * @param vacuum   whether the bundle Vacuums at all; off until the player turns it on
  */
 public record EchoBundleSettings(Optional<Category> category, boolean vacuum) {
 	public static final EchoBundleSettings DEFAULT = new EchoBundleSettings(Optional.empty(), false);

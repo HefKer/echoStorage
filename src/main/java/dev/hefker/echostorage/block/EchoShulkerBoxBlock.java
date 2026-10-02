@@ -169,7 +169,7 @@ public class EchoShulkerBoxBlock extends AbstractEchoChestBlock {
 		}
 	}
 
-	/** Vanilla's contents preview, then the Echo Chest's Category and Strict lines, then whether it vacuums. */
+	/** Vanilla's contents preview, then the Echo Chest's Category and Strict lines, then whether it Vacuums. */
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> lines, TooltipFlag flag) {
 		super.appendHoverText(stack, context, lines, flag);

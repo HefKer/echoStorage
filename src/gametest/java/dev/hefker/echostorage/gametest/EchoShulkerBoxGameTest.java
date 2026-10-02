@@ -64,7 +64,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 /**
  * The Echo Shulker Box's own behaviour: what it keeps when broken, how it is crafted and dyed,
- * how it vacuums while carried, and the vanilla shulker box rules it follows. What it does as an Echo Chest is tested with the
+ * how it Vacuums while carried, and the vanilla shulker box rules it follows. What it does as an Echo Chest is tested with the
  * other kinds, through {@link EchoChestTests.ChestKind#SHULKER}.
  */
 public class EchoShulkerBoxGameTest implements FabricGameTest {
@@ -231,13 +231,13 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		EchoShulkerBoxBlockEntity box = (EchoShulkerBoxBlockEntity) placeChest(helper, CHEST, EchoChestTests.ChestKind.SHULKER);
 		ServerPlayer player = openedBy(helper, box);
 		EchoChestMenu menu = menu(player);
-		helper.assertFalse(menu.vacuums(), "a new box vacuums");
+		helper.assertFalse(menu.vacuums(), "a new box Vacuums");
 
-		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), "vacuum on handled");
-		helper.assertTrue(box.vacuums(), "the box vacuums after the on button");
-		helper.assertTrue(menu.vacuums(), "the screen sees vacuum on");
-		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_OFF_BUTTON), "vacuum off handled");
-		helper.assertFalse(box.vacuums(), "the box vacuums after the off button");
+		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON), "Vacuum on handled");
+		helper.assertTrue(box.vacuums(), "the box Vacuums after the on button");
+		helper.assertTrue(menu.vacuums(), "the screen sees Vacuum on");
+		helper.assertTrue(menu.clickMenuButton(player, EchoChestMenu.VACUUM_OFF_BUTTON), "Vacuum off handled");
+		helper.assertFalse(box.vacuums(), "the box Vacuums after the off button");
 		menu.clickMenuButton(player, EchoChestMenu.VACUUM_ON_BUTTON);
 		player.closeContainer();
 
@@ -257,7 +257,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		breakChest(helper, CHEST);
 
 		helper.assertFalse(EchoChestTests.droppedChest(helper, EchoChestTests.ChestKind.SHULKER).has(EchoComponents.ECHO_SHULKER_BOX_VACUUM),
-				"a box never turned on dropped vacuuming");
+				"a box never turned on dropped Vacuuming");
 		helper.succeed();
 	}
 

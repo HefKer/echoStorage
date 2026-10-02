@@ -6,7 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Auto-vacuum: a stack the player picks up goes into the Echo Bundles and Echo Shulker Boxes they
+ * Vacuum: a stack the player picks up goes into the Echo Bundles and Echo Shulker Boxes they
  * carry before it reaches their inventory. Legal under ADR-0002 because it moves items between the
  * world and the player's own containers, never between two containers.
  *
@@ -68,7 +68,7 @@ public final class Vacuum {
 	}
 
 	/**
-	 * Whether a bundle vacuums {@code stack}: never with the toggle off; otherwise whatever its
+	 * Whether a bundle Vacuums {@code stack}: never with the toggle off; otherwise whatever its
 	 * Category matches or it already holds — so an empty bundle with no Category takes nothing, and
 	 * a new player's diamonds do not vanish into it.
 	 */
