@@ -28,7 +28,7 @@ carried Echo Bundle or Echo Shulker Box takes a picked-up item when the item is 
 **or** it already holds that item. Echo Bundles still have no strictness, so a bundle with a
 Category now tops up a Stray it holds.
 
-A carried Echo Shulker Box keeps its strictness. A Strict box vacuums only what its Category
+A carried Echo Shulker Box keeps its strictness. A Strict box Vacuums only what its Category
 matches, into the bundles inside it as well as its own slots: Vacuum is not the player's hand, so
 it is refused like Quick-stack. Strictness therefore touches two bulk actions, Quick-stack and
 Vacuum, and both refuse the same Strays.
