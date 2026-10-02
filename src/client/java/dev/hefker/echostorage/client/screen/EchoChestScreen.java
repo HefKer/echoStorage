@@ -222,7 +222,7 @@ public class EchoChestScreen extends AbstractContainerScreen<EchoChestMenu> {
 	protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
 		graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, chestHeight);
 		graphics.blit(TEXTURE, leftPos, topPos + chestHeight, 0, PLAYER_INVENTORY_V, imageWidth, PLAYER_INVENTORY_HEIGHT);
-		// Under the items, so a stray is marked without being hidden.
+		// Under the items, so a Stray is marked without being hidden.
 		for (Slot slot : menu.slots.subList(0, menu.chestSlots())) {
 			if (slot.hasItem() && menu.isStray(slot.getItem())) {
 				int x = leftPos + slot.x;

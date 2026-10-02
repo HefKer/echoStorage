@@ -93,7 +93,7 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 
 		quickStack(player);
 
-		assertStack(helper, new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT), "the stray");
+		assertStack(helper, new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT), "the Stray");
 		assertStack(helper, new ItemStack(Items.IRON_ORE, 6), chest.getItem(1), "the match");
 		helper.succeed();
 	}
@@ -108,7 +108,7 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 
 		quickStack(player);
 
-		assertStack(helper, new ItemStack(Items.BREAD, 6), chest.getItem(0), "the stray");
+		assertStack(helper, new ItemStack(Items.BREAD, 6), chest.getItem(0), "the Stray");
 		helper.succeed();
 	}
 

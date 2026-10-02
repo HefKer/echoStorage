@@ -22,7 +22,7 @@ import net.minecraft.network.codec.StreamCodec;
  * would be noise. The placed chest's own load does warn, once, naming where it stands.
  *
  * @param category what the chest is assigned to hold, if anything
- * @param strict   whether the chest refuses strays from everything but the player's hand (ADR-0009)
+ * @param strict   whether the chest refuses Strays from everything but the player's hand (ADR-0009)
  */
 public record EchoChestAssignment(Optional<Category> category, boolean strict) {
 	public static final EchoChestAssignment DEFAULT = new EchoChestAssignment(Optional.empty(), false);

@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
  * nested bundle is the Quick-stack button's job alone (ADR-0007). A strict chest refuses a
- * stray from shift-click and Quick-stack alike (ADR-0009), but a stack placed by hand always goes
+ * Stray from shift-click and Quick-stack alike (ADR-0009), but a stack placed by hand always goes
  * in: that is the player choosing to.
  *
  * <p>An Echo Shulker Box's slots take no shulker box of any kind, even by hand, as vanilla's
@@ -170,7 +170,7 @@ public class EchoChestMenu extends AbstractContainerMenu {
 		return settings.get(VACUUM_DATA) != 0;
 	}
 
-	/** Whether {@code stack} falls outside the chest's Category. An unassigned chest has no strays. */
+	/** Whether {@code stack} falls outside the chest's Category. An unassigned chest has no Strays. */
 	public boolean isStray(ItemStack stack) {
 		return EchoChestBlockEntity.isStray(category(), stack);
 	}

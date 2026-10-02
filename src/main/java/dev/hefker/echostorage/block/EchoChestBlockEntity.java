@@ -171,7 +171,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	}
 
 	/**
-	 * Whether this chest refuses strays from everything but the player's hand: shift-click,
+	 * Whether this chest refuses Strays from everything but the player's hand: shift-click,
 	 * Quick-stack and every automated insert (ADR-0009).
 	 */
 	public boolean isStrict() {
@@ -207,7 +207,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	}
 
 	/**
-	 * Whether {@code stack} falls outside {@code category}. With no Category nothing is a stray.
+	 * Whether {@code stack} falls outside {@code category}. With no Category nothing is a Stray.
 	 * An Echo Bundle or a shulker box is judged by what it holds, one level deep and read-only
 	 * (ADR-0007), so an empty one — capacity waiting to be filled — belongs in any chest.
 	 */
@@ -357,7 +357,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * What every automated insert asks first — hoppers, droppers, {@code /loot insert}, other mods'
-	 * pipes — so a strict chest refuses strays from all of them (ADR-0009). A player placing by hand
+	 * pipes — so a strict chest refuses Strays from all of them (ADR-0009). A player placing by hand
 	 * never asks, and is never refused.
 	 */
 	@Override

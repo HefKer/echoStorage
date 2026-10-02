@@ -155,7 +155,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		menu(player).clickMenuButton(player, EchoChestMenu.assignButton(Categories.FOOD));
 
 		helper.assertValueEqual(chest.category(), Optional.of(Categories.FOOD), "category");
-		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 16), chest.getItem(0)), "the stray stays put");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.IRON_ORE, 16), chest.getItem(0)), "the Stray stays put");
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(1)), "the match stays put");
 		helper.succeed();
 	}
@@ -210,7 +210,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		EchoChestMenu unsynced = new EchoChestMenu(1, player.getInventory(), new EchoChestMenuData("", 3, ChestKind.ECHO.id()));
 
 		helper.assertValueEqual(unsynced.category(), Optional.empty(), "category before sync");
-		helper.assertFalse(unsynced.isStray(new ItemStack(Items.BREAD)), "an unsynced screen marks strays");
+		helper.assertFalse(unsynced.isStray(new ItemStack(Items.BREAD)), "an unsynced screen marks Strays");
 		helper.succeed();
 	}
 
@@ -222,8 +222,8 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
 
-		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), left), "the hopper keeps the stray, got " + left);
-		helper.assertTrue(chest.isEmpty(), "the chest took a stray");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), left), "the hopper keeps the Stray, got " + left);
+		helper.assertTrue(chest.isEmpty(), "the chest took a Stray");
 		helper.succeed();
 	}
 
@@ -245,7 +245,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
 
-		helper.assertTrue(left.isEmpty(), "a permissive chest refused a stray, " + left);
+		helper.assertTrue(left.isEmpty(), "a permissive chest refused a Stray, " + left);
 		helper.succeed();
 	}
 
@@ -263,7 +263,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aStrictChestRefusesAShiftClickedStray(GameTestHelper helper) {
 		EchoChestBlockEntity chest = strictChestOf(helper, Categories.ORES);
-		// A stray already inside must not become a way in for more of it.
+		// A Stray already inside must not become a way in for more of it.
 		chest.setItem(0, new ItemStack(Items.BREAD, 1));
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.BREAD, 5));
@@ -271,8 +271,8 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT)),
-				"the stray stays with the player");
-		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 1), chest.getItem(0)), "the chest took a stray");
+				"the Stray stays with the player");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 1), chest.getItem(0)), "the chest took a Stray");
 		helper.succeed();
 	}
 
@@ -297,7 +297,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		menu(player).quickMoveStack(player, menu(player).chestSlots());
 
-		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(0)), "the stray went in");
+		helper.assertTrue(ItemStack.matches(new ItemStack(Items.BREAD, 5), chest.getItem(0)), "the Stray went in");
 		helper.succeed();
 	}
 
@@ -307,10 +307,10 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 	public void aBundleIsJudgedByWhatItHolds(GameTestHelper helper) {
 		Optional<Category> ores = Optional.of(Categories.ORES);
 
-		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf(new ItemStack(Items.IRON_ORE, 10))), "a bundle of ore is a stray");
+		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf(new ItemStack(Items.IRON_ORE, 10))), "a bundle of ore is a Stray");
 		helper.assertTrue(EchoChestBlockEntity.isStray(ores, bundleOf(new ItemStack(Items.IRON_ORE, 10), new ItemStack(Items.BREAD, 1))),
-				"a bundle with bread in it is not a stray");
-		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf()), "an empty bundle is a stray");
+				"a bundle with bread in it is not a Stray");
+		helper.assertFalse(EchoChestBlockEntity.isStray(ores, bundleOf()), "an empty bundle is a Stray");
 		helper.succeed();
 	}
 
@@ -335,13 +335,13 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		for (Item kind : List.of(Items.SHULKER_BOX, Items.RED_SHULKER_BOX, EchoItems.ECHO_SHULKER_BOX)) {
 			helper.assertFalse(EchoChestBlockEntity.isStray(ores, boxOf(kind, new ItemStack(Items.IRON_ORE, 10))),
-					"a " + kind + " of ore is a stray");
+					"a " + kind + " of ore is a Stray");
 			helper.assertTrue(EchoChestBlockEntity.isStray(ores, boxOf(kind, new ItemStack(Items.IRON_ORE, 10), new ItemStack(Items.BREAD, 1))),
-					"a " + kind + " with bread in it is not a stray");
-			helper.assertFalse(EchoChestBlockEntity.isStray(ores, boxOf(kind)), "an empty " + kind + " is a stray");
-			helper.assertFalse(EchoChestBlockEntity.isStray(ores, new ItemStack(kind)), "a new " + kind + " is a stray");
+					"a " + kind + " with bread in it is not a Stray");
+			helper.assertFalse(EchoChestBlockEntity.isStray(ores, boxOf(kind)), "an empty " + kind + " is a Stray");
+			helper.assertFalse(EchoChestBlockEntity.isStray(ores, new ItemStack(kind)), "a new " + kind + " is a Stray");
 			helper.assertTrue(EchoChestBlockEntity.isStray(ores, boxOf(kind, bundleOf(new ItemStack(Items.IRON_ORE, 10)))),
-					"a " + kind + " holding a bundle of ore is not a stray: reads stop one level deep");
+					"a " + kind + " holding a bundle of ore is not a Stray: reads stop one level deep");
 		}
 		helper.succeed();
 	}
@@ -351,7 +351,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		ItemStack unrolled = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
 		unrolled.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
 
-		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), unrolled), "an unrolled box of ore is not a stray");
+		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), unrolled), "an unrolled box of ore is not a Stray");
 		helper.succeed();
 	}
 
