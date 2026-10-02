@@ -76,7 +76,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 		return Optional.ofNullable(color);
 	}
 
-	/** Whether the box vacuums what the player picks up while they carry it; off until they turn it on. */
+	/** Whether the box Vacuums what the player picks up while they carry it; off until they turn it on. */
 	public boolean vacuums() {
 		return vacuum;
 	}

@@ -10,7 +10,7 @@ The scope rule is: **the mod never moves items between containers on its own. Mo
 container and the player's hand or inventory is exempt.**
 
 That exemption is deliberate and load-bearing. It legalises the Echo Bundle's conveniences —
-auto-vacuum on pickup, auto-refill into the hand, placing directly from the bundle — which are
+Vacuum on pickup, auto-refill into the hand, placing directly from the bundle — which are
 what make the bundle worth carrying. It keeps illegal the thing that actually makes a storage
 mod feel like AE2: autonomous inter-container logistics. Hoppers feeding Categories, chests
 rebalancing themselves, background tidying — all out, permanently.
@@ -31,5 +31,5 @@ placing the Selected item, pick-block from a bundle, and eating the Selected ite
 bundle. All of them move items only between a container and the player, and each keeps its own
 world switch.
 
-Vacuum is no longer bundle-only: a carried Echo Shulker Box vacuums by the same rule, under the
+Vacuum is no longer bundle-only: a carried Echo Shulker Box Vacuums by the same rule, under the
 same switch.

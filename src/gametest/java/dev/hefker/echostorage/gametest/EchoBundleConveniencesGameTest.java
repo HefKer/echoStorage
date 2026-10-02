@@ -274,13 +274,13 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		helper.assertTrue(player.containerMenu instanceof EchoBundleMenu, "the bundle screen did not open: " + player.containerMenu);
 		helper.assertValueEqual(count(player.getMainHandItem(), Items.IRON_ORE), 2, "sneak-use dropped the contents");
 		EchoBundleMenu menu = (EchoBundleMenu) player.containerMenu;
-		helper.assertTrue(menu.clickMenuButton(player, EchoBundleMenu.VACUUM_ON_BUTTON), "vacuum button handled");
+		helper.assertTrue(menu.clickMenuButton(player, EchoBundleMenu.VACUUM_ON_BUTTON), "Vacuum button handled");
 		helper.assertTrue(menu.clickMenuButton(player, EchoBundleMenu.assignButton(Categories.ORES)), "Category button handled");
 
 		EchoBundleSettings settings = EchoBundleItem.settingsOf(player.getMainHandItem());
 		helper.assertValueEqual(settings, new EchoBundleSettings(Optional.of(Categories.ORES), true), "the bundle's settings");
 		helper.assertValueEqual(menu.category(), Optional.of(Categories.ORES), "the menu's Category");
-		helper.assertTrue(menu.vacuums(), "the menu shows vacuum on");
+		helper.assertTrue(menu.vacuums(), "the menu shows Vacuum on");
 
 		menu.clickMenuButton(player, EchoBundleMenu.VACUUM_OFF_BUTTON);
 		menu.clickMenuButton(player, EchoBundleMenu.CLEAR_CATEGORY_BUTTON);

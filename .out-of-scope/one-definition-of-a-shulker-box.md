@@ -26,7 +26,7 @@ Either merge loses something:
 - Refusing by the tag would let an untagged backpack from another mod go inside an Echo Shulker Box, and from there nest without limit.
 - Reading through everything that does not fit inside containers would treat items as shulker boxes that keep their contents somewhere the mod cannot read.
 
-The one disagreement that did harm was a tagged box that fits inside containers being vacuumed into an Echo Bundle. That was a bug in Vacuum's guard, fixed in #54: Vacuum now asks `CarriedStorage` before anything else. It did not need the definitions merged.
+The one disagreement that did harm was a tagged box that fits inside containers being Vacuumed into an Echo Bundle. That was a bug in Vacuum's guard, fixed in #54: Vacuum now asks `CarriedStorage` before anything else. It did not need the definitions merged.
 
 ## Prior requests
 

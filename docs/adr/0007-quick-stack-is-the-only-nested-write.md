@@ -34,7 +34,7 @@ what it already holds, ignoring its own Category (ADR-0010). Recursion is still 
 level, whatever the containers: Quick-stack into a chest holding a shulker box that holds a
 bundle fills the shulker box, never the bundle inside it.
 
-**Vacuum is the second nested write.** A carried Echo Shulker Box that vacuums an item tops up
+**Vacuum is the second nested write.** A carried Echo Shulker Box that Vacuums an item tops up
 the bundles inside it before its own slots. The risk this ADR manages lives in interactive menu
 clicks, and Vacuum on pickup is, like the button, one server-authoritative operation. So the
 rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the only nested

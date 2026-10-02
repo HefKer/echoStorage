@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Auto-vacuum's hook: a pickup offers the stack to the player's Echo Bundles and Echo Shulker
+ * Vacuum's hook: a pickup offers the stack to the player's Echo Bundles and Echo Shulker
  * Boxes before vanilla puts what is left in the inventory. On NeoForge this is an
  * {@code ItemEntityPickupEvent.Pre} handler.
  */

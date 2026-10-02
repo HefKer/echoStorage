@@ -13,7 +13,7 @@ public final class Refill {
 
 	/**
 	 * Takes up to one stack of exactly {@code like} out of the bundles in {@code inventory}, in
-	 * slot order, whatever their vacuum setting. Empty if no bundle holds any.
+	 * slot order, whatever their Vacuum setting. Empty if no bundle holds any.
 	 */
 	public static ItemStack take(Container inventory, ItemStack like) {
 		int wanted = like.getMaxStackSize();
