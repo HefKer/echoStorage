@@ -281,13 +281,14 @@ class VacuumTest {
 	}
 
 	@Test
-	void aShulkerBoxIsCarriedStorageWithoutAnotherTestClassBindingTheTag() {
+	void aShulkerBoxIsCarriedStorage() {
 		assertTrue(CarriedStorage.isCarriedStorage(new ItemStack(Items.SHULKER_BOX)), "c:shulker_boxes is not bound");
 	}
 
 	@Test
 	void anotherModsShulkerBoxIsNeverVacuumedEvenByABundleOrABoxWhoseCategoryMatchesIt() {
-		// It fits inside container items, so neither the bundle nor the box would refuse it itself.
+		// It fits inside container items, so the bundle would hold it: only Vacuum's own check keeps
+		// it out. The box is asked as Quick-stack would ask it, which refuses carried storage again.
 		Category boxes = Category.of("boxes", stack -> stack.is(VanillaBootstrap.otherModsShulkerBox()));
 		player.setItem(3, TestBundles.of(vacuuming(Optional.of(boxes))));
 		player.setItem(4, box(permissive(boxes), true));

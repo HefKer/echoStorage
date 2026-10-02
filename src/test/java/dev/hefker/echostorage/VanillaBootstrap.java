@@ -12,10 +12,11 @@ import net.minecraft.world.item.Items;
 
 /**
  * Brings up vanilla's registries so tests can make real {@code ItemStack}s, and binds the one tag
- * the code under test reads, since no datapack does here. Idempotent.
+ * the code under test reads, since no datapack does here. Idempotent. The items standing in for
+ * the shulker boxes a unit test cannot register live here too, so the tag and the tests agree on them.
  */
 public final class VanillaBootstrap {
-	private static boolean tagsBound;
+	private static boolean tagBound;
 
 	private VanillaBootstrap() {
 	}
@@ -38,12 +39,13 @@ public final class VanillaBootstrap {
 	public static synchronized void run() {
 		SharedConstants.tryDetectVersion();
 		Bootstrap.bootStrap();
-		if (!tagsBound) {
+		if (!tagBound) {
 			// The binding is global to the item registry, so every test class sees the same tag.
+			// It replaces every item tag at once: another tag goes in this map, not in a second call.
 			BuiltInRegistries.ITEM.bindTags(Map.of(CarriedStorage.SHULKER_BOXES,
 					List.of(Items.SHULKER_BOX.builtInRegistryHolder(), echoShulkerBox().builtInRegistryHolder(),
 							otherModsShulkerBox().builtInRegistryHolder())));
-			tagsBound = true;
+			tagBound = true;
 		}
 	}
 }
