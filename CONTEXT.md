@@ -6,6 +6,8 @@ never the player's knowledge of where things are.
 
 ## Language
 
+A glossary term takes a capital in every form, singular, plural or inflected.
+
 **Echo Chest**:
 A placed container that knows which Category it holds and carries a player-given name.
 _Avoid_: filtered chest, smart chest, storage unit
@@ -49,17 +51,17 @@ _Avoid_: filter, group, class
 
 **Stray**:
 An item outside the Category of the Echo Chest it is in or being put into. A chest with no
-Category has no strays. A bundle or shulker box is judged by what it holds, one level deep: a
-stray if anything inside is, and never one while empty.
+Category has no Strays. A bundle or shulker box is judged by what it holds, one level deep: a
+Stray if anything inside is, and never one while empty.
 _Avoid_: misfit, foreign item, unsorted item
 
 **Strict**:
-The Echo Chest setting under which the chest refuses strays from every source except the
+The Echo Chest setting under which the chest refuses Strays from every source except the
 player's own hand. Has no effect on a chest with no Category.
 _Avoid_: locked, whitelist mode, filtered
 
 **Permissive**:
-The default setting, the opposite of Strict: strays are accepted from any source.
+The default setting, the opposite of Strict: Strays are accepted from any source.
 _Avoid_: open, unfiltered
 
 **Link**:
