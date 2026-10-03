@@ -52,7 +52,9 @@ _Avoid_: filter, group, class
 **Stray**:
 An item outside the Category of the Echo Chest it is in or being put into. A chest with no
 Category has no Strays. A bundle or shulker box is judged by what it holds, one level deep: a
-Stray if anything inside is, and never one while empty.
+Stray if anything inside is, and never one while empty. A shulker box that is not see-through,
+because its loot is not rolled yet or it does not keep its items in the vanilla `container`
+component, is judged as the item it is.
 _Avoid_: misfit, foreign item, unsorted item
 
 **Strict**:

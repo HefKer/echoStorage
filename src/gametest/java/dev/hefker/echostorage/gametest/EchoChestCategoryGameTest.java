@@ -348,11 +348,18 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aShulkerBoxWhoseLootIsUnrolledIsJudgedAsTheItemItIs(GameTestHelper helper) {
-		ItemStack unrolled = boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10));
-		unrolled.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
+		ItemStack ore = unrolled(boxOf(Items.SHULKER_BOX, new ItemStack(Items.IRON_ORE, 10)));
+		ItemStack bread = unrolled(boxOf(Items.SHULKER_BOX, new ItemStack(Items.BREAD, 1)));
+		Optional<Category> boxes = Optional.of(Category.of("boxes", stack -> stack.is(Items.SHULKER_BOX)));
 
-		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), unrolled), "an unrolled box of ore is not a Stray");
+		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), ore), "an unrolled box of ore is not a Stray");
+		helper.assertFalse(EchoChestBlockEntity.isStray(boxes, bread), "an unrolled box of bread is a Stray among shulker boxes");
 		helper.succeed();
+	}
+
+	private static ItemStack unrolled(ItemStack box) {
+		box.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
+		return box;
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
