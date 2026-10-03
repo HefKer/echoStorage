@@ -55,8 +55,8 @@ import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 /**
- * An Echo Chest's Category and strictness: how they are saved, assigned, enforced and shown.
- * Assignment is unrestricted and never moves anything; strictness only refuses what is being
+ * An Echo Chest's Category and Strictness: how they are saved, assigned, enforced and shown.
+ * Assignment is unrestricted and never moves anything; Strictness only refuses what is being
  * put in by shift-click or hopper.
  */
 public class EchoChestCategoryGameTest implements FabricGameTest {
@@ -76,7 +76,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		EchoChestBlockEntity loaded = load(helper, chest, save(helper, chest));
 
 		helper.assertValueEqual(loaded.category(), Optional.of(Categories.ORES), "category after load");
-		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.assertTrue(loaded.isStrict(), "Strictness after load");
 		helper.succeed();
 	}
 
@@ -92,7 +92,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		CompoundTag resaved = save(helper, loaded);
 
 		helper.assertValueEqual(loaded.category(), Optional.of(Categories.ORES), "category after load");
-		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.assertTrue(loaded.isStrict(), "Strictness after load");
 		helper.assertValueEqual(resaved.getString("Category"), "ores", "Category tag written back");
 		helper.assertTrue(resaved.getBoolean("Strict"), "Strict tag written back");
 		helper.succeed();
@@ -105,8 +105,8 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		EchoChestBlockEntity loaded = load(helper, chest, save(helper, chest));
 
 		helper.assertValueEqual(loaded.category(), Optional.empty(), "category after load");
-		helper.assertFalse(loaded.isStrict(), "a chest is permissive by default");
-		helper.assertFalse(save(helper, loaded).contains("Strict"), "a permissive chest writes no Strict tag");
+		helper.assertFalse(loaded.isStrict(), "a chest is Permissive by default");
+		helper.assertFalse(save(helper, loaded).contains("Strict"), "a Permissive chest writes no Strict tag");
 		helper.succeed();
 	}
 
@@ -125,7 +125,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		helper.assertValueEqual(loaded.category(), Optional.empty(), "category after load");
 		helper.assertValueEqual(loaded.name(), "Logs", "name after load");
-		helper.assertTrue(loaded.isStrict(), "strictness after load");
+		helper.assertTrue(loaded.isStrict(), "Strictness after load");
 		helper.assertTrue(ItemStack.matches(new ItemStack(Items.OAK_LOG, 32), loaded.getItem(4)), "contents after load");
 		helper.succeed();
 	}
@@ -180,11 +180,11 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		menu(player).clickMenuButton(player, EchoChestMenu.STRICT_BUTTON);
 		menu(player).clickMenuButton(player, EchoChestMenu.STRICT_BUTTON);
-		helper.assertTrue(chest.isStrict(), "strict after asking twice");
-		helper.assertTrue(menu(player).isStrict(), "strictness the screen sees");
+		helper.assertTrue(chest.isStrict(), "Strict after asking twice");
+		helper.assertTrue(menu(player).isStrict(), "Strictness the screen sees");
 
 		menu(player).clickMenuButton(player, EchoChestMenu.PERMISSIVE_BUTTON);
-		helper.assertFalse(chest.isStrict(), "strict after asking for permissive");
+		helper.assertFalse(chest.isStrict(), "Strict after asking for Permissive");
 		helper.succeed();
 	}
 
@@ -199,7 +199,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		}
 
 		helper.assertValueEqual(chest.category(), Optional.of(Categories.ORES), "category");
-		helper.assertFalse(chest.isStrict(), "strictness");
+		helper.assertFalse(chest.isStrict(), "Strictness");
 		helper.succeed();
 	}
 
@@ -214,7 +214,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	// --- strictness -----------------------------------------------------------------------
+	// --- Strictness -----------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aStrictChestRefusesAStrayFromAHopper(GameTestHelper helper) {
@@ -245,7 +245,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
 
-		helper.assertTrue(left.isEmpty(), "a permissive chest refused a Stray, " + left);
+		helper.assertTrue(left.isEmpty(), "a Permissive chest refused a Stray, " + left);
 		helper.succeed();
 	}
 
@@ -256,7 +256,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		ItemStack left = hopperInto(chest, new ItemStack(Items.BREAD, 5));
 
-		helper.assertTrue(left.isEmpty(), "an unassigned chest has nothing to be strict about, " + left);
+		helper.assertTrue(left.isEmpty(), "an unassigned chest has nothing to be Strict about, " + left);
 		helper.succeed();
 	}
 
@@ -456,7 +456,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.of(Categories.ORES), "category after replacing");
-		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
+		helper.assertTrue(replaced.isStrict(), "Strictness after replacing");
 		helper.succeed();
 	}
 
@@ -469,7 +469,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.of(Categories.FOOD), "category after replacing");
-		helper.assertFalse(replaced.isStrict(), "a permissive chest comes back permissive");
+		helper.assertFalse(replaced.isStrict(), "a Permissive chest comes back Permissive");
 		helper.succeed();
 	}
 
@@ -482,7 +482,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		EchoChestBlockEntity replaced = chestAt(helper, CHEST);
 		helper.assertValueEqual(replaced.category(), Optional.empty(), "category after replacing");
-		helper.assertTrue(replaced.isStrict(), "strictness after replacing");
+		helper.assertTrue(replaced.isStrict(), "Strictness after replacing");
 		helper.succeed();
 	}
 
@@ -500,7 +500,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		EchoChestBlockEntity placed = chestAt(helper, CHEST);
 		helper.assertValueEqual(placed.category(), Optional.empty(), "category after placing");
-		helper.assertTrue(placed.isStrict(), "strictness after placing");
+		helper.assertTrue(placed.isStrict(), "Strictness after placing");
 		helper.assertValueEqual(placed.name(), "Logs", "name after placing");
 		helper.succeed();
 	}
@@ -523,7 +523,7 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 
 		EchoChestBlockEntity placed = chestAt(helper, NEIGHBOUR);
 		helper.assertValueEqual(placed.category(), Optional.of(Categories.ORES), "category after placing");
-		helper.assertTrue(placed.isStrict(), "strictness after placing");
+		helper.assertTrue(placed.isStrict(), "Strictness after placing");
 		helper.succeed();
 	}
 

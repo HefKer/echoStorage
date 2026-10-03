@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
 /**
  * A shaped recipe that makes one kind of Echo Chest from another and keeps what the player set
- * on it: the name and the Category and strictness.
+ * on it: the name and the Category and Strictness.
  *
  * <p>Only the settings travel. The chest's id is never on the item, so the result is a new chest
  * once placed: Interfaces list it as a new row and Echo Relays have to hear it again.

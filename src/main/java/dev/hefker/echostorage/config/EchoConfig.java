@@ -2,7 +2,7 @@ package dev.hefker.echostorage.config;
 
 /**
  * World-preference switches: what a pack author may turn off for everyone. Per-object intent —
- * a chest's strictness, a bundle's or box's Vacuum toggle — is never here; it lives on the object. Nor
+ * a chest's Strictness, a bundle's or box's Vacuum toggle — is never here; it lives on the object. Nor
  * is the Echo Chest's slot count: container size is world data, and shrinking it would strand
  * whatever sat in the removed slots.
  *

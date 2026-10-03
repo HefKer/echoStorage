@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
  * (ADR-0006): there is no chest-type property, so there is no half-a-chest to become.
  *
  * <p>Breaking it spills the contents like any chest and drops the chest itself, name,
- * Category and strictness and all, through its loot table — reorganising a storage wall
+ * Category and Strictness and all, through its loot table — reorganising a storage wall
  * should never cost materials.
  *
  * <p>The Echo Chest and the Deep Echo Chest are this one class with a different number of rows;

@@ -44,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>The id is assigned when the block entity is made and again when a player places the
  * chest, and it is never written to the dropped item — so it dies with the block, and a
  * chest broken and replaced is a different chest. The name (a vanilla custom name), the
- * Category and strictness do travel with the item (ADR-0008), which is what stops a chest
+ * Category and Strictness do travel with the item (ADR-0008), which is what stops a chest
  * with anything set stacking with a blank one.
  *
  * <p>This is a plain {@link BlockEntity} rather than a {@code BaseContainerBlockEntity}
@@ -184,7 +184,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	}
 
 	/**
-	 * Whether {@code stack} is kept out: by a strict chest, only if it is not in the Category, and by
+	 * Whether {@code stack} is kept out: by a Strict chest, only if it is not in the Category, and by
 	 * a chest that {@link #refusesShulkerBoxes refuses shulker boxes}, any shulker box. What every
 	 * insert but the player's hand asks.
 	 */
@@ -291,7 +291,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 		ContainerHelper.saveAllItems(tag, items, registries);
 	}
 
-	/** The item side of the name, Category and strictness: read on placement, written when the block drops. */
+	/** The item side of the name, Category and Strictness: read on placement, written when the block drops. */
 	@Override
 	protected void applyImplicitComponents(BlockEntity.DataComponentInput components) {
 		super.applyImplicitComponents(components);
@@ -359,7 +359,7 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 
 	/**
 	 * What every automated insert asks first — hoppers, droppers, {@code /loot insert}, other mods'
-	 * pipes — so a strict chest refuses Strays from all of them (ADR-0009). A player placing by hand
+	 * pipes — so a Strict chest refuses Strays from all of them (ADR-0009). A player placing by hand
 	 * never asks, and is never refused.
 	 */
 	@Override

@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 /**
  * Makes an Echo Shulker Box from a vanilla shulker box, keeping what is inside it, its colour and
- * its name. It starts with no Category and permissive, since a vanilla box has neither to give.
+ * its name. It starts with no Category and Permissive, since a vanilla box has neither to give.
  *
  * <p>A vanilla box whose loot table has not rolled yet, such as one picked up from an End city
  * unopened, does not craft: keeping the table would mean the Echo Shulker Box rolls loot itself,

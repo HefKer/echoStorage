@@ -11,7 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * An Echo Chest's Category and strictness: the placed chest's state, and what travels on its item
+ * An Echo Chest's Category and Strictness: the placed chest's state, and what travels on its item
  * so a broken chest keeps what the player set on it (ADR-0008). Only put on the item when something is set, so a blank
  * chest still stacks with a freshly crafted one.
  *

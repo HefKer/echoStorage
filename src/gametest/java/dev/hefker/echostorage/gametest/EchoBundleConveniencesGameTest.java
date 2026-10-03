@@ -55,7 +55,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	 */
 	private static final Item OTHER_MODS_SHULKER_BOX = Items.HEART_OF_THE_SEA;
 
-	// --- vacuum ----------------------------------------------------------------------------
+	// --- Vacuum ----------------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aVacuumingBundlePicksUpWhatItHoldsBeforeTheInventoryDoes(GameTestHelper helper) {

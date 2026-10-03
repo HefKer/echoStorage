@@ -1,6 +1,6 @@
 # Reading an Echo Chest's assignment from its block data
 
-When an Echo Chest is placed, it takes its Category and strictness only from the item's `echostorage:echo_chest_assignment` component. It does not use the `Category` or `Strict` keys in the item's `minecraft:block_entity_data` as a fallback. If the component is missing, the chest places unassigned and Permissive.
+When an Echo Chest is placed, it takes its Category and Strictness only from the item's `echostorage:echo_chest_assignment` component. It does not use the `Category` or `Strict` keys in the item's `minecraft:block_entity_data` as a fallback. If the component is missing, the chest places unassigned and Permissive.
 
 This matters for items copied before #12. Back then, `removeComponentsFromTag` stripped only the name, so a ctrl + pick-block copy kept `Category` and `Strict` inside its block data. Those copies now place blank.
 

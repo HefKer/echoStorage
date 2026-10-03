@@ -32,7 +32,7 @@ import net.minecraft.world.item.Item;
  * <p>The screen only reports what was typed. The server decides what the name becomes, so the
  * field may show untrimmed text until the chest is next opened.
  *
- * <p>Beside the chest sit its Category and strictness. Either can change at any time and neither
+ * <p>Beside the chest sit its Category and Strictness. Either can change at any time and neither
  * moves anything: slots holding items outside the Category are tinted, not emptied. An unnamed
  * chest with a Category shows the Category's name, in italics, where its name would be.
  *

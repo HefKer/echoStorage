@@ -234,7 +234,7 @@ public class EchoChestGameTest implements FabricGameTest {
 		EchoChestBlockEntity placed = chestAt(helper, CHEST);
 		helper.assertValueEqual(placed.name(), "Ores", "placed name");
 		helper.assertValueEqual(placed.category(), Optional.of(Categories.ORES), "placed Category");
-		helper.assertTrue(placed.isStrict(), "the placed chest should still be strict");
+		helper.assertTrue(placed.isStrict(), "the placed chest should still be Strict");
 		helper.succeed();
 	}
 

@@ -84,7 +84,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		EchoChestBlockEntity box = chestAt(helper, CHEST);
 		helper.assertValueEqual(box.name(), "Ores", "placed name");
 		helper.assertValueEqual(box.category(), Optional.of(Categories.ORES), "placed Category");
-		helper.assertTrue(box.isStrict(), "the placed box should be strict");
+		helper.assertTrue(box.isStrict(), "the placed box should be Strict");
 		assertStack(helper, new ItemStack(Items.COBBLESTONE, 64), box.getItem(0), "slot 0");
 		assertStack(helper, new ItemStack(Items.DIAMOND_SWORD), box.getItem(1), "slot 1");
 
@@ -224,7 +224,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	// --- vacuum ---------------------------------------------------------------------------
+	// --- Vacuum ---------------------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void theVacuumButtonSetsTheToggleWhichSurvivesBreakingAndPlacingTheBox(GameTestHelper helper) {
@@ -344,7 +344,7 @@ public class EchoShulkerBoxGameTest implements FabricGameTest {
 		helper.assertValueEqual(made.get(DataComponents.CONTAINER), vanilla.get(DataComponents.CONTAINER), "contents");
 		helper.assertValueEqual(made.get(DataComponents.BASE_COLOR), DyeColor.LIME, "colour");
 		helper.assertValueEqual(made.get(DataComponents.CUSTOM_NAME), Component.literal("Gems"), "name");
-		helper.assertFalse(made.has(EchoComponents.ECHO_CHEST_ASSIGNMENT), "a new box should be unassigned and permissive");
+		helper.assertFalse(made.has(EchoComponents.ECHO_CHEST_ASSIGNMENT), "a new box should be unassigned and Permissive");
 		helper.succeed();
 	}
 

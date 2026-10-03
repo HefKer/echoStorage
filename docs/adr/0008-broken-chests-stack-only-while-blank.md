@@ -1,4 +1,4 @@
-# A broken Echo Chest keeps its name, Category and strictness; it stacks only while blank
+# A broken Echo Chest keeps its name, Category and Strictness; it stacks only while blank
 
 Breaking an Echo Chest drops an item that carries everything the player set on it: the typed
 name, the Category and the Strict flag. The chest's id and contents do not travel (the id dies
@@ -17,7 +17,7 @@ Category is set, and carrying one without the other would keep half of the playe
 ## Consequences
 
 - A chest with a Category, or set to Strict, stops stacking with blank chests, just as a named
-  chest already does. The item's tooltip shows the Category and strictness so the reason is
+  chest already does. The item's tooltip shows the Category and Strictness so the reason is
   visible.
 - The Category is saved on the item by name and read leniently: a name no preset has any more
   loads as unassigned and must never make the item or the chest fail to load.
@@ -28,5 +28,5 @@ Category is set, and carrying one without the other would keep half of the playe
 
 The Echo Shulker Box breaks both rules above, as a vanilla shulker box would. Broken, by hand or
 by a piston, it does not spill: its contents travel on the item it drops as, along with its
-colour, name, Category and strictness. Its item stacks to 1 even when blank, as vanilla's does.
+colour, name, Category and Strictness. Its item stacks to 1 even when blank, as vanilla's does.
 Its id still dies with the block, so placing it again makes a new chest.
