@@ -357,9 +357,15 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		helper.succeed();
 	}
 
-	private static ItemStack unrolled(ItemStack box) {
-		box.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
-		return box;
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aShulkerBoxWithNoContainerComponentIsJudgedAsTheItemItIs(GameTestHelper helper) {
+		ItemStack box = new ItemStack(Items.SHULKER_BOX);
+		box.remove(DataComponents.CONTAINER);
+		Optional<Category> boxes = Optional.of(Category.of("boxes", stack -> stack.is(Items.SHULKER_BOX)));
+
+		helper.assertTrue(EchoChestBlockEntity.isStray(Optional.of(Categories.ORES), box), "a box with no container component is not a Stray");
+		helper.assertFalse(EchoChestBlockEntity.isStray(boxes, box), "a box with no container component is a Stray among shulker boxes");
+		helper.succeed();
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
@@ -540,6 +546,11 @@ public class EchoChestCategoryGameTest implements FabricGameTest {
 		List<Component> lines = new ArrayList<>();
 		stack.getItem().appendHoverText(stack, Item.TooltipContext.EMPTY, lines, TooltipFlag.NORMAL);
 		return lines;
+	}
+
+	private static ItemStack unrolled(ItemStack box) {
+		box.set(DataComponents.CONTAINER_LOOT, new SeededContainerLoot(BuiltInLootTables.SIMPLE_DUNGEON, 0));
+		return box;
 	}
 
 	private static EchoChestBlockEntity strictChestOf(GameTestHelper helper, Category category) {

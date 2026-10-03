@@ -210,8 +210,8 @@ public class EchoChestBlockEntity extends BlockEntity implements Container, Name
 	 * Whether {@code stack} falls outside {@code category}. With no Category nothing is a Stray.
 	 * An Echo Bundle or a shulker box is judged by what it holds, one level deep and read-only
 	 * (ADR-0007), so an empty one — capacity waiting to be filled — belongs in any chest. A shulker
-	 * box that is not see-through, because its loot is not rolled yet or it has no {@code container}
-	 * component, is judged as the item it is.
+	 * box that is not see-through, because its loot is not rolled yet or it does not keep its items in
+	 * the vanilla {@code container} component, is judged as the item it is.
 	 */
 	public static boolean isStray(Optional<Category> category, ItemStack stack) {
 		return category.filter(assigned -> !belongs(assigned, stack)).isPresent();
