@@ -24,7 +24,8 @@ _Avoid_: big bundle, sack, pouch
 
 **Selected item**:
 The one item an Echo Bundle acts with when used from the hand: the block it places or the food
-it eats. The player moves it through the distinct items inside; it passes to the next when used up.
+it eats. The player moves it through the distinct items inside, where items that would stack
+together, however many there are, count as one; it passes to the next when used up.
 _Avoid_: active item, current slot, most recent
 
 **Echo Shulker Box**:
