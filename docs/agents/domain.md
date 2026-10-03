@@ -44,6 +44,15 @@ When your output names a domain concept (in an issue title, a refactor proposal,
 
 If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
+## Amend an ADR, or edit it in place
+
+An ADR changes in one of two ways:
+
+- **A new decision, or a change to one**, gets a new amendment of its own at the end of the ADR, dated the day it was decided. Its heading is `## Amendment (YYYY-MM-DD): <what changed>`. Leave earlier text and earlier amendments as they stand.
+- **A wording fix that changes no decision** is edited in place, in the body or in the existing amendment it belongs to. It gets no new amendment and no new date.
+
+To tell them apart, ask: would a reader who knew the ADR before the change now expect different behaviour? If yes, it is an amendment. If no, it is a wording fix.
+
 ## Flag ADR conflicts
 
 If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
