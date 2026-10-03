@@ -45,14 +45,6 @@ boxes count as well. One is see-through when it keeps its items in the vanilla `
 component and its loot has been rolled. One that is not see-through is neither read nor written,
 and is still carried storage that Quick-stack and Vacuum never move.
 
-**How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
-boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
-and then fills their empty slots. Any other shulker box only has the stacks it already holds
-topped up: same item, same components, up to the stack's limit. No empty slot in it is written
-and no slot is added past those its component lists, so a smaller box loses nothing and a bigger
-one is topped up wherever its stacks are. A box listing more than 27 slots is treated this way
-whatever its kind. Reads are the same for every kind.
-
 **Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
 item it is, not by what it holds, so that shulker box is a Stray unless the Category covers
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
@@ -60,3 +52,16 @@ bundles. One depth for reads and writes keeps a single rule; the hand still gets
 **A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
 whatever it holds. Seeing through them would otherwise put a player's box of ore in an ore
 chest's Category, and a bulk action would take the whole box.
+
+## Amendment (2026-10-01): a shulker box of unknown size is only topped up
+
+This adds to "What a shulker box is" in the 2026-09-29 amendment, which lets Quick-stack write
+into any shulker box in the `c:shulker_boxes` tag but does not say how many slots one has.
+
+**How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
+boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
+and then fills their empty slots. Any other shulker box only has the stacks it already holds
+topped up: same item, same components, up to the stack's limit. No empty slot in it is written
+and no slot is added past those its component lists, so a smaller box loses nothing and a bigger
+one is topped up wherever its stacks are. A box listing more than 27 slots is treated this way
+whatever its kind. Reads are the same for every kind.
