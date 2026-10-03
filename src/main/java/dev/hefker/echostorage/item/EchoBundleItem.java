@@ -75,19 +75,19 @@ public class EchoBundleItem extends Item {
 		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
 	}
 
-	private static SelectedItem storedSelectionOf(ItemStack stack) {
+	private static SelectedItem storedSelectedItemOf(ItemStack stack) {
 		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, SelectedItem.NONE);
 	}
 
 	/** One of the bundle's Selected item, or empty if the bundle is. */
 	public static ItemStack selectedItemOf(ItemStack bundle) {
-		return contentsOf(bundle).selected(storedSelectionOf(bundle));
+		return contentsOf(bundle).selected(storedSelectedItemOf(bundle));
 	}
 
 	/**
 	 * Writes the bundle's contents, and its Selected item to match: the way the mod changes what a
-	 * bundle holds. See {@link EchoBundleContents#selectionAfter} for how the selection
-	 * follows.
+	 * bundle holds. See {@link EchoBundleContents#selectedItemAfter} for how the Selected
+	 * item follows.
 	 */
 	public static void setContents(ItemStack bundle, EchoBundleContents contents) {
 		setContents(bundle, contents, null);
@@ -95,17 +95,17 @@ public class EchoBundleItem extends Item {
 
 	/**
 	 * {@link #setContents(ItemStack, EchoBundleContents)}, telling {@code player} on the action bar
-	 * when their Selected item ran out and the selection moved on by itself.
+	 * when their Selected item ran out and moved on by itself.
 	 */
 	public static void setContents(ItemStack bundle, EchoBundleContents contents, @Nullable Player player) {
 		EchoBundleContents before = contentsOf(bundle);
-		SelectedItem stored = storedSelectionOf(bundle);
+		SelectedItem stored = storedSelectedItemOf(bundle);
 		ItemStack wasSelected = before.selected(stored);
-		SelectedItem selection = before.selectionAfter(stored, contents);
+		SelectedItem selected = before.selectedItemAfter(stored, contents);
 
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contents);
-		setSelection(bundle, selection);
-		if (player != null && !wasSelected.isEmpty() && !selection.isEmpty() && !selection.matches(wasSelected)) {
+		setSelectedItem(bundle, selected);
+		if (player != null && !wasSelected.isEmpty() && !selected.isEmpty() && !selected.matches(wasSelected)) {
 			showSelectedItem(bundle, player);
 		}
 	}
@@ -118,29 +118,29 @@ public class EchoBundleItem extends Item {
 		if (contentsOf(bundle).countOf(item) == 0) {
 			return false;
 		}
-		setSelection(bundle, new SelectedItem(item));
+		setSelectedItem(bundle, new SelectedItem(item));
 		return true;
 	}
 
 	/**
-	 * Moves the Selected item {@code steps} stops on, wrapping round, and shows {@code player} the
-	 * new one, even when the bundle holds a single stop and nothing moved. An empty bundle is left
+	 * Moves the Selected item {@code steps} Stops on, wrapping round, and shows {@code player} the
+	 * new one, even when the bundle holds a single Stop and nothing moved. An empty bundle is left
 	 * alone.
 	 */
-	public static void stepSelection(ItemStack bundle, int steps, Player player) {
+	public static void stepSelectedItem(ItemStack bundle, int steps, Player player) {
 		EchoBundleContents contents = contentsOf(bundle);
 		if (contents.isEmpty()) {
 			return;
 		}
-		setSelection(bundle, contents.stepped(storedSelectionOf(bundle), steps));
+		setSelectedItem(bundle, contents.stepped(storedSelectedItemOf(bundle), steps));
 		showSelectedItem(bundle, player);
 	}
 
-	private static void setSelection(ItemStack bundle, SelectedItem selection) {
-		if (selection.isEmpty()) {
+	private static void setSelectedItem(ItemStack bundle, SelectedItem selected) {
+		if (selected.isEmpty()) {
 			bundle.remove(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM);
 		} else {
-			bundle.set(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, selection);
+			bundle.set(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, selected);
 		}
 	}
 

@@ -20,7 +20,7 @@ public final class SelectedItemSteps {
 	public static void onStep(ServerPlayer player, StepSelectedItemPayload step) {
 		ItemStack bundle = player.getMainHandItem();
 		if (bundle.getItem() instanceof EchoBundleItem) {
-			EchoBundleItem.stepSelection(bundle, step.steps(), player);
+			EchoBundleItem.stepSelectedItem(bundle, step.steps(), player);
 		}
 	}
 }

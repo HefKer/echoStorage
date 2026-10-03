@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Sneak + scroll with an Echo Bundle in the main hand steps its Selected item, one stop per
+ * Sneak + scroll with an Echo Bundle in the main hand steps its Selected item, one Stop per
  * notch: down to the next, up to the previous, the way the hotbar moves. The server does the
  * stepping and shows the result; the client only asks.
  */
