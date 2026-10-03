@@ -28,7 +28,7 @@ in the UI rather than left as a hidden rule.
 
 Two things change; the read-versus-write split and its reasoning stand.
 
-**Shulker boxes are see-through too.** A shulker box item (vanilla or Echo) inside an Echo Chest
+**Shulker boxes are See-through too.** A shulker box item (vanilla or Echo) inside an Echo Chest
 is read and written exactly as a bundle there is: matching sees into it, Quick-stack tops up
 what it already holds, ignoring its own Category (ADR-0010). Recursion is still exactly one
 level, whatever the containers: Quick-stack into a chest holding a shulker box that holds a
@@ -41,21 +41,21 @@ rule becomes: server-authoritative bulk actions (Quick-stack, Vacuum) are the on
 writes; a menu click never is.
 
 **What a shulker box is.** Anything in the `c:shulker_boxes` item tag, so another mod's shulker
-boxes count as well. One is see-through when it keeps its items in the vanilla `container`
-component and its loot has been rolled. One that is not see-through is neither read nor written.
+boxes count as well. One is See-through when it keeps its items in the vanilla `container`
+component and its loot has been rolled. One that is not See-through is neither read nor written.
 
 **Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
 item it is, not by what it holds, so that shulker box is a Stray unless the Category covers
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
 
 **A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
-whatever it holds, see-through or not. Seeing through them would otherwise put a player's box
+whatever it holds, See-through or not. Seeing through them would otherwise put a player's box
 of ore in an ore chest's Category, and a bulk action would take the whole box.
 
 ## Amendment (2026-10-01): a shulker box of unknown size is only topped up
 
-This adds to "Shulker boxes are see-through too" and "What a shulker box is" in the 2026-09-29
-amendment, which make any see-through shulker box in the `c:shulker_boxes` tag a target for
+This adds to "Shulker boxes are See-through too" and "What a shulker box is" in the 2026-09-29
+amendment, which make any See-through shulker box in the `c:shulker_boxes` tag a target for
 Quick-stack, another mod's included. It also widens that amendment's "Quick-stack tops up what
 it already holds": for vanilla's shulker boxes and the Echo Shulker Box, an item the box already
 holds may now go into its empty slots as well, not only onto its existing stacks.

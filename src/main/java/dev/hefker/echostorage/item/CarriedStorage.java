@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 
 /**
  * Bundles and shulker boxes: the storage a player carries. Quick-stack and Vacuum never move one,
- * and inside an Echo Chest an Echo Bundle or a shulker box is see-through, exactly one level deep
+ * and inside an Echo Chest an Echo Bundle or a shulker box is See-through, exactly one level deep
  * (ADR-0007): the one place that says which stacks those are and what is in them.
  */
 public final class CarriedStorage {
@@ -43,7 +43,7 @@ public final class CarriedStorage {
 	}
 
 	/**
-	 * What is inside {@code stack}, if it is see-through: an Echo Bundle's or a shulker box's items.
+	 * What is inside {@code stack}, if it is See-through: an Echo Bundle's or a shulker box's items.
 	 * Empty for any other stack, which is then judged as the item it is. The items are not looked
 	 * into in turn, so a bundle inside a shulker box is one of them and what it holds is not.
 	 */
@@ -71,7 +71,7 @@ public final class CarriedStorage {
 		return known ? OptionalInt.of(EchoShulkerBoxBlockEntity.SLOTS) : OptionalInt.empty();
 	}
 
-	/** Whether {@code stack} is see-through and holds {@code item}, whatever its components. */
+	/** Whether {@code stack} is See-through and holds {@code item}, whatever its components. */
 	public static boolean holds(ItemStack stack, Item item) {
 		return contents(stack).filter(inside -> inside.stream().anyMatch(held -> held.is(item))).isPresent();
 	}
