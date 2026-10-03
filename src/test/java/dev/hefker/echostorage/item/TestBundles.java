@@ -18,7 +18,7 @@ final class TestBundles {
 			mutable.tryInsert(stack.copy());
 		}
 		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		EchoBundleItem.setContents(bundle, mutable.toImmutable());
 		bundle.set(EchoComponents.ECHO_BUNDLE_SETTINGS, settings);
 		return bundle;
 	}

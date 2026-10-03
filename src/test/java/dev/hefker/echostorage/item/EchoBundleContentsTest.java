@@ -113,7 +113,7 @@ class EchoBundleContentsTest {
 	@Test
 	void refusesAnotherEchoBundle() {
 		ItemStack echoBundle = new ItemStack(Items.STICK);
-		echoBundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
+		EchoBundleItem.setContents(echoBundle, EchoBundleContents.EMPTY);
 
 		assertRefuses(echoBundle);
 	}

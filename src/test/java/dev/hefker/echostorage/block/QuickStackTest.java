@@ -16,6 +16,7 @@ import java.util.Optional;
 import dev.hefker.echostorage.VanillaBootstrap;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoBundleItem;
 import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.TestShulkerBoxes;
@@ -550,7 +551,7 @@ class QuickStackTest {
 			mutable.tryInsert(stack.copy());
 		}
 		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		EchoBundleItem.setContents(bundle, mutable.toImmutable());
 		return bundle;
 	}
 

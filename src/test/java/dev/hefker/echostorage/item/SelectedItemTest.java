@@ -34,7 +34,7 @@ class SelectedItemTest {
 		VanillaBootstrap.run();
 	}
 
-	// --- stops -----------------------------------------------------------------------------
+	// --- Stops -----------------------------------------------------------------------------
 
 	@Test
 	void logsOverSeveralEntriesAreOneStopAndTwoDifferentBooksAreTwoNewestFirst() {
@@ -48,7 +48,7 @@ class SelectedItemTest {
 		List<ItemStack> stops = contents.stops();
 
 		assertStops(List.of(new ItemStack(Items.OAK_LOG), unbreaking, mending), stops);
-		stops.forEach(stop -> assertEquals(1, stop.getCount(), "a stop is a one-count template"));
+		stops.forEach(stop -> assertEquals(1, stop.getCount(), "a Stop is a one-count template"));
 		assertEquals(120, contents.countOf(new ItemStack(Items.OAK_LOG)));
 	}
 
@@ -80,7 +80,7 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void aLaterInsertOfADifferentItemLeavesTheSelection() {
+	void aLaterInsertOfADifferentItemLeavesTheSelectedItem() {
 		ItemStack bundle = emptyBundle();
 		put(bundle, new ItemStack(Items.STONE, 5));
 
@@ -91,18 +91,15 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void aBundleWithItemsAndNoSelectionResolvesToTheFirstStop() {
-		// As a bundle saved before the Selected item existed loads.
-		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contentsOf(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5)));
+	void aBundleSavedBeforeTheSelectedItemExistedResolvesToTheFirstStop() {
+		ItemStack bundle = savedBeforeTheSelectedItem(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5));
 
 		assertSelected(Items.DIRT, bundle);
 	}
 
 	@Test
-	void aBundleWithNoSelectionKeepsItsFirstStopSelectedWhenSomethingNewGoesIn() {
-		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contentsOf(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5)));
+	void aBundleSavedBeforeTheSelectedItemExistedKeepsItsFirstStopSelectedWhenSomethingNewGoesIn() {
+		ItemStack bundle = savedBeforeTheSelectedItem(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5));
 
 		put(bundle, new ItemStack(Items.BREAD, 5));
 
@@ -110,9 +107,8 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void aSelectionNamingAnItemNoLongerInsideCountsAsNone() {
-		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contentsOf(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5)));
+	void aStoredSelectedItemNoLongerInsideCountsAsNone() {
+		ItemStack bundle = bundleOf(new ItemStack(Items.STONE, 5), new ItemStack(Items.DIRT, 5));
 		bundle.set(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, new SelectedItem(new ItemStack(Items.DIAMOND)));
 
 		assertSelected(Items.DIRT, bundle);
@@ -126,7 +122,7 @@ class SelectedItemTest {
 		EchoBundleItem.setContents(bundle, EchoBundleContents.EMPTY);
 
 		assertTrue(EchoBundleItem.selectedItemOf(bundle).isEmpty());
-		assertFalse(bundle.has(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM), "an empty bundle kept its selection");
+		assertFalse(bundle.has(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM), "an empty bundle kept its Selected item");
 	}
 
 	@Test
@@ -149,9 +145,9 @@ class SelectedItemTest {
 		SelectedItem stone = new SelectedItem(new ItemStack(Items.STONE));
 
 		assertEquals(new SelectedItem(new ItemStack(Items.DIRT)), contents.stepped(bread, 1));
-		assertEquals(bread, contents.stepped(stone, 1), "forward from the last stop wraps to the first");
-		assertEquals(stone, contents.stepped(bread, -1), "back from the first stop wraps to the last");
-		assertEquals(stone, contents.stepped(SelectedItem.NONE, -1), "no selection steps from the first stop");
+		assertEquals(bread, contents.stepped(stone, 1), "forward from the last Stop wraps to the first");
+		assertEquals(stone, contents.stepped(bread, -1), "back from the first Stop wraps to the last");
+		assertEquals(stone, contents.stepped(SelectedItem.NONE, -1), "no stored Selected item steps from the first Stop");
 	}
 
 	@Test
@@ -164,7 +160,7 @@ class SelectedItemTest {
 	// --- running out -----------------------------------------------------------------------
 
 	@Test
-	void whenTheSelectedItemRunsOutTheSelectionMovesToTheStopAfterIt() {
+	void whenTheSelectedItemRunsOutItMovesToTheStopAfterIt() {
 		// Stops, newest first: bread, dirt, stone.
 		ItemStack bundle = bundleOf(new ItemStack(Items.STONE), new ItemStack(Items.DIRT), new ItemStack(Items.BREAD));
 		EchoBundleItem.select(bundle, new ItemStack(Items.DIRT));
@@ -175,7 +171,7 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void whenTheLastStopRunsOutTheSelectionWrapsToTheFirst() {
+	void whenTheLastStopRunsOutTheSelectedItemWrapsToTheFirst() {
 		ItemStack bundle = bundleOf(new ItemStack(Items.STONE), new ItemStack(Items.DIRT), new ItemStack(Items.BREAD));
 		EchoBundleItem.select(bundle, new ItemStack(Items.STONE));
 
@@ -197,7 +193,7 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void emptyingTheBundleClearsTheSelection() {
+	void emptyingTheBundleClearsTheSelectedItem() {
 		ItemStack bundle = bundleOf(new ItemStack(Items.STONE));
 
 		take(bundle, new ItemStack(Items.STONE));
@@ -232,12 +228,12 @@ class SelectedItemTest {
 	}
 
 	@Test
-	void aSelectionIsAlwaysOneOfItsItem() {
+	void aSelectedItemIsAlwaysOneOfItsItem() {
 		assertEquals(new SelectedItem(new ItemStack(Items.STONE)), new SelectedItem(new ItemStack(Items.STONE, 40)));
 	}
 
 	@Test
-	void aGarbageOrUnknownSelectionLoadsAsNoneRatherThanFailing() {
+	void aGarbageOrUnknownSelectedItemLoadsAsNoneRatherThanFailing() {
 		assertEquals(SelectedItem.NONE, load("{}"));
 		assertEquals(SelectedItem.NONE, load("{\"item\": 5}"));
 		assertEquals(SelectedItem.NONE, load("{\"item\": {\"id\": \"othermod:gone\"}}"));
@@ -276,7 +272,17 @@ class SelectedItemTest {
 
 	private static ItemStack emptyBundle() {
 		ItemStack bundle = new ItemStack(Items.STICK);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
+		EchoBundleItem.setContents(bundle, EchoBundleContents.EMPTY);
+		return bundle;
+	}
+
+	/**
+	 * A bundle as one saved before the Selected item existed (#31) loads: contents and no stored
+	 * Selected item. The one place tests write the contents without {@link EchoBundleItem#setContents}.
+	 */
+	private static ItemStack savedBeforeTheSelectedItem(ItemStack... stacks) {
+		ItemStack bundle = new ItemStack(Items.STICK);
+		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contentsOf(stacks));
 		return bundle;
 	}
 
@@ -308,10 +314,10 @@ class SelectedItemTest {
 	}
 
 	private static void assertStops(List<ItemStack> expected, List<ItemStack> actual) {
-		assertEquals(expected.size(), actual.size(), "stops: " + actual);
+		assertEquals(expected.size(), actual.size(), "Stops: " + actual);
 		for (int i = 0; i < expected.size(); i++) {
 			assertTrue(ItemStack.isSameItemSameComponents(expected.get(i), actual.get(i)),
-					"stop " + i + " is " + actual.get(i) + ", expected " + expected.get(i));
+					"Stop " + i + " is " + actual.get(i) + ", expected " + expected.get(i));
 		}
 	}
 
