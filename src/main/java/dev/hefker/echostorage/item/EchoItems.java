@@ -31,7 +31,7 @@ public final class EchoItems {
 
 	/**
 	 * Stacks to one even when empty, and carries empty contents before it is ever placed, as a
-	 * vanilla shulker box does: that component is what makes a shulker box see-through (ADR-0007).
+	 * vanilla shulker box does: that component is what makes a shulker box See-through (ADR-0007).
 	 */
 	public static final Item ECHO_SHULKER_BOX = new EchoShulkerBoxItem(EchoBlocks.ECHO_SHULKER_BOX, new Item.Properties()
 			.stacksTo(1)

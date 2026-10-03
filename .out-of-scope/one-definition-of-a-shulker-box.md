@@ -2,7 +2,7 @@
 
 The mod identifies a shulker box in two ways, and they are not merged into one.
 
-- `CarriedStorage` goes by the `c:shulker_boxes` item tag. That decides which stacks are see-through inside an Echo Chest, and which stacks Quick-stack and Vacuum never move (ADR-0007).
+- `CarriedStorage` goes by the `c:shulker_boxes` item tag. That decides which stacks are See-through inside an Echo Chest, and which stacks Quick-stack and Vacuum never move (ADR-0007).
 - `EchoChestBlockEntity.refuses`, the menu's slots and `EchoBundleContents.canHold` go by `canFitInsideContainerItems()`. That decides what an Echo Shulker Box or an Echo Bundle keeps out.
 
 The two agree for vanilla shulker boxes and the Echo Shulker Box. They can disagree for another mod's item: one in the tag that fits inside containers, or one outside the tag that does not.
