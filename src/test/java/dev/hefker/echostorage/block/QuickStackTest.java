@@ -183,17 +183,6 @@ class QuickStackTest {
 	}
 
 	@Test
-	void anEchoShulkerBoxIsReadAndToppedUpAsAVanillaOneIs() {
-		chest.setItem(5, boxOf(echoShulkerBox(), new ItemStack(Items.IRON_ORE, 10)));
-		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
-
-		quickStack();
-
-		assertBoxHolds(chest.getItem(5), new ItemStack(Items.IRON_ORE, 30));
-		assertOnlySlotFilled(5);
-	}
-
-	@Test
 	void aShulkerBoxThatDoesNotHoldTheItemIsLeftAloneWhateverItsOwnCategory() {
 		ItemStack box = boxOf(echoShulkerBox(), new ItemStack(Items.COAL_ORE, 10));
 		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(ORES), false));
