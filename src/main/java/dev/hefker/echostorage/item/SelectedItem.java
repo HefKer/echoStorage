@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
  * stack with it. An item rather than an entry index, because every insert shifts the indices.
  *
  * <p>What is stored may name an item no longer inside, and an old bundle stores nothing; either
- * way {@link EchoBundleContents#selected} falls back to the first stop. Read through
+ * way {@link EchoBundleContents#selected} falls back to the first Stop. Read through
  * {@link EchoBundleItem#selectedItemOf}; the mod writes it only from {@link EchoBundleItem}.
  *
  * <p>Read leniently, as {@link EchoBundleSettings} is: an item that no longer exists, or a value of

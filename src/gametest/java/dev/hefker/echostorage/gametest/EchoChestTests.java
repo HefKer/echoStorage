@@ -18,6 +18,7 @@ import dev.hefker.echostorage.block.EchoBlocks;
 import dev.hefker.echostorage.block.EchoChestBlockEntity;
 import dev.hefker.echostorage.config.EchoConfig;
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoBundleItem;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoChestMenu;
@@ -202,7 +203,7 @@ final class EchoChestTests {
 			mutable.tryInsert(stack.copy());
 		}
 		ItemStack bundle = new ItemStack(EchoItems.ECHO_BUNDLE);
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		EchoBundleItem.setContents(bundle, mutable.toImmutable());
 		return bundle;
 	}
 

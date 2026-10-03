@@ -232,7 +232,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	@GameTest(template = EMPTY_STRUCTURE)
 	public void aSelectedItemThatIsNotABlockPlacesNothingThoughABlockIsInside(GameTestHelper helper) {
 		ServerPlayer player = player(helper);
-		// No selection stored, so the first stop is selected: the bread, put in last.
+		// Put in all at once, so the first Stop is selected: the bread, put in last.
 		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT,
 				new ItemStack(Items.STONE, 3), new ItemStack(Items.BREAD, 4)));
 
@@ -245,7 +245,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	}
 
 	@GameTest(template = EMPTY_STRUCTURE)
-	public void placingTheLastOfTheSelectedItemMovesTheSelectionToTheNextStop(GameTestHelper helper) {
+	public void placingTheLastOfTheSelectedItemMovesItToTheNextStop(GameTestHelper helper) {
 		ServerPlayer player = player(helper);
 		// Stops, newest first: bread, planks, stone.
 		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT,
@@ -334,7 +334,7 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT));
 		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(1));
 
-		helper.assertFalse(player.getMainHandItem().has(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM), "an empty bundle got a selection");
+		helper.assertFalse(player.getMainHandItem().has(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM), "an empty bundle got a Selected item");
 		helper.succeed();
 	}
 

@@ -111,7 +111,7 @@ public final class EchoBundleContents {
 	}
 
 	/**
-	 * The stops the Selected item moves through: one for each group of entries that would stack
+	 * The Stops the Selected item moves through: one for each group of entries that would stack
 	 * together, however many entries it spans, as a one-count template. In order of each group's
 	 * first entry, which is newest first.
 	 */
@@ -138,7 +138,7 @@ public final class EchoBundleContents {
 
 	/**
 	 * One of the Selected item, given what the bundle stores: the stored item while any is inside,
-	 * otherwise the first stop. Empty only when the bundle is.
+	 * otherwise the first Stop. Empty only when the bundle is.
 	 */
 	public ItemStack selected(SelectedItem stored) {
 		List<ItemStack> stops = stops();
@@ -149,7 +149,7 @@ public final class EchoBundleContents {
 		return stops.isEmpty() ? ItemStack.EMPTY : stops.getFirst();
 	}
 
-	/** The selection {@code steps} stops on from the Selected item, wrapping round at both ends. */
+	/** The Selected item {@code steps} Stops on from the stored one, wrapping round at both ends. */
 	public SelectedItem stepped(SelectedItem stored, int steps) {
 		List<ItemStack> stops = stops();
 		if (stops.isEmpty()) {
@@ -160,12 +160,12 @@ public final class EchoBundleContents {
 	}
 
 	/**
-	 * What the selection becomes when these contents change to {@code after}. A Selected item still
+	 * What the Selected item becomes when these contents change to {@code after}. A Selected item still
 	 * inside stays selected, however much was put in or taken out. One that ran out passes to the
-	 * stop that followed it here, wrapping round, skipping any that ran out with it. The first item
+	 * Stop that followed it here, wrapping round, skipping any that ran out with it. The first item
 	 * into an empty bundle becomes the Selected item, and an emptied bundle has none.
 	 */
-	public SelectedItem selectionAfter(SelectedItem stored, EchoBundleContents after) {
+	public SelectedItem selectedItemAfter(SelectedItem stored, EchoBundleContents after) {
 		List<ItemStack> afterStops = after.stops();
 		if (afterStops.isEmpty()) {
 			return SelectedItem.NONE;
