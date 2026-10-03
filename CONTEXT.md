@@ -30,7 +30,7 @@ _Avoid_: selection, active item, current slot, most recent
 **Stop**:
 One group of an Echo Bundle's contents that would stack together, however many there are and
 however many entries they span: a place the Selected item can be. Ordered newest first.
-_Avoid_: distinct item, entry, group
+_Avoid_: distinct item, kind
 
 **Echo Shulker Box**:
 An Echo Chest the player can carry: placed, it is an Echo Chest in every respect; broken, it

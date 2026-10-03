@@ -101,11 +101,11 @@ public class EchoBundleItem extends Item {
 		EchoBundleContents before = contentsOf(bundle);
 		SelectedItem stored = storedSelectedItemOf(bundle);
 		ItemStack wasSelected = before.selected(stored);
-		SelectedItem selected = before.selectedItemAfter(stored, contents);
+		SelectedItem selectedAfter = before.selectedItemAfter(stored, contents);
 
 		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contents);
-		setSelectedItem(bundle, selected);
-		if (player != null && !wasSelected.isEmpty() && !selected.isEmpty() && !selected.matches(wasSelected)) {
+		setSelectedItem(bundle, selectedAfter);
+		if (player != null && !wasSelected.isEmpty() && !selectedAfter.isEmpty() && !selectedAfter.matches(wasSelected)) {
 			showSelectedItem(bundle, player);
 		}
 	}
