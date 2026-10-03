@@ -41,7 +41,7 @@ public final class TestShulkerBoxes {
 	}
 
 	/**
-	 * Gives an Echo Shulker Box its Category and strictness, returning the same stack. Like a
+	 * Gives an Echo Shulker Box its Category and Strictness, returning the same stack. Like a
 	 * broken Echo Shulker Box, it carries them only when something is set.
 	 */
 	public static ItemStack withAssignment(ItemStack box, EchoChestAssignment assignment) {
