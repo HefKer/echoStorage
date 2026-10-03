@@ -29,7 +29,7 @@ public record ConfigSwitch(String path, String comment, Predicate<EchoConfig> re
 					" Let an Echo Interface search its chests by name.",
 					EchoConfig::searchByChestName),
 			new ConfigSwitch("vacuum.enabled",
-					" Let a carried Echo Bundle or Echo Shulker Box vacuum up items on pickup. Each one still starts with it off.",
+					" Let a carried Echo Bundle or Echo Shulker Box pick up matching items into itself. Each one still starts with it off.",
 					EchoConfig::vacuumEnabled),
 			new ConfigSwitch("bundle.refill",
 					" Placing the last block in hand pulls the next one from an Echo Bundle.",
