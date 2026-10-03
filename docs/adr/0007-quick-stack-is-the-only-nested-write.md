@@ -42,16 +42,15 @@ writes; a menu click never is.
 
 **What a shulker box is.** Anything in the `c:shulker_boxes` item tag, so another mod's shulker
 boxes count as well. One is see-through when it keeps its items in the vanilla `container`
-component and its loot has been rolled. One that is not see-through is neither read nor written,
-and is still carried storage that Quick-stack and Vacuum never move.
+component and its loot has been rolled. One that is not see-through is neither read nor written.
 
 **Reads stop at one level too.** A bundle inside a shulker box inside a chest is judged as the
 item it is, not by what it holds, so that shulker box is a Stray unless the Category covers
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
 
 **A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
-whatever it holds. Seeing through them would otherwise put a player's box of ore in an ore
-chest's Category, and a bulk action would take the whole box.
+whatever it holds, see-through or not. Seeing through them would otherwise put a player's box
+of ore in an ore chest's Category, and a bulk action would take the whole box.
 
 ## Amendment (2026-10-01): a shulker box of unknown size is only topped up
 
