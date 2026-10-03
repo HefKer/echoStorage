@@ -32,14 +32,14 @@ import org.jetbrains.annotations.Nullable;
  * many rows. One menu type serves every size; the open-data says how many rows to lay out.
  *
  * <p>Shift-clicking moves stacks between slots and never looks inside bundles; writing into a
- * nested bundle is the Quick-stack button's job alone (ADR-0007). A strict chest refuses a
+ * nested bundle is the Quick-stack button's job alone (ADR-0007). A Strict chest refuses a
  * Stray from shift-click and Quick-stack alike (ADR-0009), but a stack placed by hand always goes
  * in: that is the player choosing to.
  *
  * <p>An Echo Shulker Box's slots take no shulker box of any kind, even by hand, as vanilla's
  * shulker box slots do; the open-data's kind says which chest this is, so the client predicts it.
  *
- * <p>The chest's Category and strictness, and an Echo Shulker Box's Vacuum toggle, ride along as
+ * <p>The chest's Category and Strictness, and an Echo Shulker Box's Vacuum toggle, ride along as
  * vanilla data slots, so an open screen follows every change, and the screen changes them with
  * vanilla menu-button clicks — which the server already ignores for a menu the player no longer has
  * open or could not still use. Only an Echo Shulker Box's menu takes the Vacuum buttons.

@@ -147,7 +147,7 @@ public class EchoShulkerBoxBlockEntity extends EchoChestBlockEntity {
 
 	/**
 	 * Puts as much of {@code moving} into a carried {@code box} as Quick-stacking it into the box,
-	 * placed, would take, strictness and the bundles inside included, shrinking {@code moving} by
+	 * placed, would take, Strictness and the bundles inside included, shrinking {@code moving} by
 	 * what went in. Returns the box as written, or null if it took nothing.
 	 */
 	@Nullable

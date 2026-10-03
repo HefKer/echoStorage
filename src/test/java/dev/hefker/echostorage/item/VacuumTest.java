@@ -220,8 +220,8 @@ class VacuumTest {
 		Vacuum.run(player, ore);
 
 		ItemStack box = player.getItem(3);
-		assertEquals(5, bread.getCount(), "the strict box took bread onto the Stray it holds");
-		assertEquals(5, flint.getCount(), "the strict box took flint into its bundle");
+		assertEquals(5, bread.getCount(), "the Strict box took bread onto the Stray it holds");
+		assertEquals(5, flint.getCount(), "the Strict box took flint into its bundle");
 		assertTrue(ore.isEmpty(), "left over: " + ore);
 		assertStack(new ItemStack(Items.BREAD, 1), boxSlot(box, 0));
 		assertEquals(1, TestBundles.count(boxSlot(box, 1), Items.FLINT));

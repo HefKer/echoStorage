@@ -48,7 +48,7 @@ public final class EchoComponents {
 	/**
 	 * Present on an Echo Shulker Box whose Vacuum toggle is on, and absent while it is off, so a box
 	 * nobody has turned on carries nothing extra. Kept on the item when the box is broken, as its
-	 * Category and strictness are.
+	 * Category and Strictness are.
 	 */
 	public static final DataComponentType<Unit> ECHO_SHULKER_BOX_VACUUM =
 			DataComponentType.<Unit>builder()
