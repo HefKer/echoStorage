@@ -56,7 +56,9 @@ of ore in an ore chest's Category, and a bulk action would take the whole box.
 
 This adds to "Shulker boxes are see-through too" and "What a shulker box is" in the 2026-09-29
 amendment, which make any see-through shulker box in the `c:shulker_boxes` tag a target for
-Quick-stack, another mod's included.
+Quick-stack, another mod's included. It also widens that amendment's "Quick-stack tops up what
+it already holds": for vanilla's shulker boxes and the Echo Shulker Box, an item the box already
+holds may now go into its empty slots as well, not only onto its existing stacks.
 
 **How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
 boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
