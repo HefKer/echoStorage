@@ -2,8 +2,6 @@ package dev.hefker.echostorage.item;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponents;
@@ -112,9 +110,92 @@ public final class EchoBundleContents {
 		return items.stream().anyMatch(entry -> entry.is(item));
 	}
 
-	/** The most recently added entry that passes {@code test}, if any. */
-	public Optional<ItemStack> mostRecent(Predicate<ItemStack> test) {
-		return items.stream().filter(test).findFirst();
+	/**
+	 * The stops the Selected item moves through: one for each group of entries that would stack
+	 * together, however many entries it spans, as a one-count template. In order of each group's
+	 * first entry, which is newest first.
+	 */
+	public List<ItemStack> stops() {
+		List<ItemStack> stops = new ArrayList<>();
+		for (ItemStack entry : items) {
+			if (indexOf(stops, entry) == -1) {
+				stops.add(entry.copyWithCount(1));
+			}
+		}
+		return stops;
+	}
+
+	/** How many of exactly {@code like} — same item, same components — the entries hold between them. */
+	public int countOf(ItemStack like) {
+		int count = 0;
+		for (ItemStack entry : items) {
+			if (ItemStack.isSameItemSameComponents(entry, like)) {
+				count += entry.getCount();
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * One of the Selected item, given what the bundle stores: the stored item while any is inside,
+	 * otherwise the first stop. Empty only when the bundle is.
+	 */
+	public ItemStack selected(SelectedItem stored) {
+		List<ItemStack> stops = stops();
+		int index = indexOf(stops, stored.item());
+		if (index != -1) {
+			return stops.get(index);
+		}
+		return stops.isEmpty() ? ItemStack.EMPTY : stops.getFirst();
+	}
+
+	/** The selection {@code steps} stops on from the Selected item, wrapping round at both ends. */
+	public SelectedItem stepped(SelectedItem stored, int steps) {
+		List<ItemStack> stops = stops();
+		if (stops.isEmpty()) {
+			return SelectedItem.NONE;
+		}
+		int from = Math.max(indexOf(stops, stored.item()), 0);
+		return new SelectedItem(stops.get(Math.floorMod(from + steps, stops.size())));
+	}
+
+	/**
+	 * What the selection becomes when these contents change to {@code after}. A Selected item still
+	 * inside stays selected, however much was put in or taken out. One that ran out passes to the
+	 * stop that followed it here, wrapping round, skipping any that ran out with it. The first item
+	 * into an empty bundle becomes the Selected item, and an emptied bundle has none.
+	 */
+	public SelectedItem selectionAfter(SelectedItem stored, EchoBundleContents after) {
+		List<ItemStack> afterStops = after.stops();
+		if (afterStops.isEmpty()) {
+			return SelectedItem.NONE;
+		}
+		ItemStack selected = selected(stored);
+		if (selected.isEmpty()) {
+			return new SelectedItem(afterStops.getFirst());
+		}
+		List<ItemStack> stops = stops();
+		int from = indexOf(stops, selected);
+		for (int i = 0; i < stops.size(); i++) {
+			ItemStack next = stops.get((from + i) % stops.size());
+			if (indexOf(afterStops, next) != -1) {
+				return new SelectedItem(next);
+			}
+		}
+		// Everything that was inside ran out at once, and something new went in.
+		return new SelectedItem(afterStops.getFirst());
+	}
+
+	private static int indexOf(List<ItemStack> stacks, ItemStack like) {
+		if (like.isEmpty()) {
+			return -1;
+		}
+		for (int i = 0; i < stacks.size(); i++) {
+			if (ItemStack.isSameItemSameComponents(stacks.get(i), like)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override
@@ -202,10 +283,20 @@ public final class EchoBundleContents {
 
 		/** Takes out the most recently added entry, or {@link ItemStack#EMPTY} if there is none. */
 		public ItemStack removeOne() {
-			if (items.isEmpty()) {
-				return ItemStack.EMPTY;
-			}
-			ItemStack removed = items.remove(0).copy();
+			return items.isEmpty() ? ItemStack.EMPTY : remove(0);
+		}
+
+		/**
+		 * Takes out the most recently added entry of exactly {@code like} — same item, same
+		 * components — or {@link ItemStack#EMPTY} if there is none.
+		 */
+		public ItemStack removeOne(ItemStack like) {
+			int index = indexOf(items, like);
+			return index == -1 ? ItemStack.EMPTY : remove(index);
+		}
+
+		private ItemStack remove(int index) {
+			ItemStack removed = items.remove(index).copy();
 			weight = weight.subtract(weightOf(removed, removed.getCount()));
 			return removed;
 		}

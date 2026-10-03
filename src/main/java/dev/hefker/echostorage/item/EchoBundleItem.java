@@ -35,6 +35,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.lang3.math.Fraction;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A bundle holding four bundles' worth. Behaves like vanilla's {@code BundleItem}, which it
@@ -74,6 +75,85 @@ public class EchoBundleItem extends Item {
 		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
 	}
 
+	private static SelectedItem storedSelectionOf(ItemStack stack) {
+		return stack.getOrDefault(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, SelectedItem.NONE);
+	}
+
+	/** One of the bundle's Selected item, or empty if the bundle is. */
+	public static ItemStack selectedItemOf(ItemStack bundle) {
+		return contentsOf(bundle).selected(storedSelectionOf(bundle));
+	}
+
+	/**
+	 * Writes the bundle's contents, and its Selected item to match: the one way anything changes
+	 * what a bundle holds. See {@link EchoBundleContents#selectionAfter} for how the selection
+	 * follows.
+	 */
+	public static void setContents(ItemStack bundle, EchoBundleContents contents) {
+		setContents(bundle, contents, null);
+	}
+
+	/**
+	 * {@link #setContents(ItemStack, EchoBundleContents)}, telling {@code player} on the action bar
+	 * when their Selected item ran out and the selection moved on by itself.
+	 */
+	public static void setContents(ItemStack bundle, EchoBundleContents contents, @Nullable Player player) {
+		EchoBundleContents before = contentsOf(bundle);
+		SelectedItem stored = storedSelectionOf(bundle);
+		ItemStack wasSelected = before.selected(stored);
+		SelectedItem selection = before.selectionAfter(stored, contents);
+
+		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, contents);
+		setSelection(bundle, selection);
+		if (player != null && !wasSelected.isEmpty() && !selection.isEmpty() && !selection.matches(wasSelected)) {
+			showSelectedItem(bundle, player);
+		}
+	}
+
+	/**
+	 * Makes {@code item} the bundle's Selected item, if the bundle holds any of it; returns whether
+	 * it did. For pick-block to call on the server.
+	 */
+	public static boolean select(ItemStack bundle, ItemStack item) {
+		if (contentsOf(bundle).countOf(item) == 0) {
+			return false;
+		}
+		setSelection(bundle, new SelectedItem(item));
+		return true;
+	}
+
+	/**
+	 * Moves the Selected item {@code steps} stops on, wrapping round, and shows {@code player} the
+	 * new one, even when the bundle holds a single stop and nothing moved. An empty bundle is left
+	 * alone.
+	 */
+	public static void stepSelection(ItemStack bundle, int steps, Player player) {
+		EchoBundleContents contents = contentsOf(bundle);
+		if (contents.isEmpty()) {
+			return;
+		}
+		setSelection(bundle, contents.stepped(storedSelectionOf(bundle), steps));
+		showSelectedItem(bundle, player);
+	}
+
+	private static void setSelection(ItemStack bundle, SelectedItem selection) {
+		if (selection.isEmpty()) {
+			bundle.remove(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM);
+		} else {
+			bundle.set(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM, selection);
+		}
+	}
+
+	/** The Selected item's name and how many the bundle holds, on the action bar. Sent from the server only. */
+	private static void showSelectedItem(ItemStack bundle, Player player) {
+		ItemStack selected = selectedItemOf(bundle);
+		if (player.level().isClientSide() || selected.isEmpty()) {
+			return;
+		}
+		player.displayClientMessage(Component.translatable("item.echostorage.echo_bundle.selected_item",
+				selected.getHoverName(), contentsOf(bundle).countOf(selected)), true);
+	}
+
 	@Override
 	public boolean overrideStackedOnOther(ItemStack bundle, Slot slot, ClickAction action, Player player) {
 		if (action != ClickAction.SECONDARY) {
@@ -88,7 +168,7 @@ public class EchoBundleItem extends Item {
 		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
 		if (inSlot.isEmpty()) {
 			playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
-			ItemStack removed = mutable.removeOne();
+			ItemStack removed = mutable.removeOne(selectedItemOf(bundle));
 			if (!removed.isEmpty()) {
 				mutable.tryInsert(slot.safeInsert(removed));
 			}
@@ -96,7 +176,7 @@ public class EchoBundleItem extends Item {
 			playSound(player, SoundEvents.BUNDLE_INSERT);
 		}
 
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		setContents(bundle, mutable.toImmutable(), player);
 		return true;
 	}
 
@@ -113,7 +193,7 @@ public class EchoBundleItem extends Item {
 
 		EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
 		if (carried.isEmpty()) {
-			ItemStack removed = mutable.removeOne();
+			ItemStack removed = mutable.removeOne(selectedItemOf(bundle));
 			if (!removed.isEmpty()) {
 				playSound(player, SoundEvents.BUNDLE_REMOVE_ONE);
 				carriedAccess.set(removed);
@@ -122,7 +202,7 @@ public class EchoBundleItem extends Item {
 			playSound(player, SoundEvents.BUNDLE_INSERT);
 		}
 
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		setContents(bundle, mutable.toImmutable(), player);
 		return true;
 	}
 
@@ -146,9 +226,9 @@ public class EchoBundleItem extends Item {
 	}
 
 	/**
-	 * Place from the bundle: using it on a block places the block most recently put in, as if it
-	 * were in the hand. A creative player places without using any up, as with a block in hand.
-	 * With nothing placeable inside, or with the config switch off, the use falls through to
+	 * Place from the bundle: using it on a block places one of the Selected item, as if it were in
+	 * the hand. A creative player places without using any up, as with a block in hand. With a
+	 * Selected item that is not a block, or with the config switch off, the use falls through to
 	 * {@link #use}.
 	 *
 	 * <p>A block that leaves a container behind, like a powder snow bucket, is never placed from
@@ -161,14 +241,13 @@ public class EchoBundleItem extends Item {
 		if (!EchoConfig.get().bundlePlace() || contents == null || bundle.getCount() != 1) {
 			return InteractionResult.PASS;
 		}
-		Optional<ItemStack> block = contents.mostRecent(
-				entry -> entry.getItem() instanceof BlockItem && !(entry.getItem() instanceof DispensibleContainerItem));
-		if (block.isEmpty()) {
+		ItemStack selected = selectedItemOf(bundle);
+		if (!(selected.getItem() instanceof BlockItem) || selected.getItem() instanceof DispensibleContainerItem) {
 			return InteractionResult.PASS;
 		}
 
 		// A copy of one, so a failed placement changes nothing and the real hand is never emptied.
-		ItemStack placing = block.get().copyWithCount(1);
+		ItemStack placing = selected.copyWithCount(1);
 		BlockHitResult hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(),
 				context.getClickedPos(), context.isInside());
 		InteractionResult result = ((BlockItem) placing.getItem())
@@ -179,8 +258,8 @@ public class EchoBundleItem extends Item {
 		}
 		if (placing.isEmpty()) {
 			EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(contents);
-			mutable.take(block.get(), 1);
-			bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+			mutable.take(selected, 1);
+			setContents(bundle, mutable.toImmutable(), context.getPlayer());
 		}
 		return result;
 	}
@@ -204,7 +283,7 @@ public class EchoBundleItem extends Item {
 			}
 			dropped.add(removed);
 		}
-		bundle.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		setContents(bundle, mutable.toImmutable(), player);
 
 		if (player instanceof ServerPlayer) {
 			dropped.forEach(stack -> player.drop(stack, true));
@@ -233,7 +312,8 @@ public class EchoBundleItem extends Item {
 				|| stack.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
 			return Optional.empty();
 		}
-		return Optional.ofNullable(stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS)).map(EchoBundleTooltip::new);
+		return Optional.ofNullable(stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS))
+				.map(contents -> new EchoBundleTooltip(contents, selectedItemOf(stack)));
 	}
 
 	@Override
@@ -259,7 +339,7 @@ public class EchoBundleItem extends Item {
 		if (contents == null) {
 			return;
 		}
-		entity.getItem().set(EchoComponents.ECHO_BUNDLE_CONTENTS, EchoBundleContents.EMPTY);
+		setContents(entity.getItem(), EchoBundleContents.EMPTY);
 
 		Level level = entity.level();
 		if (level.isClientSide) {

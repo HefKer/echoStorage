@@ -29,7 +29,7 @@ public final class Refill {
 			if (pulled > 0) {
 				taken += pulled;
 				ItemStack written = bundle.copy();
-				written.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+				EchoBundleItem.setContents(written, mutable.toImmutable());
 				inventory.setItem(slot, written);
 			}
 		}

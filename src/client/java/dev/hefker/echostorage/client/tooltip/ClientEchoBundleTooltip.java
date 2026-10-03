@@ -13,6 +13,9 @@ import org.apache.commons.lang3.math.Fraction;
  * Vanilla's {@code ClientBundleTooltip}, drawn over {@link EchoBundleTooltipLayout} so four
  * bundles' worth of entries cannot grow it off the screen. When capped, the last cell shows
  * how many entries were left out.
+ *
+ * <p>Where vanilla highlights the entry it would take out next, this highlights every shown entry
+ * of the Selected item, or the hidden-count cell when the cap left all of them out.
  */
 public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 	private static final ResourceLocation BACKGROUND = ResourceLocation.withDefaultNamespace("container/bundle/background");
@@ -24,11 +27,28 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 	private static final int LABEL_WIDTH = SLOT_WIDTH - 2;
 
 	private final EchoBundleContents contents;
+	private final ItemStack selected;
 	private final EchoBundleTooltipLayout layout;
+	private final boolean selectedHidden;
 
-	public ClientEchoBundleTooltip(EchoBundleContents contents) {
+	public ClientEchoBundleTooltip(EchoBundleContents contents, ItemStack selected) {
 		this.contents = contents;
+		this.selected = selected;
 		this.layout = EchoBundleTooltipLayout.forEntries(contents.size());
+		this.selectedHidden = !selected.isEmpty() && layout.capped() && !selectedShown();
+	}
+
+	private boolean selectedShown() {
+		for (int index = 0; index < layout.shownEntries(); index++) {
+			if (isSelected(index)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isSelected(int index) {
+		return !selected.isEmpty() && ItemStack.isSameItemSameComponents(contents.getItemUnsafe(index), selected);
 	}
 
 	@Override
@@ -68,12 +88,15 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 			blit(graphics, x, y, SLOT);
 			graphics.renderItem(stack, x + 1, y + 1, index);
 			graphics.renderItemDecorations(font, stack, x + 1, y + 1);
-			if (index == 0) {
+			if (isSelected(index)) {
 				AbstractContainerScreen.renderSlotHighlight(graphics, x + 1, y + 1, 0);
 			}
 		} else if (index == layout.shownEntries() && layout.capped()) {
 			blit(graphics, x, y, SLOT);
 			renderHiddenCount(x, y, graphics, font);
+			if (selectedHidden) {
+				AbstractContainerScreen.renderSlotHighlight(graphics, x + 1, y + 1, 0);
+			}
 		} else {
 			blit(graphics, x, y, full ? BLOCKED_SLOT : SLOT);
 		}

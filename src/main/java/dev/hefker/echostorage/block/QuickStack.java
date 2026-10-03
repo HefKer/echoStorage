@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import dev.hefker.echostorage.category.Category;
 import dev.hefker.echostorage.item.CarriedStorage;
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.EchoBundleItem;
 import dev.hefker.echostorage.item.EchoComponents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
@@ -104,7 +105,7 @@ public final class QuickStack {
 			if (bundled != null) {
 				EchoBundleContents.Mutable mutable = new EchoBundleContents.Mutable(bundled);
 				mutable.tryInsert(moving);
-				written.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+				EchoBundleItem.setContents(written, mutable.toImmutable());
 			} else {
 				intoShulkerBox(written, moving);
 			}

@@ -2,6 +2,7 @@
   "item.echostorage.echo_bundle": "Echo Bundle",
   "item.echostorage.echo_bundle.category": "Category: %s",
   "item.echostorage.echo_bundle.vacuums": "Picks up matching items",
+  "item.echostorage.echo_bundle.selected_item": "%s (%s)",
   "container.echostorage.echo_bundle.category.tooltip": "The bundle picks up what is in its Category and what it already holds.",
   "container.echostorage.echo_bundle.vacuum": "Pick up",
   "container.echostorage.echo_bundle.vacuum.tooltip": "When on, items you pick up go into this bundle first if it wants them. Off until you turn it on.",
