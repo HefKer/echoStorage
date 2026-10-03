@@ -42,7 +42,7 @@ public final class TestShulkerBoxes {
 
 	/**
 	 * Gives an Echo Shulker Box its Category and strictness, returning the same stack. Like a
-	 * broken one, it carries them only when something is set.
+	 * broken Echo Shulker Box, it carries them only when something is set.
 	 */
 	public static ItemStack withAssignment(ItemStack box, EchoChestAssignment assignment) {
 		if (!assignment.isBlank()) {
@@ -63,8 +63,8 @@ public final class TestShulkerBoxes {
 	}
 
 	/** One of the box's slots, empty past the last one filled. */
-	public static ItemStack slot(ItemStack box, int slot) {
+	public static ItemStack slot(ItemStack box, int index) {
 		List<ItemStack> slots = slots(box);
-		return slot < slots.size() ? slots.get(slot) : ItemStack.EMPTY;
+		return index < slots.size() ? slots.get(index) : ItemStack.EMPTY;
 	}
 }

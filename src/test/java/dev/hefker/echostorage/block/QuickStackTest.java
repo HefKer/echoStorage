@@ -184,8 +184,8 @@ class QuickStackTest {
 
 	@Test
 	void aShulkerBoxThatDoesNotHoldTheItemIsLeftAloneWhateverItsOwnCategory() {
-		ItemStack box = TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.COAL_ORE, 10));
-		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(ORES), false));
+		ItemStack box = TestShulkerBoxes.withAssignment(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.COAL_ORE, 10)),
+				new EchoChestAssignment(Optional.of(ORES), false));
 		chest.setItem(5, box);
 		player.setItem(HOTBAR, new ItemStack(Items.IRON_ORE, 20));
 
@@ -197,8 +197,8 @@ class QuickStackTest {
 
 	@Test
 	void aShulkerBoxIsToppedUpWithAStrayItHoldsWhateverItsOwnStrictness() {
-		ItemStack box = TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.BREAD, 10));
-		box.set(EchoComponents.ECHO_CHEST_ASSIGNMENT, new EchoChestAssignment(Optional.of(ORES), true));
+		ItemStack box = TestShulkerBoxes.withAssignment(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.BREAD, 10)),
+				new EchoChestAssignment(Optional.of(ORES), true));
 		chest.setItem(5, box);
 		player.setItem(HOTBAR, new ItemStack(Items.BREAD, 20));
 
@@ -557,10 +557,12 @@ class QuickStackTest {
 	/** The box's slots, exactly: stack by stack from the first, with nothing after them. */
 	private static void assertBoxHolds(ItemStack box, ItemStack... expected) {
 		assertTrue(box.has(DataComponents.CONTAINER), box + " carries no contents");
+		// Built as a box, so the expected slots are stored as the box's are.
+		List<ItemStack> wanted = TestShulkerBoxes.slots(TestShulkerBoxes.of(box.getItem(), expected));
 		List<ItemStack> slots = TestShulkerBoxes.slots(box);
-		assertEquals(expected.length, slots.size(), "the box holds " + slots);
-		for (int slot = 0; slot < expected.length; slot++) {
-			assertStack(expected[slot], slots.get(slot));
+		assertEquals(wanted.size(), slots.size(), "the box holds " + slots);
+		for (int slot = 0; slot < wanted.size(); slot++) {
+			assertStack(wanted.get(slot), slots.get(slot));
 		}
 	}
 
