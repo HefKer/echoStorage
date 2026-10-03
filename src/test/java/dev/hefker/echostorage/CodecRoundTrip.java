@@ -13,7 +13,12 @@ public final class CodecRoundTrip {
 	}
 
 	public static <T> T of(StreamCodec<? super RegistryFriendlyByteBuf, T> codec, T value) {
-		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+		return of(codec, value, RegistryAccess.EMPTY);
+	}
+
+	/** {@link #of(StreamCodec, Object)} for a value that names registry entries, such as an item. */
+	public static <T> T of(StreamCodec<? super RegistryFriendlyByteBuf, T> codec, T value, RegistryAccess registries) {
+		RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
 		codec.encode(buf, value);
 		T decoded = codec.decode(buf);
 		assertEquals(0, buf.readableBytes(), "codec left unread bytes in the buffer");

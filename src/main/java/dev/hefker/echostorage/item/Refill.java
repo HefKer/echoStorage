@@ -1,6 +1,8 @@
 package dev.hefker.echostorage.item;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -16,6 +18,8 @@ public final class Refill {
 	 * slot order, whatever their Vacuum setting. Empty if no bundle holds any.
 	 */
 	public static ItemStack take(Container inventory, ItemStack like) {
+		// Told on the action bar when a refill uses up a bundle's Selected item.
+		Player owner = inventory instanceof Inventory playerInventory ? playerInventory.player : null;
 		int wanted = like.getMaxStackSize();
 		int taken = 0;
 		for (int slot = 0; slot < inventory.getContainerSize() && taken < wanted; slot++) {
@@ -29,7 +33,7 @@ public final class Refill {
 			if (pulled > 0) {
 				taken += pulled;
 				ItemStack written = bundle.copy();
-				written.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+				EchoBundleItem.setContents(written, mutable.toImmutable(), owner);
 				inventory.setItem(slot, written);
 			}
 		}

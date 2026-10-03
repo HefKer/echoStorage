@@ -16,6 +16,8 @@ import dev.hefker.echostorage.item.EchoBundleSettings;
 import dev.hefker.echostorage.item.EchoComponents;
 import dev.hefker.echostorage.item.EchoItems;
 import dev.hefker.echostorage.menu.EchoBundleMenu;
+import dev.hefker.echostorage.network.SelectedItemSteps;
+import dev.hefker.echostorage.network.StepSelectedItemPayload;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +26,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,7 +46,9 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	/** A block to click on; whatever is placed goes on its top face. */
 	private static final BlockPos FLOOR = new BlockPos(1, 1, 1);
 	private static final BlockPos ABOVE_FLOOR = FLOOR.above();
+	/** An inventory slot, which is also its index in the player's inventory menu. */
 	private static final int BUNDLE_SLOT = 9;
+	private static final int RIGHT_BUTTON = 1;
 	/**
 	 * Stands in for another mod's shulker box: the game test data pack tags it into
 	 * c:shulker_boxes, yet it fits inside container items.
@@ -206,20 +211,52 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	// --- place from the bundle -------------------------------------------------------------
 
 	@GameTest(template = EMPTY_STRUCTURE)
-	public void usingTheBundleOnABlockPlacesTheBlockMostRecentlyPutIn(GameTestHelper helper) {
+	public void usingTheBundleOnABlockPlacesTheSelectedItemNotTheMostRecentBlock(GameTestHelper helper) {
 		ServerPlayer player = player(helper);
-		// Bread first, so the most recent block is not simply the most recent entry.
+		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT,
+				new ItemStack(Items.STONE, 3), new ItemStack(Items.OAK_PLANKS, 2), new ItemStack(Items.BREAD, 4));
+		EchoBundleItem.select(bundle, new ItemStack(Items.STONE));
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle);
+
+		useOnFloor(helper, player);
+
+		helper.assertBlockPresent(Blocks.STONE, ABOVE_FLOOR);
+		ItemStack held = player.getMainHandItem();
+		helper.assertTrue(held.is(EchoItems.ECHO_BUNDLE), "the bundle left the hand: " + held);
+		helper.assertValueEqual(count(held, Items.STONE), 2, "stone left in the bundle");
+		helper.assertValueEqual(count(held, Items.OAK_PLANKS), 2, "planks left in the bundle");
+		helper.assertValueEqual(count(held, Items.BREAD), 4, "bread left in the bundle");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aSelectedItemThatIsNotABlockPlacesNothingThoughABlockIsInside(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		// No selection stored, so the first stop is selected: the bread, put in last.
 		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT,
-				new ItemStack(Items.STONE, 3), new ItemStack(Items.OAK_PLANKS, 2), new ItemStack(Items.BREAD, 4)));
+				new ItemStack(Items.STONE, 3), new ItemStack(Items.BREAD, 4)));
+
+		useOnFloor(helper, player);
+
+		helper.assertBlockNotPresent(Blocks.STONE, ABOVE_FLOOR);
+		helper.assertValueEqual(count(player.getMainHandItem(), Items.STONE), 3, "stone left in the bundle");
+		helper.assertValueEqual(count(player.getMainHandItem(), Items.BREAD), 4, "bread left in the bundle");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void placingTheLastOfTheSelectedItemMovesTheSelectionToTheNextStop(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		// Stops, newest first: bread, planks, stone.
+		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT,
+				new ItemStack(Items.STONE, 2), new ItemStack(Items.OAK_PLANKS, 1), new ItemStack(Items.BREAD, 2));
+		EchoBundleItem.select(bundle, new ItemStack(Items.OAK_PLANKS));
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle);
 
 		useOnFloor(helper, player);
 
 		helper.assertBlockPresent(Blocks.OAK_PLANKS, ABOVE_FLOOR);
-		ItemStack bundle = player.getMainHandItem();
-		helper.assertTrue(bundle.is(EchoItems.ECHO_BUNDLE), "the bundle left the hand: " + bundle);
-		helper.assertValueEqual(count(bundle, Items.OAK_PLANKS), 1, "planks left in the bundle");
-		helper.assertValueEqual(count(bundle, Items.STONE), 3, "stone left in the bundle");
-		helper.assertValueEqual(count(bundle, Items.BREAD), 4, "bread left in the bundle");
+		assertSelected(helper, Items.STONE, player.getMainHandItem());
 		helper.succeed();
 	}
 
@@ -227,12 +264,14 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 	public void aBlockThatLeavesAContainerBehindIsNeverPlacedFromTheBundle(GameTestHelper helper) {
 		ServerPlayer player = player(helper);
 		// A powder snow bucket places a block and hands back its bucket, which a bundle cannot.
-		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT,
-				new ItemStack(Items.STONE, 3), new ItemStack(Items.POWDER_SNOW_BUCKET)));
+		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT, new ItemStack(Items.STONE, 3), new ItemStack(Items.POWDER_SNOW_BUCKET));
+		EchoBundleItem.select(bundle, new ItemStack(Items.POWDER_SNOW_BUCKET));
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle);
 
 		useOnFloor(helper, player);
 
-		helper.assertBlockPresent(Blocks.STONE, ABOVE_FLOOR);
+		helper.assertBlockNotPresent(Blocks.POWDER_SNOW, ABOVE_FLOOR);
+		helper.assertBlockNotPresent(Blocks.STONE, ABOVE_FLOOR);
 		helper.assertValueEqual(count(player.getMainHandItem(), Items.POWDER_SNOW_BUCKET), 1, "buckets left in the bundle");
 		helper.succeed();
 	}
@@ -258,6 +297,74 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		withConfig(EchoConfig.DEFAULTS.withBundlePlace(false), () -> useOnFloor(helper, player));
 
 		helper.assertBlockNotPresent(Blocks.STONE, ABOVE_FLOOR);
+		helper.succeed();
+	}
+
+	// --- the Selected item -----------------------------------------------------------------
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStepStepsTheSelectedItemOfTheBundleInTheMainHandWrappingRound(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		// Stops, newest first: dirt, stone.
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT,
+				new ItemStack(Items.STONE, 3), new ItemStack(Items.DIRT, 3)));
+
+		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(1));
+		assertSelected(helper, Items.STONE, player.getMainHandItem());
+		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(1));
+		assertSelected(helper, Items.DIRT, player.getMainHandItem());
+		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(-1));
+		assertSelected(helper, Items.STONE, player.getMainHandItem());
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void aStepDoesNothingWithoutAnEchoBundleWithItemsInTheMainHand(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack carried = bundle(EchoBundleSettings.DEFAULT, new ItemStack(Items.STONE, 3), new ItemStack(Items.DIRT, 3));
+		player.getInventory().setItem(BUNDLE_SLOT, carried.copy());
+		player.setItemInHand(InteractionHand.OFF_HAND, carried.copy());
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE, 5));
+
+		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(1));
+
+		helper.assertTrue(ItemStack.matches(carried, player.getInventory().getItem(BUNDLE_SLOT)), "a bundle in the inventory stepped");
+		helper.assertTrue(ItemStack.matches(carried, player.getOffhandItem()), "a bundle in the off hand stepped");
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, bundle(EchoBundleSettings.DEFAULT));
+		SelectedItemSteps.onStep(player, new StepSelectedItemPayload(1));
+
+		helper.assertFalse(player.getMainHandItem().has(EchoComponents.ECHO_BUNDLE_SELECTED_ITEM), "an empty bundle got a selection");
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void rightClickingTheBundleWithAnEmptyCursorTakesOutAnEntryOfTheSelectedItem(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT, new ItemStack(Items.STONE, 3), new ItemStack(Items.DIRT, 5));
+		EchoBundleItem.select(bundle, new ItemStack(Items.STONE));
+		player.getInventory().setItem(BUNDLE_SLOT, bundle);
+
+		player.inventoryMenu.clicked(BUNDLE_SLOT, RIGHT_BUTTON, ClickType.PICKUP, player);
+
+		assertStack(helper, new ItemStack(Items.STONE, 3), player.inventoryMenu.getCarried(), "the cursor");
+		ItemStack after = player.getInventory().getItem(BUNDLE_SLOT);
+		helper.assertValueEqual(count(after, Items.DIRT), 5, "dirt left in the bundle");
+		assertSelected(helper, Items.DIRT, after);
+		helper.succeed();
+	}
+
+	@GameTest(template = EMPTY_STRUCTURE)
+	public void rightClickingAnEmptySlotWithTheBundleTakesOutAnEntryOfTheSelectedItem(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ItemStack bundle = bundle(EchoBundleSettings.DEFAULT, new ItemStack(Items.STONE, 3), new ItemStack(Items.DIRT, 5));
+		EchoBundleItem.select(bundle, new ItemStack(Items.STONE));
+		player.inventoryMenu.setCarried(bundle);
+
+		player.inventoryMenu.clicked(BUNDLE_SLOT, RIGHT_BUTTON, ClickType.PICKUP, player);
+
+		assertStack(helper, new ItemStack(Items.STONE, 3), player.getInventory().getItem(BUNDLE_SLOT), "the slot");
+		helper.assertValueEqual(count(player.inventoryMenu.getCarried(), Items.DIRT), 5, "dirt left in the bundle");
 		helper.succeed();
 	}
 
@@ -320,6 +427,11 @@ public class EchoBundleConveniencesGameTest implements FabricGameTest {
 		BlockHitResult hit = new BlockHitResult(helper.absoluteVec(Vec3.atCenterOf(FLOOR).add(0, 0.5, 0)), Direction.UP,
 				helper.absolutePos(FLOOR), false);
 		player.gameMode.useItemOn(player, player.serverLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
+	}
+
+	private static void assertSelected(GameTestHelper helper, Item expected, ItemStack bundle) {
+		ItemStack selected = EchoBundleItem.selectedItemOf(bundle);
+		helper.assertTrue(selected.is(expected), "the Selected item is " + selected + ", not " + expected);
 	}
 
 	private static EchoBundleSettings vacuuming(Optional<Category> category) {

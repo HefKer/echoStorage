@@ -13,6 +13,6 @@ public final class EchoTooltips {
 
 	public static void register() {
 		TooltipComponentCallback.EVENT.register(data ->
-				data instanceof EchoBundleTooltip tooltip ? new ClientEchoBundleTooltip(tooltip.contents()) : null);
+				data instanceof EchoBundleTooltip tooltip ? new ClientEchoBundleTooltip(tooltip.contents(), tooltip.selected()) : null);
 	}
 }

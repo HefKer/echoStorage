@@ -54,7 +54,7 @@ public final class Vacuum {
 			return null;
 		}
 		ItemStack written = bundle.copy();
-		written.set(EchoComponents.ECHO_BUNDLE_CONTENTS, mutable.toImmutable());
+		EchoBundleItem.setContents(written, mutable.toImmutable());
 		return written;
 	}
 
