@@ -58,11 +58,10 @@ is judged as the item it is.
 _Avoid_: misfit, foreign item, unsorted item
 
 **See-through**:
-Of an Echo Bundle or a shulker box inside an Echo Chest: its items can be looked into, one level
-deep, so it is judged by what it holds and Quick-stack can top it up. An Echo Bundle always is;
-a shulker box is once its loot has been rolled, and only if it keeps its items the way vanilla's
-shulker boxes do (ADR-0007).
-_Avoid_: transparent, readable, unpacked
+Of an Echo Bundle or a shulker box: its items can be looked into, one level deep, so in an Echo
+Chest it is judged by what it holds, and Quick-stack or Vacuum can top it up. An Echo Bundle
+always is; a shulker box is once its loot has been rolled, and only if it keeps its items the
+way vanilla's shulker boxes do (ADR-0007).
 
 **Strict**:
 The Echo Chest setting under which the chest refuses Strays from every source except the
