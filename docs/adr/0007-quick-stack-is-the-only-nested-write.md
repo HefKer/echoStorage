@@ -55,8 +55,9 @@ chest's Category, and a bulk action would take the whole box.
 
 ## Amendment (2026-10-01): a shulker box of unknown size is only topped up
 
-This adds to "What a shulker box is" in the 2026-09-29 amendment, which lets Quick-stack write
-into any shulker box in the `c:shulker_boxes` tag but does not say how many slots one has.
+This adds to "Shulker boxes are see-through too" and "What a shulker box is" in the 2026-09-29
+amendment, which make any see-through shulker box in the `c:shulker_boxes` tag a target for
+Quick-stack, another mod's included.
 
 **How many slots a shulker box has.** The `container` component does not say. Vanilla's shulker
 boxes and the Echo Shulker Box are known to have 27, so Quick-stack tops up their matching stacks
