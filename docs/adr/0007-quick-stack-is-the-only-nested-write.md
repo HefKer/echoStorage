@@ -5,9 +5,10 @@ see through them — an ore chest whose ore is in bundles would otherwise be inv
 matcher. Recursion is one level deep, which Q18's refusal of bundle-in-bundle makes exhaustive.
 
 The split is read versus write. Category matching, contents-matching for display and the
-interface's view are all **read-only** through nested bundles. The explicit Quick-stack action is
-the **only** path that writes into one: it prefers topping up bundles already in the chest until
-they are full, then falls through to chest slots.
+interface's view are all **read-only** through nested Echo Bundles. The explicit Quick-stack
+action is the **only** path that writes into one: it prefers topping up Echo Bundles already in
+the chest until they are full, then falls through to chest slots. A vanilla bundle is not seen
+into: it is judged as the item it is, and Quick-stack never writes into it.
 
 The risk being managed is writing to a data component on a stack that lives inside a container.
 That is genuinely dangerous through interactive menu clicks, where the client cursor, the slot
@@ -29,7 +30,7 @@ in the UI rather than left as a hidden rule.
 Two things change; the read-versus-write split and its reasoning stand.
 
 **Shulker boxes are see-through too.** A shulker box item (vanilla or Echo) inside an Echo Chest
-is read and written exactly as a bundle there is: matching sees into it, Quick-stack tops up
+is read and written exactly as an Echo Bundle there is: matching sees into it, Quick-stack tops up
 what it already holds, ignoring its own Category (ADR-0010). Recursion is still exactly one
 level, whatever the containers: Quick-stack into a chest holding a shulker box that holds a
 bundle fills the shulker box, never the bundle inside it.
