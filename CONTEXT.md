@@ -6,7 +6,7 @@ never the player's knowledge of where things are.
 
 ## Language
 
-A glossary term takes a capital in every form, singular, plural or inflected.
+A glossary term takes a capital in every form, singular, plural or inflected, and so does a word derived from one, such as "Strictness".
 
 **Echo Chest**:
 A placed container that knows which Category it holds and carries a player-given name.
