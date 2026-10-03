@@ -49,8 +49,9 @@ item it is, not by what it holds, so that shulker box is a Stray unless the Cate
 bundles. One depth for reads and writes keeps a single rule; the hand still gets it past Strict.
 
 **A shulker box is carried storage, like a bundle.** Quick-stack and Vacuum never move one,
-whatever it holds, see-through or not. Seeing through them would otherwise put a player's box
-of ore in an ore chest's Category, and a bulk action would take the whole box.
+whatever it holds. Seeing through one would otherwise put a player's box of ore in an ore
+chest's Category, and a bulk action would take the whole box; one that is not see-through is
+carried storage all the same.
 
 ## Amendment (2026-10-01): a shulker box of unknown size is only topped up
 
