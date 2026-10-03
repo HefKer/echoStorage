@@ -35,6 +35,7 @@ public final class Net {
 		PayloadTypeRegistry.playC2S().register(OpenLinkedChestPayload.TYPE, OpenLinkedChestPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playC2S().register(DismissLinkedChestPayload.TYPE, DismissLinkedChestPayload.STREAM_CODEC);
 		PayloadTypeRegistry.playS2C().register(EchoConfigPayload.TYPE, EchoConfigPayload.STREAM_CODEC);
+		PayloadTypeRegistry.playC2S().register(StepSelectedItemPayload.TYPE, StepSelectedItemPayload.STREAM_CODEC);
 	}
 
 	/** Wires the server-bound handlers. Payload types must already be registered. */
@@ -47,6 +48,8 @@ public final class Net {
 				(payload, context) -> EchoInterfaces.onOpen(context.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(DismissLinkedChestPayload.TYPE,
 				(payload, context) -> EchoInterfaces.onDismiss(context.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(StepSelectedItemPayload.TYPE,
+				(payload, context) -> SelectedItemSteps.onStep(context.player(), payload));
 	}
 
 	/**
