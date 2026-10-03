@@ -7,7 +7,7 @@
 	"entrypoints": {
 		"main": [
 			"dev.hefker.echostorage.gametest.GameTestDefaults",
-			"dev.hefker.echostorage.gametest.OtherModsShulkerBox"
+			"dev.hefker.echostorage.gametest.ShulkerBoxExtendingVanillas"
 		],
 		"fabric-gametest": [
 			"dev.hefker.echostorage.gametest.EchoChestGameTest",

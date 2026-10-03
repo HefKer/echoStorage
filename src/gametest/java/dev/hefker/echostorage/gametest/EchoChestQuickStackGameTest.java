@@ -214,14 +214,14 @@ public class EchoChestQuickStackGameTest implements FabricGameTest {
 	public void theButtonOnlyTopsUpAnotherModsBoxEvenOneWhoseBlockExtendsVanillas(GameTestHelper helper) {
 		// Its slots 0 and 2 are empty, and would take the ore if the box were known to have 27.
 		EchoChestBlockEntity chest = placeChest(helper, CHEST);
-		chest.setItem(5, boxOf(OtherModsShulkerBox.ITEM, ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 60),
+		chest.setItem(5, boxOf(ShulkerBoxExtendingVanillas.ITEM, ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 60),
 				ItemStack.EMPTY, new ItemStack(Items.BREAD, 1)));
 		ServerPlayer player = openedBy(helper, chest);
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 10));
 
 		quickStack(player);
 
-		assertStack(helper, boxOf(OtherModsShulkerBox.ITEM, ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 64),
+		assertStack(helper, boxOf(ShulkerBoxExtendingVanillas.ITEM, ItemStack.EMPTY, new ItemStack(Items.IRON_ORE, 64),
 				ItemStack.EMPTY, new ItemStack(Items.BREAD, 1)), chest.getItem(5), "another mod's box");
 		assertStack(helper, new ItemStack(Items.IRON_ORE, 6), chest.getItem(0), "what the box had no room for");
 		helper.assertTrue(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT).isEmpty(), "the ore stayed with the player");
