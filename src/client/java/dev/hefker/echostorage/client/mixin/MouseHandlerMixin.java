@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 abstract class MouseHandlerMixin {
 	@WrapWithCondition(method = "onScroll", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/entity/player/Inventory;swapPaint(D)V"))
-	private boolean echostorage$stepSelectedItem(Inventory inventory, double direction) {
-		return !SelectedItemScrolling.onScroll(inventory.player, direction);
+	private boolean echostorage$stepSelectedItem(Inventory inventory, double notches) {
+		return !SelectedItemScrolling.onScroll(inventory.player, notches);
 	}
 }

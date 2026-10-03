@@ -1,6 +1,7 @@
 package dev.hefker.echostorage.client.tooltip;
 
 import dev.hefker.echostorage.item.EchoBundleContents;
+import dev.hefker.echostorage.item.SelectedItem;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -27,11 +28,11 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 	private static final int LABEL_WIDTH = SLOT_WIDTH - 2;
 
 	private final EchoBundleContents contents;
-	private final ItemStack selected;
+	private final SelectedItem selected;
 	private final EchoBundleTooltipLayout layout;
 	private final boolean selectedHidden;
 
-	public ClientEchoBundleTooltip(EchoBundleContents contents, ItemStack selected) {
+	public ClientEchoBundleTooltip(EchoBundleContents contents, SelectedItem selected) {
 		this.contents = contents;
 		this.selected = selected;
 		this.layout = EchoBundleTooltipLayout.forEntries(contents.size());
@@ -48,7 +49,7 @@ public final class ClientEchoBundleTooltip implements ClientTooltipComponent {
 	}
 
 	private boolean isSelected(int index) {
-		return !selected.isEmpty() && ItemStack.isSameItemSameComponents(contents.getItemUnsafe(index), selected);
+		return selected.matches(contents.getItemUnsafe(index));
 	}
 
 	@Override

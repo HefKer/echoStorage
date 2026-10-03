@@ -12,7 +12,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * <p>An intent, not an instruction. It names no bundle and no item: the server steps the
  * Selected item of whatever Echo Bundle is in the player's main hand when it arrives.
  *
- * @param steps how many stops to move, forward for positive; one per scroll
+ * @param steps how many stops to move, forward for positive; one per scroll notch
  */
 public record StepSelectedItemPayload(int steps) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<StepSelectedItemPayload> TYPE =

@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Sneak + scroll with an Echo Bundle in the main hand steps its Selected item, one stop per
- * scroll: down to the next, up to the previous, as the hotbar would move. The server does the
+ * notch: down to the next, up to the previous, the way the hotbar moves. The server does the
  * stepping and shows the result; the client only asks.
  */
 public final class SelectedItemScrolling {
@@ -20,15 +20,15 @@ public final class SelectedItemScrolling {
 	 * it did, so the hotbar is left alone. An empty bundle, or one in the off hand, lets the hotbar
 	 * scroll as usual.
 	 *
-	 * @param direction vanilla's hotbar scroll amount: positive for up
+	 * @param notches the whole notches vanilla scrolled the hotbar by: positive for up
 	 */
-	public static boolean onScroll(Player player, double direction) {
+	public static boolean onScroll(Player player, double notches) {
 		ItemStack held = player.getMainHandItem();
 		if (!player.isShiftKeyDown() || !(held.getItem() instanceof EchoBundleItem)
 				|| EchoBundleItem.selectedItemOf(held).isEmpty()) {
 			return false;
 		}
-		NetClient.sendToServer(new StepSelectedItemPayload(direction > 0 ? -1 : 1));
+		NetClient.sendToServer(new StepSelectedItemPayload(-(int) notches));
 		return true;
 	}
 }

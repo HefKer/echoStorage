@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>What is stored may name an item no longer inside, and an old bundle stores nothing; either
  * way {@link EchoBundleContents#selected} falls back to the first stop. Read through
- * {@link EchoBundleItem#selectedItemOf}, and written only by {@link EchoBundleItem}.
+ * {@link EchoBundleItem#selectedItemOf}; the mod writes it only from {@link EchoBundleItem}.
  *
  * <p>Read leniently, as {@link EchoBundleSettings} is: an item that no longer exists, or a value of
  * the wrong type, loads as {@link #NONE}, because a failing component would lose the whole bundle.

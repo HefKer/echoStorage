@@ -85,8 +85,8 @@ public class EchoBundleItem extends Item {
 	}
 
 	/**
-	 * Writes the bundle's contents, and its Selected item to match: the one way anything changes
-	 * what a bundle holds. See {@link EchoBundleContents#selectionAfter} for how the selection
+	 * Writes the bundle's contents, and its Selected item to match: the way the mod changes what a
+	 * bundle holds. See {@link EchoBundleContents#selectionAfter} for how the selection
 	 * follows.
 	 */
 	public static void setContents(ItemStack bundle, EchoBundleContents contents) {
@@ -313,7 +313,7 @@ public class EchoBundleItem extends Item {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(stack.get(EchoComponents.ECHO_BUNDLE_CONTENTS))
-				.map(contents -> new EchoBundleTooltip(contents, selectedItemOf(stack)));
+				.map(contents -> new EchoBundleTooltip(contents, new SelectedItem(selectedItemOf(stack))));
 	}
 
 	@Override
