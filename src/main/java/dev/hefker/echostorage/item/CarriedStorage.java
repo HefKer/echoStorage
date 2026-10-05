@@ -15,6 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
 /**
  * Bundles and shulker boxes: the storage a player carries. Quick-stack and Vacuum never move one,
@@ -60,15 +61,19 @@ public final class CarriedStorage {
 
 	/**
 	 * How many slots the shulker box {@code stack} has, where that is known: vanilla's shulker boxes
-	 * and the Echo Shulker Box, which has as many. Empty for another mod's, since the
+	 * by vanilla's own count, and the Echo Shulker Box by its own. Empty for another mod's, since the
 	 * {@code container} component does not say, so only the stacks it already lists may be written.
 	 */
 	public static OptionalInt shulkerBoxSlots(ItemStack stack) {
+		if (stack.getItem() instanceof EchoShulkerBoxItem) {
+			return OptionalInt.of(EchoShulkerBoxBlockEntity.SLOTS);
+		}
 		// Another mod's box may extend vanilla's block and still have a size of its own.
-		boolean known = stack.getItem() instanceof EchoShulkerBoxItem
-				|| (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof ShulkerBoxBlock
-						&& ResourceLocation.DEFAULT_NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(item).getNamespace()));
-		return known ? OptionalInt.of(EchoShulkerBoxBlockEntity.SLOTS) : OptionalInt.empty();
+		if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof ShulkerBoxBlock
+				&& ResourceLocation.DEFAULT_NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(item).getNamespace())) {
+			return OptionalInt.of(ShulkerBoxBlockEntity.CONTAINER_SIZE);
+		}
+		return OptionalInt.empty();
 	}
 
 	/** Whether {@code stack} is See-through and holds {@code item}, whatever its components. */
