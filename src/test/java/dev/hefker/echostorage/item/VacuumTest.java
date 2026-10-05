@@ -131,7 +131,7 @@ class VacuumTest {
 
 	@Test
 	void aBoxVacuumsWhatItsCategoryMatchesEvenIfEmpty() {
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox()), permissive(ORES))));
+		player.setItem(3, vacuumingBox(permissive(ORES)));
 		ItemStack ore = new ItemStack(Items.COAL_ORE, 5);
 		ItemStack bread = new ItemStack(Items.BREAD, 5);
 
@@ -145,7 +145,7 @@ class VacuumTest {
 
 	@Test
 	void aBoxVacuumsWhatItAlreadyHoldsOutsideItsCategoryOntoItsOwnStack() {
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.DIRT), new ItemStack(Items.BREAD, 10)), permissive(ORES))));
+		player.setItem(3, vacuumingBox(permissive(ORES), new ItemStack(Items.DIRT), new ItemStack(Items.BREAD, 10)));
 		ItemStack bread = new ItemStack(Items.BREAD, 5);
 
 		Vacuum.run(player, bread);
@@ -156,7 +156,7 @@ class VacuumTest {
 
 	@Test
 	void anEmptyBoxWithNoCategoryVacuumsNothing() {
-		player.setItem(3, withVacuum(TestShulkerBoxes.of(echoShulkerBox())));
+		player.setItem(3, vacuumingBox(EchoChestAssignment.DEFAULT));
 		ItemStack pickedUp = new ItemStack(Items.DIAMOND, 2);
 
 		Vacuum.run(player, pickedUp);
@@ -167,7 +167,7 @@ class VacuumTest {
 
 	@Test
 	void aBoxVacuumsWhatItHoldsOnlyInsideOneOfItsBundlesIntoThatBundle() {
-		player.setItem(3, withVacuum(TestShulkerBoxes.of(echoShulkerBox(), TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.FLINT, 1)))));
+		player.setItem(3, vacuumingBox(EchoChestAssignment.DEFAULT, TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.FLINT, 1))));
 		ItemStack flint = new ItemStack(Items.FLINT, 4);
 
 		Vacuum.run(player, flint);
@@ -182,7 +182,7 @@ class VacuumTest {
 		EchoBundleSettings foodNotVacuuming = new EchoBundleSettings(Optional.of(Category.of("food", stack -> stack.is(Items.BREAD))), false);
 		ItemStack holdsNoOre = TestBundles.of(vacuuming(Optional.empty()), new ItemStack(Items.STICK, 1));
 		ItemStack holdsOre = TestBundles.of(foodNotVacuuming, new ItemStack(Items.IRON_ORE, 1));
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), holdsNoOre, new ItemStack(Items.IRON_ORE, 1), holdsOre), permissive(ORES))));
+		player.setItem(3, vacuumingBox(permissive(ORES), holdsNoOre, new ItemStack(Items.IRON_ORE, 1), holdsOre));
 		ItemStack ore = new ItemStack(Items.IRON_ORE, 6);
 
 		Vacuum.run(player, ore);
@@ -198,7 +198,7 @@ class VacuumTest {
 	void whatTheBundlesInsideCannotTakeGoesToTheBoxsOwnSlots() {
 		ItemStack fullOfCobble = TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.COBBLESTONE, 64),
 				new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 60));
-		player.setItem(3, withVacuum(TestShulkerBoxes.of(echoShulkerBox(), fullOfCobble)));
+		player.setItem(3, vacuumingBox(EchoChestAssignment.DEFAULT, fullOfCobble));
 		ItemStack cobble = new ItemStack(Items.COBBLESTONE, 10);
 
 		Vacuum.run(player, cobble);
@@ -211,7 +211,7 @@ class VacuumTest {
 	@Test
 	void aStrictBoxRefusesAStrayItHoldsInItsSlotsOrItsBundlesAndStillTakesItsCategory() {
 		ItemStack flintBundle = TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.FLINT, 1));
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.BREAD, 1), flintBundle), new EchoChestAssignment(Optional.of(ORES), true))));
+		player.setItem(3, vacuumingBox(new EchoChestAssignment(Optional.of(ORES), true), new ItemStack(Items.BREAD, 1), flintBundle));
 		ItemStack bread = new ItemStack(Items.BREAD, 5);
 		ItemStack flint = new ItemStack(Items.FLINT, 5);
 		ItemStack ore = new ItemStack(Items.IRON_ORE, 5);
@@ -231,7 +231,7 @@ class VacuumTest {
 
 	@Test
 	void aStrictBoxWithNoCategoryHasNoStrays() {
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.BREAD, 1)), new EchoChestAssignment(Optional.empty(), true))));
+		player.setItem(3, vacuumingBox(new EchoChestAssignment(Optional.empty(), true), new ItemStack(Items.BREAD, 1)));
 		ItemStack bread = new ItemStack(Items.BREAD, 5);
 
 		Vacuum.run(player, bread);
@@ -259,7 +259,7 @@ class VacuumTest {
 		nearlyFull[0] = new ItemStack(Items.COBBLESTONE, 60);
 		player.setItem(1, TestBundles.of(vacuuming(Optional.empty()), new ItemStack(Items.COBBLESTONE, 64),
 				new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 62)));
-		player.setItem(4, withVacuum(TestShulkerBoxes.of(echoShulkerBox(), nearlyFull)));
+		player.setItem(4, vacuumingBox(EchoChestAssignment.DEFAULT, nearlyFull));
 		player.setItem(7, TestBundles.of(vacuuming(Optional.empty()), new ItemStack(Items.COBBLESTONE, 1)));
 		ItemStack cobble = new ItemStack(Items.COBBLESTONE, 10);
 
@@ -273,7 +273,7 @@ class VacuumTest {
 
 	@Test
 	void aShulkerBoxIsNeverVacuumedIntoABox() {
-		player.setItem(3, withVacuum(TestShulkerBoxes.of(echoShulkerBox(), new ItemStack(Items.SHULKER_BOX))));
+		player.setItem(3, vacuumingBox(EchoChestAssignment.DEFAULT, new ItemStack(Items.SHULKER_BOX)));
 		ItemStack shulkerBox = new ItemStack(Items.SHULKER_BOX);
 
 		Vacuum.run(player, shulkerBox);
@@ -292,7 +292,7 @@ class VacuumTest {
 		// it out. The box is asked as Quick-stack would ask it, which refuses carried storage again.
 		Category boxes = Category.of("boxes", stack -> stack.is(otherModsShulkerBox()));
 		player.setItem(3, TestBundles.of(vacuuming(Optional.of(boxes))));
-		player.setItem(4, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox()), permissive(boxes))));
+		player.setItem(4, vacuumingBox(permissive(boxes)));
 		ItemStack bundleBefore = player.getItem(3).copy();
 		ItemStack boxBefore = player.getItem(4).copy();
 		ItemStack pickedUp = new ItemStack(otherModsShulkerBox());
@@ -307,7 +307,7 @@ class VacuumTest {
 	@Test
 	void aBundleOfEitherKindIsNeverVacuumedIntoABoxWhoseCategoryMatchesBundles() {
 		Category bundles = Category.of("bundles", EchoBundleContents::isBundle);
-		player.setItem(3, withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox()), permissive(bundles))));
+		player.setItem(3, vacuumingBox(permissive(bundles)));
 		ItemStack before = player.getItem(3).copy();
 		ItemStack echoBundle = TestBundles.of(EchoBundleSettings.DEFAULT, new ItemStack(Items.FLINT, 1));
 		ItemStack vanillaBundle = new ItemStack(Items.BUNDLE);
@@ -322,7 +322,7 @@ class VacuumTest {
 
 	@Test
 	void aBundleOfEitherKindIsNeverVacuumedIntoABoxThatAlreadyHoldsThatKind() {
-		player.setItem(3, withVacuum(TestShulkerBoxes.of(echoShulkerBox(), TestBundles.of(EchoBundleSettings.DEFAULT), new ItemStack(Items.BUNDLE))));
+		player.setItem(3, vacuumingBox(EchoChestAssignment.DEFAULT, TestBundles.of(EchoBundleSettings.DEFAULT), new ItemStack(Items.BUNDLE)));
 		ItemStack before = player.getItem(3).copy();
 		ItemStack echoBundle = TestBundles.of(EchoBundleSettings.DEFAULT);
 		ItemStack vanillaBundle = new ItemStack(Items.BUNDLE);
@@ -337,6 +337,11 @@ class VacuumTest {
 
 	private static EchoBundleSettings vacuuming(Optional<Category> category) {
 		return new EchoBundleSettings(category, true);
+	}
+
+	/** An Echo Shulker Box with Vacuum on and the given Category and Strictness, its slots filled in order from the first. */
+	private static ItemStack vacuumingBox(EchoChestAssignment assignment, ItemStack... slots) {
+		return withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), slots), assignment));
 	}
 
 	private static EchoChestAssignment permissive(Category category) {
