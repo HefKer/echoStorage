@@ -61,7 +61,7 @@ public final class CarriedStorage {
 
 	/**
 	 * How many slots the shulker box {@code stack} has, where that is known: vanilla's shulker boxes
-	 * and the Echo Shulker Box, each by its own class's count. Empty for another mod's, since the
+	 * by vanilla's own count, and the Echo Shulker Box by its own. Empty for another mod's, since the
 	 * {@code container} component does not say, so only the stacks it already lists may be written.
 	 */
 	public static OptionalInt shulkerBoxSlots(ItemStack stack) {
@@ -69,9 +69,11 @@ public final class CarriedStorage {
 			return OptionalInt.of(EchoShulkerBoxBlockEntity.SLOTS);
 		}
 		// Another mod's box may extend vanilla's block and still have a size of its own.
-		boolean vanilla = stack.getItem() instanceof BlockItem item && item.getBlock() instanceof ShulkerBoxBlock
-				&& ResourceLocation.DEFAULT_NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(item).getNamespace());
-		return vanilla ? OptionalInt.of(ShulkerBoxBlockEntity.CONTAINER_SIZE) : OptionalInt.empty();
+		if (stack.getItem() instanceof BlockItem item && item.getBlock() instanceof ShulkerBoxBlock
+				&& ResourceLocation.DEFAULT_NAMESPACE.equals(BuiltInRegistries.ITEM.getKey(item).getNamespace())) {
+			return OptionalInt.of(ShulkerBoxBlockEntity.CONTAINER_SIZE);
+		}
+		return OptionalInt.empty();
 	}
 
 	/** Whether {@code stack} is See-through and holds {@code item}, whatever its components. */
