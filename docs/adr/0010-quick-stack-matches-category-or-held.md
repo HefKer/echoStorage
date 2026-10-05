@@ -7,7 +7,7 @@ Category is the player's statement of what belongs there, and Quick-stack should
 
 The nested write into a bundle or shulker box inside the chest (ADR-0007) ignores any Category
 the bundle or shulker box has itself and adds only items it already holds, so Quick-stack never
-starts a new kind of item inside either. Where those items go is ADR-0007's to say: onto the
+starts a new kind of item inside either. Where held items go is ADR-0007's to say: onto the
 stacks already there, and for a shulker box of known size into its empty slots as well (ADR-0007's
 2026-10-01 amendment).
 
