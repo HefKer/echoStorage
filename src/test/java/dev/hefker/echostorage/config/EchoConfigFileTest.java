@@ -39,6 +39,17 @@ class EchoConfigFileTest {
 	}
 
 	@Test
+	void aFreshFileSaysThePlayerPicksUpWhatVacuumTakes() throws IOException {
+		Path file = dir.resolve("echostorage.toml");
+
+		EchoConfigFile.load(file);
+
+		String written = Files.readString(file);
+		assertTrue(written.contains("# Let a carried Echo Bundle or Echo Shulker Box take matching items you pick up."
+				+ " Each one starts with this turned off.\n\tenabled = true"), written);
+	}
+
+	@Test
 	void theQuickStackSwitchesAreReadFromTheFile() throws IOException {
 		Path file = write("""
 				[quick_stack]
