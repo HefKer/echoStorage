@@ -35,8 +35,8 @@ public final class CarriedStorage {
 	}
 
 	/**
-	 * Whether {@code stack} is a shulker box that keeps its items where they can be read and
-	 * written. One whose loot has not been rolled yet is a plain item.
+	 * Whether {@code stack} is a See-through shulker box: one with the vanilla {@code container}
+	 * component and no unrolled loot.
 	 */
 	private static boolean isSeeThroughShulkerBox(ItemStack stack) {
 		return stack.is(SHULKER_BOXES) && stack.has(DataComponents.CONTAINER) && !stack.has(DataComponents.CONTAINER_LOOT);
