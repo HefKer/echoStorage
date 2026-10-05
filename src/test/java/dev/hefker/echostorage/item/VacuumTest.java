@@ -339,7 +339,7 @@ class VacuumTest {
 		return new EchoBundleSettings(category, true);
 	}
 
-	/** An Echo Shulker Box with Vacuum on and the given assignment, its slots filled in order from the first. */
+	/** An Echo Shulker Box with Vacuum on and the given Category and Strictness, its slots filled in order from the first. */
 	private static ItemStack vacuumingBox(EchoChestAssignment assignment, ItemStack... slots) {
 		return withVacuum(withAssignment(TestShulkerBoxes.of(echoShulkerBox(), slots), assignment));
 	}
