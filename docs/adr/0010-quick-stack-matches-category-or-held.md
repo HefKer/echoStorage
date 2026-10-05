@@ -7,7 +7,7 @@ Category is the player's statement of what belongs there, and Quick-stack should
 
 The nested write into a bundle or shulker box inside the chest (ADR-0007) ignores any Category
 the bundle or shulker box has itself and adds only items it already holds, so Quick-stack never
-starts a new kind of item inside either. Where those items go inside it is ADR-0007's to say.
+starts a new kind of item inside either. Where those items go is ADR-0007's to say.
 
 Global Quick-stack from an Echo Interface makes two passes over every Linked chest: first the
 chests that already hold the item, then those whose Category matches it. Like items join each
