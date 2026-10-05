@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -44,9 +45,11 @@ class EchoConfigFileTest {
 
 		EchoConfigFile.load(file);
 
-		String written = Files.readString(file);
-		assertTrue(written.contains("# Let a carried Echo Bundle or Echo Shulker Box take matching items you pick up."
-				+ " Each one starts with this turned off.\n\tenabled = true"), written);
+		List<String> lines = Files.readAllLines(file).stream().map(String::strip).toList();
+		int comment = lines.indexOf("# Let a carried Echo Bundle or Echo Shulker Box take matching items you pick up."
+				+ " Each one starts with this turned off.");
+		assertTrue(comment >= 0, String.join("\n", lines));
+		assertEquals("enabled = true", lines.get(comment + 1), "the comment should sit above vacuum.enabled");
 	}
 
 	@Test
