@@ -50,7 +50,7 @@ public class EchoRelayGameTest implements FabricGameTest {
 		EchoInterfaceBlockEntity echoInterface = build(helper, kind);
 		EchoChestBlockEntity chest = helper.getBlockEntity(CHEST);
 		echoInterface.resolve();
-		helper.assertTrue(echoInterface.rows().isEmpty(), "the chest was linked before the relay heard it");
+		helper.assertTrue(echoInterface.rows().isEmpty(), "the chest was Linked before the relay heard it");
 
 		EchoChestTests.openedBy(helper, chest);
 		echoInterface.resolve();
