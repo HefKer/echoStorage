@@ -140,7 +140,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		EchoInterfaces.onOpen(player, new OpenLinkedChestPayload(player.containerMenu.containerId, chest.id()));
 
 		helper.assertTrue(player.containerMenu instanceof EchoChestMenu menu && menu.container() == chest,
-				"the linked chest did not open, got " + player.containerMenu);
+				"the Linked chest did not open, got " + player.containerMenu);
 		helper.assertTrue(player.containerMenu.stillValid(player), "the chest closed as soon as it opened");
 		helper.succeed();
 	}
@@ -186,9 +186,9 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		helper.assertTrue(quickStackToAll(player, true), "button handled");
 
 		helper.assertTrue(ItemStack.matches(linked.getItem(0), new ItemStack(Items.COBBLESTONE, 21)),
-				"the linked chest has " + linked.getItem(0));
+				"the Linked chest has " + linked.getItem(0));
 		helper.assertTrue(ItemStack.matches(lone.getItem(0), new ItemStack(Items.BREAD, 1)),
-				"the unlinked chest has " + lone.getItem(0));
+				"the Unlinked chest has " + lone.getItem(0));
 		helper.assertTrue(ItemStack.matches(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1), new ItemStack(Items.BREAD, 5)),
 				"the bread should have stayed with the player");
 		helper.succeed();
@@ -217,8 +217,8 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		quickStackToAll(player, false);
 
 		helper.assertTrue(ItemStack.matches(linked.getItem(0), new ItemStack(Items.COBBLESTONE, 1)),
-				"the linked chest has " + linked.getItem(0));
-		helper.assertTrue(linked.getItem(1).isEmpty(), "the linked chest took " + linked.getItem(1));
+				"the Linked chest has " + linked.getItem(0));
+		helper.assertTrue(linked.getItem(1).isEmpty(), "the Linked chest took " + linked.getItem(1));
 		helper.assertTrue(ItemStack.matches(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT), new ItemStack(Items.COBBLESTONE, 20)),
 				"the cobblestone should have stayed with the player");
 		helper.assertTrue(ItemStack.matches(player.getInventory().getItem(FIRST_MAIN_INVENTORY_SLOT + 1), new ItemStack(Items.IRON_ORE, 5)),
@@ -246,7 +246,7 @@ public class EchoInterfaceGameTest implements FabricGameTest {
 		EchoChestBlockEntity categoryChest = helper.getBlockEntity(ofCategory);
 		categoryChest.assign(Categories.ORES);
 		ServerPlayer player = openedBy(helper, echoInterface);
-		helper.assertValueEqual(echoInterface.rows().size(), 2, "linked chests");
+		helper.assertValueEqual(echoInterface.rows().size(), 2, "Linked chests");
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT, new ItemStack(Items.IRON_ORE, 20));
 		player.getInventory().setItem(FIRST_MAIN_INVENTORY_SLOT + 1, new ItemStack(Items.COAL_ORE, 5));
 
