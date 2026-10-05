@@ -39,9 +39,9 @@ import net.minecraft.world.item.Item;
  * <p>An Echo Shulker Box has a Vacuum button under them, which sets whether the box picks up
  * what the player picks up once they carry it. No other kind of chest has one.
  *
- * <p>Below them is Quick-stack, which tops up bundles inside the chest where a shift-click would
- * only fill a slot, unless the config turns it off. Its tooltip says so, since the two otherwise
- * look like the same action.
+ * <p>Below them is Quick-stack, which tops up Echo Bundles and shulker boxes inside the chest where
+ * a shift-click would only fill a slot, unless the config turns it off. Its tooltip says so, since
+ * the two otherwise look like the same action.
  *
  * <p>Last is a search box, unless the config turns it off. It dims the chest's slots whose item
  * names do not match, and moves nothing. It sees only this chest: ADR-0002 keeps search to what

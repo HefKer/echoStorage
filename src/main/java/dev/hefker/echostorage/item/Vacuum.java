@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Each carried item wants what is in its Category or what it already holds (ADR-0010). A box
  * decides exactly as Quick-stack into it would, Strictness included (ADR-0009), and so tops up the
- * bundles inside it before its own slots (ADR-0007).
+ * Echo Bundles inside it before its own slots (ADR-0007).
  *
  * <p>A picked-up bundle or shulker box is carried storage, and no carried item takes it (ADR-0007).
  */

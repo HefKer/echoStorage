@@ -18,7 +18,7 @@
   "container.echostorage.echo_chest.strict": "Strict",
   "container.echostorage.echo_chest.strict.tooltip": "When on, items outside the Category are refused from shift-click, Quick-stack, hoppers and pipes. Placing by hand always works.",
   "container.echostorage.echo_chest.quick_stack": "Quick-stack",
-  "container.echostorage.echo_chest.quick_stack.tooltip": "Puts away everything in your inventory, not your hotbar, that is in this chest's Category or that it already holds. Echo Bundles and shulker boxes inside that hold an item are topped up first. Shift-click only fills slots and never fills a bundle.",
+  "container.echostorage.echo_chest.quick_stack.tooltip": "Puts away everything in your inventory, not your hotbar, that is in this chest's Category or that it already holds. Echo Bundles and shulker boxes inside that hold an item are topped up first. Shift-click only fills slots and never fills a bundle or shulker box.",
   "container.echostorage.echo_chest.search": "Search",
   "item.echostorage.echo_shulker_box.vacuums": "Picks up matching items",
   "container.echostorage.echo_shulker_box.vacuum": "Pick up",
