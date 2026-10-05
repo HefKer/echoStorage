@@ -22,7 +22,7 @@
   "container.echostorage.echo_chest.search": "Search",
   "item.echostorage.echo_shulker_box.vacuums": "Picks up matching items",
   "container.echostorage.echo_shulker_box.vacuum": "Pick up",
-  "container.echostorage.echo_shulker_box.vacuum.tooltip": "When on, items you pick up while carrying this box go into it first if they are in its Category or it already holds them. Echo Bundles and shulker boxes inside that hold an item are topped up first. Off until you turn it on.",
+  "container.echostorage.echo_shulker_box.vacuum.tooltip": "When on, items you pick up while carrying this box go into it first if they are in its Category or it already holds them. Echo Bundles inside that hold an item are topped up first. Off until you turn it on.",
   "block.echostorage.echo_interface": "Echo Interface",
   "container.echostorage.echo_interface.empty": "No Echo Chests reach here yet. Run sculk from here to a chest, or to an Echo Relay near one you have opened.",
   "container.echostorage.echo_interface.unloaded": "Can't open: this chest, or the sculk leading to it, is in an unloaded chunk.",
