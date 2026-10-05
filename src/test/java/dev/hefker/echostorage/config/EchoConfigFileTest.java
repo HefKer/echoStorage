@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -36,6 +37,19 @@ class EchoConfigFileTest {
 		assertTrue(written.contains("[quick_stack]"), written);
 		assertTrue(written.contains("chest = true"), written);
 		assertTrue(written.contains("interface = false"), written);
+	}
+
+	@Test
+	void aFreshFileSaysThePlayerPicksUpWhatVacuumTakes() throws IOException {
+		Path file = dir.resolve("echostorage.toml");
+
+		EchoConfigFile.load(file);
+
+		List<String> lines = Files.readAllLines(file).stream().map(String::strip).toList();
+		int comment = lines.indexOf("# Let a carried Echo Bundle or Echo Shulker Box take matching items you pick up."
+				+ " Each one starts with this turned off.");
+		assertTrue(comment >= 0, String.join("\n", lines));
+		assertEquals("enabled = true", lines.get(comment + 1), "the comment should sit above vacuum.enabled");
 	}
 
 	@Test
