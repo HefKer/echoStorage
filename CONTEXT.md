@@ -6,7 +6,9 @@ never the player's knowledge of where things are.
 
 ## Language
 
-A glossary term takes a capital in every form, singular, plural or inflected, and so does a word derived from one, such as "Strictness".
+A glossary term takes a capital in every form, singular, plural or inflected, and so does a word derived from one, such as "Strictness" from Strict or "Linked" from Link. An ordinary word the term was built from is not derived from it: "see through" and "look into" stay lower-case beside See-through, as "strict" does in "a strict rule".
+
+Player-facing text, in the language file and the config file's comments, uses a glossary term only where the game shows that term as a name: an item or block name, or a button or label. There it takes its capital, tooltips included. Anything else is said in plain words, so Vacuum is "Pick up".
 
 **Echo Chest**:
 A placed container that knows which Category it holds and carries a player-given name.
