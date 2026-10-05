@@ -1,4 +1,4 @@
-# Quick-stack is the only thing that writes into a nested bundle
+# Quick-stack and Vacuum are the only nested writes, one level into an Echo Bundle or See-through shulker box
 
 Because capacity comes from Echo Bundles placed inside Echo Chests (ADR-0005), matching has to
 see through them — an ore chest whose ore is in bundles would otherwise be invisible to its own
@@ -25,7 +25,7 @@ The button and a shift-click produce materially different results in the same ch
 intended — the button is the bulk action, the click is the precise one — but it must be visible
 in the UI rather than left as a hidden rule.
 
-## Amendment (2026-09-29): one level, through bundles and shulker boxes, for bulk actions
+## Amendment (2026-09-29): one level, through Echo Bundles and shulker boxes, for bulk actions
 
 Two things change; the read-versus-write split and its reasoning stand.
 
