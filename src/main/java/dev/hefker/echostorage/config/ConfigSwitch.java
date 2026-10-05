@@ -41,7 +41,7 @@ public record ConfigSwitch(String path, String comment, Predicate<EchoConfig> re
 					" Offer a Quick-stack button on an Echo Chest's screen.",
 					EchoConfig::chestQuickStack),
 			new ConfigSwitch("quick_stack.interface",
-					" Offer a Quick-stack button on an Echo Interface's screen, into every Linked chest at once.",
+					" Offer a Quick-stack to all button on an Echo Interface's screen, into every chest listed there at once.",
 					EchoConfig::interfaceQuickStack));
 
 	/** The record's canonical constructor, taking one boolean per switch. */
