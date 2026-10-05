@@ -16,3 +16,4 @@ The cost of a miss is a lower-case word in a document. The casing was brought in
 ## Prior requests
 
 - #61: "Nothing checks glossary casing, so it can drift again"
+- #103: "Review judgement calls from #97: config comment wording and PlayerTextTest" (point 3: widen `PlayerTextTest` from Link to every glossary term that is not shown as a name)
