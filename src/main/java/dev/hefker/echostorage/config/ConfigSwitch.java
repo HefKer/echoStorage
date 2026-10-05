@@ -38,10 +38,10 @@ public record ConfigSwitch(String path, String comment, Predicate<EchoConfig> re
 					" Using an Echo Bundle on a block places a block out of it.",
 					EchoConfig::bundlePlace),
 			new ConfigSwitch("quick_stack.chest",
-					" Offer a quick-stack button on an Echo Chest's screen.",
+					" Offer a Quick-stack button on an Echo Chest's screen.",
 					EchoConfig::chestQuickStack),
 			new ConfigSwitch("quick_stack.interface",
-					" Offer a quick-stack button on an Echo Interface's screen, into every linked chest at once.",
+					" Offer a Quick-stack button on an Echo Interface's screen, into every Linked chest at once.",
 					EchoConfig::interfaceQuickStack));
 
 	/** The record's canonical constructor, taking one boolean per switch. */
